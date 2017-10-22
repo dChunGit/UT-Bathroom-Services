@@ -64,28 +64,6 @@
         fab:menu_showShadow="true">
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_label="My Location"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_colorPressed="@color/colorPrimaryDark"
-            fab:fab_colorRipple="@color/colorPrimary"
-            android:src="@drawable/ic_location"
-            fab:fab_size="mini" />
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            fab:fab_label="Find"
-            fab:fab_colorNormal="@color/colorAccent"
-            fab:fab_colorPressed="@color/colorPrimaryDark"
-            fab:fab_colorRipple="@color/colorPrimary"
-            android:src="@drawable/ic_search"
-            fab:fab_size="mini" />
-
-        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/newLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,6 +74,17 @@
             fab:fab_colorRipple="@color/colorPrimary"
             fab:fab_size="mini" />
 
-    </com.github.clans.fab.FloatingActionMenu>
 
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        fab:fab_label="My Location"
+        fab:fab_colorNormal="@color/colorAccent"
+        fab:fab_colorPressed="@color/colorPrimaryDark"
+        fab:fab_colorRipple="@color/colorPrimary"
+        android:src="@drawable/ic_location"
+        fab:fab_size="mini" />
+
+    </com.github.clans.fab.FloatingActionMenu>
 </android.support.design.widget.CoordinatorLayout>
