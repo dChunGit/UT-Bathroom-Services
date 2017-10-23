@@ -1,10 +1,13 @@
 <resources>
     <string name="app_name">UT Bathroom Services</string>
-    <string name="title_activity_map">MapActivity</string>
 
+    <!--Toolbar Titles-->
+    <string name="title_activity_map">Map</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!--Drawer Items-->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-    <string name="title_activity_maps">Map</string>
 </resources>
