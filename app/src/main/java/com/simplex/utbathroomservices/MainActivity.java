@@ -2,8 +2,10 @@ package com.simplex.utbathroomservices;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -20,8 +22,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -37,15 +42,17 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, LocationUpdateListener {
 
     String TAG = "DEVICE_LOCATION";
+    String SAVELOCATION = "SAVE LOCATION";
+    String LOCATIONGRANTED = "LOCATION GRANTED";
     private GoogleMap mMap;
-    private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
-    private static final int DEFAULT_ZOOM = 15;
+    private GoogleLocationService googleLocationService;
+    private final LatLng mDefaultLocation = new LatLng(30.2849, -97.7341);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private FusedLocationProviderApi mFusedLocationProviderApi;
     private Location mLastKnownLocation;
 
     @Override
@@ -57,24 +64,56 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        if(savedInstanceState != null) {
+            mLastKnownLocation = savedInstanceState.getParcelable(SAVELOCATION);
+            mLocationPermissionGranted = savedInstanceState.getBoolean(LOCATIONGRANTED);
+        }
+
+        setFont();
+        setUpUI();
+        setUpMap();
+    }
+
+    private void setFont() {
+
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath("fonts/ColabReg.ttf")
                 .setFontAttrId(R.attr.fontPath)
                 .build()
         );
+    }
 
+    private void setUpUI() {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(getString(R.string.title_activity_map));
 
-        FloatingActionButton fab = findViewById(R.id.location);
-        fab.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton location = findViewById(R.id.location);
+        location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 checkPermissions();
                 if(mLocationPermissionGranted) {
                     updateLocationUI();
                     getDeviceLocation();
+                    moveCamera();
+                }
+            }
+        });
+
+        FloatingActionButton addLocation = findViewById(R.id.newLocation);
+        addLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                checkPermissions();
+                if(mLocationPermissionGranted) {
+                    if(mLastKnownLocation != null) {
+                        Toast.makeText(getApplicationContext(),
+                                mLastKnownLocation.getLatitude() + " " + mLastKnownLocation.getLongitude(),
+                                Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
@@ -87,6 +126,9 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void setUpMap() {
 
         // Get map asynchronously and add callback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -94,8 +136,20 @@ public class MainActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
         // Current location setup
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationProviderApi = LocationServices.FusedLocationApi;
+        googleLocationService = new GoogleLocationService(this);
+        googleLocationService.startUpdates();
+    }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        System.out.println("TAG, onSavedInstanceState");
+        if(mLastKnownLocation != null) {
+            outState.putParcelable(SAVELOCATION, mLastKnownLocation);
+        }
+        outState.putBoolean(LOCATIONGRANTED, mLocationPermissionGranted);
     }
 
     @Override
@@ -129,6 +183,10 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settings = new Intent(this, Settings.class);
+            startActivity(settings);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
             return true;
         }
 
@@ -164,14 +222,17 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+        checkPermissions();
         updateLocationUI();
         getDeviceLocation();
+        moveCamera();
 
         //Add markers
         /*LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));*/
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     private void checkPermissions() {
@@ -210,10 +271,8 @@ public class MainActivity extends AppCompatActivity
         try {
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
                 mMap.setMyLocationEnabled(false);
-                mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
                 checkPermissions();
             }
@@ -225,30 +284,78 @@ public class MainActivity extends AppCompatActivity
     private void getDeviceLocation() {
         try {
             if (mLocationPermissionGranted) {
-                Task locationResult = mFusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            mLastKnownLocation = (Location) task.getResult();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                        } else {
-                            Log.d(TAG, "Current location is null. Using defaults.");
-                            Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
-                    }
-                });
+                Location current = mFusedLocationProviderApi.getLastLocation(googleLocationService.getApiClient());
+                if(current != null) {
+                    mLastKnownLocation = current;
+
+                } else {
+                    Log.i("Location", "Current location is null");
+                    mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                }
             }
         } catch(SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
     }
 
+    private void moveCamera() {
+        if(mLastKnownLocation != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(mLastKnownLocation.getLatitude(),
+                            mLastKnownLocation.getLongitude()), 17f));
+        } else {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, 17f));
+        }
+    }
 
+    @Override
+    public void canReceiveLocationUpdates() {
+    }
+
+    @Override
+    public void cannotReceiveLocationUpdates() {
+    }
+
+    @Override
+    public void updateLocation(Location location) {
+        if (location != null) {
+            Toast.makeText(getApplicationContext(),
+                    "updated location: " + location.getLatitude() + " " + location.getLongitude(),
+                    Toast.LENGTH_SHORT).show();
+            updateLocationUI();
+            getDeviceLocation();
+        }
+    }
+
+    @Override
+    public void updateLocationName(String localityName, Location location) {
+        googleLocationService.stopLocationUpdates();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (googleLocationService != null) {
+            googleLocationService.stopLocationUpdates();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (googleLocationService != null) {
+            googleLocationService.startUpdates();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
 }
