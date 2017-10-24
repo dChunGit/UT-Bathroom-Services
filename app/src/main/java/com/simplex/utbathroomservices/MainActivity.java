@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setUpMap() {
-
+        checkPermissions();
         // Get map asynchronously and add callback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
