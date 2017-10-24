@@ -1,11 +1,14 @@
 package com.simplex.utbathroomservices;
 
 import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -35,17 +38,42 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, LocationUpdateListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
+        GoogleMap.OnCameraMoveListener, LocationCallback {
 
     String SAVELOCATION = "SAVE LOCATION";
     String LOCATIONGRANTED = "LOCATION GRANTED";
+    String FOLLOW = "FOLLOW";
+
     private GoogleMap mMap;
-    private GoogleLocationService googleLocationService;
+    //private GoogleLocationService googleLocationService;
     private final LatLng mDefaultLocation = new LatLng(30.2849, -97.7341);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
     private FusedLocationProviderApi mFusedLocationProviderApi;
     private Location mLastKnownLocation;
+    private boolean followPerson;
+
+    boolean mBounded;
+    LocationService mServer;
+
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.e("BINDER", "SERVICE UNBOUND");
+            mBounded = false;
+            mServer = null;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.e("BINDER", "SERVICE BOUND");
+            mBounded = true;
+            LocationService.LocalBinder mLocalBinder = (LocationService.LocalBinder)service;
+            mServer = mLocalBinder.getServerInstance();
+            mServer.setCallbacks(MainActivity.this);
+        }
+    };
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -57,9 +85,14 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
+        followPerson = true;
+        Intent mIntent = new Intent(this, LocationService.class);
+        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
+
         if(savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(SAVELOCATION);
             mLocationPermissionGranted = savedInstanceState.getBoolean(LOCATIONGRANTED);
+            followPerson = savedInstanceState.getBoolean(FOLLOW);
         }
 
         setFont();
@@ -88,9 +121,9 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 checkPermissions();
                 if(mLocationPermissionGranted) {
+                    followPerson = true;
                     updateLocationUI();
-                    getDeviceLocation();
-                    moveCamera();
+                    getDeviceLocation(null);
                 }
             }
         });
@@ -129,8 +162,8 @@ public class MainActivity extends AppCompatActivity
 
         // Current location setup
         mFusedLocationProviderApi = LocationServices.FusedLocationApi;
-        googleLocationService = new GoogleLocationService(this);
-        googleLocationService.startUpdates();
+        /*googleLocationService = new GoogleLocationService(this);
+        googleLocationService.startUpdates();*/
     }
 
     @Override
@@ -142,6 +175,7 @@ public class MainActivity extends AppCompatActivity
             outState.putParcelable(SAVELOCATION, mLastKnownLocation);
         }
         outState.putBoolean(LOCATIONGRANTED, mLocationPermissionGranted);
+        outState.putBoolean(FOLLOW, followPerson);
     }
 
     @Override
@@ -216,10 +250,11 @@ public class MainActivity extends AppCompatActivity
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
 
+        mMap.setOnCameraMoveListener(this);
+
         checkPermissions();
-        updateLocationUI();
-        getDeviceLocation();
-        moveCamera();
+        //updateLocationUI();
+        //getDeviceLocation(null);
 
         //Add markers
         /*LatLng sydney = new LatLng(-34, 151);
@@ -273,21 +308,41 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void getDeviceLocation() {
+    private void getDeviceLocation(Location location) {
         try {
             if (mLocationPermissionGranted) {
-                Location current = mFusedLocationProviderApi.getLastLocation(googleLocationService.getApiClient());
-                if(current != null) {
-                    mLastKnownLocation = current;
-
+                if(location == null) {
+                    Location current = mFusedLocationProviderApi.getLastLocation(mServer.getCurrentLocation());
+                    if (current != null) {
+                        mLastKnownLocation = current;
+                    } else {
+                        Log.i("Location", "Current location is null");
+                        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                    }
                 } else {
-                    Log.i("Location", "Current location is null");
-                    mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                    mLastKnownLocation = location;
                 }
+
+
+                if (followPerson) {
+                    moveCamera();
+                }
+
             }
         } catch(SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
+    }
+
+    @Override
+    public void updateLocationGUI(Location location) {
+        updateLocationUI();
+        getDeviceLocation(location);
+    }
+
+    @Override
+    public void onCameraMove() {
+        followPerson = false;
     }
 
     private void moveCamera() {
@@ -301,34 +356,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void canReceiveLocationUpdates() {
-    }
-
-    @Override
-    public void cannotReceiveLocationUpdates() {
-    }
-
-    @Override
-    public void updateLocation(Location location) {
-        if (location != null) {
-            Toast.makeText(getApplicationContext(),
-                    "updated location: " + location.getLatitude() + " " + location.getLongitude(),
-                    Toast.LENGTH_SHORT).show();
-            updateLocationUI();
-            getDeviceLocation();
-        }
-    }
-
-    @Override
-    public void updateLocationName(String localityName, Location location) {
-        googleLocationService.stopLocationUpdates();
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (googleLocationService != null) {
+        /*if (googleLocationService != null) {
             googleLocationService.stopLocationUpdates();
+        }*/
+        if(mBounded) {
+            mServer.setCallbacks(null); // unregister
+            unbindService(mConnection);
+            mBounded = false;
         }
     }
 
@@ -340,14 +381,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-        if (googleLocationService != null) {
-            googleLocationService.startUpdates();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+        /*if (googleLocationService != null) {
+            startService(new Intent(this, LocationService.class));
+        }*/
     }
 
 }
