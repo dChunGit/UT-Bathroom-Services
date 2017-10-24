@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "492749046467",
+    "firebase_url": "https://ut-bathroom-services.firebaseio.com",
+    "project_id": "ut-bathroom-services",
+    "storage_bucket": "ut-bathroom-services.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:492749046467:android:6ee7f03b621d2e1c",
+        "android_client_info": {
+          "package_name": "com.simplex.utbathroomservices"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "492749046467-sjm5mgsavjr7t445kt42dladk676nemm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRmyAgQB0AWnXYJdGXilF6j9SfcNV8k6Y"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
