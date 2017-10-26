@@ -31,7 +31,6 @@ public class GoogleLocationService {
 
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
 
-
     public GoogleLocationService(Context activity) {
         this.locationUpdateListener = (LocationUpdateListener) activity;
         this.activity = activity;
