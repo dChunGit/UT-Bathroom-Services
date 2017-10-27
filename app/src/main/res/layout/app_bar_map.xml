@@ -21,6 +21,7 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         <include layout="@layout/content_map" />
+
     </LinearLayout>
 
     <com.github.clans.fab.FloatingActionMenu
@@ -28,6 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
+        android:layout_marginBottom="@dimen/bottomSheet"
         fab:menu_animationDelayPerItem="50"
         fab:menu_backgroundColor="@android:color/transparent"
         fab:menu_buttonSpacing="0dp"

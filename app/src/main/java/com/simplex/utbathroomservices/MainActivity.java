@@ -12,6 +12,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.SearchView;
@@ -29,11 +31,13 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.android.gms.location.FusedLocationProviderApi;
@@ -50,12 +54,14 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        GoogleMap.OnCameraMoveListener, LocationCallback {
+        GoogleMap.OnCameraMoveStartedListener, LocationCallback {
 
     String SAVELOCATION = "SAVE LOCATION";
     String LOCATIONGRANTED = "LOCATION GRANTED";
     String FOLLOW = "FOLLOW";
     String ZOOM = "ZOOM";
+
+    private BottomSheetBehavior bottomSheetBehavior;
 
     private GoogleMap mMap;
     //private GoogleLocationService googleLocationService;
@@ -190,6 +196,38 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        RelativeLayout bottomSheetLayout = findViewById(R.id.locationSheet);
+        final FloatingActionMenu floatingActionMenu = findViewById(R.id.menu);
+
+        //get bottom sheet behavior from bottom sheet view
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetCallback() {
+
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
+                if(newState == BottomSheetBehavior.STATE_COLLAPSED) {
+
+                    floatingActionMenu.setVisibility(View.VISIBLE);
+
+                } else if(newState == BottomSheetBehavior.STATE_EXPANDED) {
+
+                    floatingActionMenu.setVisibility(View.GONE);
+
+                } else if(newState == BottomSheetBehavior.STATE_DRAGGING) {
+
+                    floatingActionMenu.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                System.out.println(1 - slideOffset);
+                floatingActionMenu.setAlpha(1 - slideOffset);
+            }
+        });
+
     }
 
     private void setUpMap() {
@@ -346,7 +384,7 @@ public class MainActivity extends AppCompatActivity
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
 
-        mMap.setOnCameraMoveListener(this);
+        mMap.setOnCameraMoveStartedListener(this);
 
         checkPermissions();
         setMapType();
@@ -438,8 +476,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCameraMove() {
-        followPerson = false;
+    public void onCameraMoveStarted(int reason) {
+
+       if (reason != GoogleMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION) {
+           followPerson = false;
+       }
     }
 
     private void moveCamera() {
@@ -503,5 +544,4 @@ public class MainActivity extends AppCompatActivity
             startService(new Intent(this, LocationService.class));
         }*/
     }
-
 }
