@@ -36,6 +36,7 @@ dependencies {
     implementation "com.github.mancj:SlideUp-Android:2.2.7.1"
     implementation 'com.github.javiersantos:MaterialStyledDialogs:2.1'
     implementation 'com.github.javiersantos:AppUpdater:2.6.3'
+    implementation 'com.iarcuschin:simpleratingbar:0.1.5'
 
 
 }

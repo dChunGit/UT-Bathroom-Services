@@ -56,6 +56,13 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleMap.OnCameraMoveStartedListener, LocationCallback {
     //TODO: Save current location and update
+    //TODO: Variable update rate
+    //TODO: Favorites activity
+    //TODO: Reviews activity
+    //TODO: Search Activity
+    //TODO: Settings/About/Help Activity
+    //TODO: Firebase integration, search widget integration
+    //TODO: Bar graph, key features, reviews recyclerview
     String SAVELOCATION = "SAVE LOCATION";
     String LOCATIONGRANTED = "LOCATION GRANTED";
     String FOLLOW = "FOLLOW";
@@ -64,17 +71,17 @@ public class MainActivity extends AppCompatActivity
     private BottomSheetBehavior bottomSheetBehavior;
 
     private GoogleMap mMap;
-    //private GoogleLocationService googleLocationService;
-    private final LatLng mDefaultLocation = new LatLng(30.2849, -97.7341);
+    private final LatLng mDefaultLocation = new LatLng(30.286310, -97.739560);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private boolean mLocationPermissionGranted, toolbarToggle = false;
+    private boolean mLocationPermissionGranted;
     private FusedLocationProviderApi mFusedLocationProviderApi;
     private Location mLastKnownLocation;
     private boolean followPerson;
     private int maptype = GoogleMap.MAP_TYPE_NORMAL;
     private float zoomLevel;
-    private Toolbar toolbar;
+    private Toolbar toolbar, toolbar2;
     private DrawerLayout drawerLayout;
+    private FloatingActionMenu floatingActionMenu;
 
     boolean mBounded;
     LocationService mServer;
@@ -199,8 +206,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         RelativeLayout bottomSheetLayout = findViewById(R.id.locationSheet);
-        final FloatingActionMenu floatingActionMenu = findViewById(R.id.menu);
-        final Toolbar toolbar2 = findViewById(R.id.toolbar2);
+        floatingActionMenu = findViewById(R.id.menu);
+        toolbar2 = findViewById(R.id.toolbar2);
         final Toolbar locationToolbar = findViewById(R.id.location_toolbar);
 
         //get bottom sheet behavior from bottom sheet view
@@ -273,8 +280,6 @@ public class MainActivity extends AppCompatActivity
 
         // Current location setup
         mFusedLocationProviderApi = LocationServices.FusedLocationApi;
-        /*googleLocationService = new GoogleLocationService(this);
-        googleLocationService.startUpdates();*/
     }
 
     @Override
@@ -317,11 +322,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
-        System.out.println("Option selected");
+
         if(id == android.R.id.home) {
             if(bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
                 drawerLayout.openDrawer(GravityCompat.START);
@@ -399,7 +402,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.favorites) {
-            // Handle the camera action
+
         } else if (id == R.id.advanced_search) {
 
         } else if (id == R.id.settings) {
@@ -427,10 +430,8 @@ public class MainActivity extends AppCompatActivity
 
         mMap.setOnCameraMoveStartedListener(this);
 
-        //checkPermissions();
         setMapType();
-        //updateLocationUI();
-        //setDeviceLocation(null);
+        moveCamera();
 
         //Add markers
         /*LatLng sydney = new LatLng(-34, 151);
@@ -562,9 +563,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onStop() {
         super.onStop();
-        /*if (googleLocationService != null) {
-            googleLocationService.stopLocationUpdates();
-        }*/
         if(mBounded) {
             mServer.setCallbacks(null); // unregister
             unbindService(mConnection);
@@ -581,8 +579,5 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-        /*if (googleLocationService != null) {
-            startService(new Intent(this, LocationService.class));
-        }*/
     }
 }
