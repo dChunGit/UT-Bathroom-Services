@@ -3,17 +3,18 @@ package com.simplex.utbathroomservices;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.SearchView;
@@ -42,7 +43,6 @@ import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -55,7 +55,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleMap.OnCameraMoveStartedListener, LocationCallback {
-
+    //TODO: Save current location and update
     String SAVELOCATION = "SAVE LOCATION";
     String LOCATIONGRANTED = "LOCATION GRANTED";
     String FOLLOW = "FOLLOW";
@@ -67,12 +67,14 @@ public class MainActivity extends AppCompatActivity
     //private GoogleLocationService googleLocationService;
     private final LatLng mDefaultLocation = new LatLng(30.2849, -97.7341);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private boolean mLocationPermissionGranted;
+    private boolean mLocationPermissionGranted, toolbarToggle = false;
     private FusedLocationProviderApi mFusedLocationProviderApi;
     private Location mLastKnownLocation;
     private boolean followPerson;
     private int maptype = GoogleMap.MAP_TYPE_NORMAL;
     private float zoomLevel;
+    private Toolbar toolbar;
+    private DrawerLayout drawerLayout;
 
     boolean mBounded;
     LocationService mServer;
@@ -134,11 +136,11 @@ public class MainActivity extends AppCompatActivity
 
     private void setUpUI() {
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.title_activity_map));
 
-        FloatingActionButton location = findViewById(R.id.location);
+        final FloatingActionButton location = findViewById(R.id.location);
         location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -146,7 +148,7 @@ public class MainActivity extends AppCompatActivity
                 if(mLocationPermissionGranted) {
                     followPerson = true;
                     updateLocationUI();
-                    getDeviceLocation(null);
+                    setDeviceLocation(null);
                 }
             }
         });
@@ -188,17 +190,18 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        drawerLayout = findViewById(R.id.drawer_layout);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         RelativeLayout bottomSheetLayout = findViewById(R.id.locationSheet);
         final FloatingActionMenu floatingActionMenu = findViewById(R.id.menu);
+        final Toolbar toolbar2 = findViewById(R.id.toolbar2);
+        final Toolbar locationToolbar = findViewById(R.id.location_toolbar);
 
         //get bottom sheet behavior from bottom sheet view
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
@@ -210,24 +213,53 @@ public class MainActivity extends AppCompatActivity
                 if(newState == BottomSheetBehavior.STATE_COLLAPSED) {
 
                     floatingActionMenu.setVisibility(View.VISIBLE);
+                    toolbar.setVisibility(View.VISIBLE);
+                    toolbar2.setVisibility(View.VISIBLE);
+                    setSupportActionBar(toolbar);
+                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setHomeButtonEnabled(true);
 
                 } else if(newState == BottomSheetBehavior.STATE_EXPANDED) {
 
                     floatingActionMenu.setVisibility(View.GONE);
+                    toolbar.setVisibility(View.GONE);
+                    toolbar2.setVisibility(View.GONE);
+                    setSupportActionBar(locationToolbar);
+                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setHomeButtonEnabled(true);
+
 
                 } else if(newState == BottomSheetBehavior.STATE_DRAGGING) {
 
                     floatingActionMenu.setVisibility(View.VISIBLE);
+                    toolbar.setVisibility(View.VISIBLE);
+                    toolbar2.setVisibility(View.VISIBLE);
                 }
             }
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                System.out.println(1 - slideOffset);
                 floatingActionMenu.setAlpha(1 - slideOffset);
+                toolbar.setAlpha(1 - slideOffset);
+                toolbar2.setAlpha(1-slideOffset);
+                if((1 - slideOffset) < .05) {
+                    toolbar.setVisibility(View.GONE);
+                    toolbar2.setVisibility(View.GONE);
+                } else {
+                    toolbar.setVisibility(View.VISIBLE);
+                    toolbar2.setVisibility(View.VISIBLE);
+                }
             }
         });
 
+        toolbar2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
+        });
     }
 
     private void setUpMap() {
@@ -271,11 +303,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.map, menu);
+        System.out.println("inflating");
+        if(bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+            getMenuInflater().inflate(R.menu.map, menu);
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        }
 
         return true;
     }
@@ -286,9 +321,15 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        System.out.println("Option selected");
+        if(id == android.R.id.home) {
+            if(bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            } else {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+            return true;
+        }  else if (id == R.id.action_settings) {
             Intent settings = new Intent(this, Settings.class);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
@@ -386,10 +427,10 @@ public class MainActivity extends AppCompatActivity
 
         mMap.setOnCameraMoveStartedListener(this);
 
-        checkPermissions();
+        //checkPermissions();
         setMapType();
         //updateLocationUI();
-        //getDeviceLocation(null);
+        //setDeviceLocation(null);
 
         //Add markers
         /*LatLng sydney = new LatLng(-34, 151);
@@ -436,14 +477,14 @@ public class MainActivity extends AppCompatActivity
             } else {
                 mMap.setMyLocationEnabled(false);
                 mLastKnownLocation = null;
-                checkPermissions();
+                //checkPermissions();
             }
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
     }
 
-    private void getDeviceLocation(Location location) {
+    private void setDeviceLocation(Location location) {
         try {
             if (mLocationPermissionGranted) {
                 if(location == null) {
@@ -472,7 +513,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void updateLocationGUI(Location location) {
         updateLocationUI();
-        getDeviceLocation(location);
+        setDeviceLocation(location);
     }
 
     @Override
