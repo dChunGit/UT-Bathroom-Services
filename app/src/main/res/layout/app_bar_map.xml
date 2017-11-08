@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context="com.simplex.utbathroomservices.MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -21,7 +21,8 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         <include layout="@layout/content_map" />
-    </LinearLayout>
+
+    </RelativeLayout>
 
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/menu"
