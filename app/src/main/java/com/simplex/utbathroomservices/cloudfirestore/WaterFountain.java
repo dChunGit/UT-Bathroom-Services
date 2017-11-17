@@ -14,11 +14,26 @@ public class WaterFountain {
     boolean isBottleRefillStation;
     String taste;
     Rating rating;
+    String [] image;
 
     public WaterFountain(){
 
     }
-    public WaterFountain(Location location, String building, String floor, String temperature, boolean isBottleRefillStation, String taste, Rating rating) {
+
+    @Override
+    public String toString() {
+        return "WaterFountain{" +
+                "location=" + location +
+                ", building='" + building + '\'' +
+                ", floor='" + floor + '\'' +
+                ", temperature='" + temperature + '\'' +
+                ", isBottleRefillStation=" + isBottleRefillStation +
+                ", taste='" + taste + '\'' +
+                ", rating=" + rating +
+                '}';
+    }
+
+    public WaterFountain(Location location, String building, String floor, String temperature, boolean isBottleRefillStation, String taste, Rating rating, String [] image) {
         this.location = location;
         this.building = building;
         this.floor = floor;
@@ -26,6 +41,7 @@ public class WaterFountain {
         this.isBottleRefillStation = isBottleRefillStation;
         this.taste = taste;
         this.rating = rating;
+        this.image = image;
     }
 
     public Location getLocation() {
@@ -85,5 +101,11 @@ public class WaterFountain {
         this.rating = rating;
     }
 
+    public String[] getImage() {
+        return image;
+    }
 
+    public void setImage(String[] image) {
+        this.image = image;
+    }
 }

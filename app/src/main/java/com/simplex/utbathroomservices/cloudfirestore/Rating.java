@@ -7,6 +7,13 @@ package com.simplex.utbathroomservices.cloudfirestore;
 public class Rating {
     String review;
 
+    @Override
+    public String toString() {
+        return "Rating{" +
+                "review='" + review + '\'' +
+                '}';
+    }
+
     public Rating(){
 
     }

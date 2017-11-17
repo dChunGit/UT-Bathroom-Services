@@ -15,11 +15,27 @@ public class Bathroom {
     Integer wifiQuality; // 1 to 5 scale
     Integer busyness; // 1 to 5 scale
     Rating rating;
+    String[] image;
 
-    public Bathroom(){
+    @Override
+    public String toString() {
+        return "Bathroom{" +
+                "location=" + location +
+                ", building='" + building + '\'' +
+                ", floor='" + floor + '\'' +
+                ", space='" + space + '\'' +
+                ", numberStalls=" + numberStalls +
+                ", wifiQuality=" + wifiQuality +
+                ", busyness=" + busyness +
+                ", rating=" + rating +
+                '}';
+    }
+
+    public Bathroom() {
 
     }
-    public Bathroom(Location location, String building, String floor, String space, Integer numberStalls, Integer wifiQuality, Integer busyness, Rating rating) {
+
+    public Bathroom(Location location, String building, String floor, String space, Integer numberStalls, Integer wifiQuality, Integer busyness, Rating rating, String[] image) {
         this.location = location;
         this.building = building;
         this.floor = floor;
@@ -28,11 +44,13 @@ public class Bathroom {
         this.wifiQuality = wifiQuality;
         this.busyness = busyness;
         this.rating = rating;
+        this.image = image;
     }
 
     public String getBuilding() {
         return building;
     }
+
 
     public void setBuilding(String building) {
         this.building = building;
@@ -45,7 +63,6 @@ public class Bathroom {
     public void setFloor(String floor) {
         this.floor = floor;
     }
-
 
 
     public String getSpace() {
@@ -96,5 +113,13 @@ public class Bathroom {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public String[] getImage() {
+        return image;
+    }
+
+    public void setImage(String[] image) {
+        this.image = image;
     }
 }
