@@ -16,17 +16,22 @@ import java.util.ArrayList;
  * Created by zoeng on 11/10/17.
  */
 
-public class WaterFountainDB {
-    FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
 
-    public void addWaterFountainToDB(Location location, String building, String floor, String temperature, boolean isBottleRefillStation, String taste, Rating rating){
-        WaterFountain wf= new WaterFountain( location,  building,  floor, temperature,isBottleRefillStation,taste,   rating);
+public class WaterFountainDB {
+    private FirebaseFirestore mFireStore;
+
+    public WaterFountainDB() {
+        mFireStore = FirebaseFirestore.getInstance();
+    }
+
+    public void addWaterFountainToDB(Location location, String building, String floor, String temperature, boolean isBottleRefillStation, String taste, Rating rating, String[] image) {
+        WaterFountain wf = new WaterFountain(location, building, floor, temperature, isBottleRefillStation, taste, rating, image);
         mFireStore.collection("waterfountain").add(wf);
 
     }
 
-    public ArrayList<WaterFountain> getAllWaterFountains(){
-        final ArrayList<WaterFountain> results= new ArrayList<WaterFountain>();
+    public ArrayList<WaterFountain> getAllWaterFountains() {
+        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
         mFireStore.collection("waterfountain")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -47,8 +52,8 @@ public class WaterFountainDB {
         return results;
     }
 
-    public ArrayList<WaterFountain> getWaterFountainsByBuilding(String building){
-        final ArrayList<WaterFountain> results= new ArrayList<WaterFountain>();
+    public ArrayList<WaterFountain> getWaterFountainsByBuilding(String building) {
+        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
         mFireStore.collection("waterfountain")
                 .whereEqualTo("building", building)
                 .get()
@@ -69,8 +74,9 @@ public class WaterFountainDB {
                 });
         return results;
     }
-    public ArrayList<WaterFountain> getWaterFountainsByBuildingAndFloor(String building, String floor){
-        final ArrayList<WaterFountain> results= new ArrayList<WaterFountain>();
+
+    public ArrayList<WaterFountain> getWaterFountainsByBuildingAndFloor(String building, String floor) {
+        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
         mFireStore.collection("waterfountain")
                 .whereEqualTo("building", building)
                 .whereEqualTo("floor", floor)
@@ -92,4 +98,5 @@ public class WaterFountainDB {
                 });
         return results;
     }
+
 }
