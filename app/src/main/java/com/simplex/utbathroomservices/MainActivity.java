@@ -45,6 +45,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
+import com.simplex.utbathroomservices.location.LocationCallback;
+import com.simplex.utbathroomservices.location.LocationService;
 import com.willy.ratingbar.ScaleRatingBar;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;

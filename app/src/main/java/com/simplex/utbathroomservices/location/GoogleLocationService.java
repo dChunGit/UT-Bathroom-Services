@@ -1,4 +1,4 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.location;
 
 import android.content.Context;
 import android.content.pm.PackageManager;

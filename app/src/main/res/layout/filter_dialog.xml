@@ -35,7 +35,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center"
-                    android:layout_marginStart="20dp">
+                    android:layout_marginStart="30dp">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/overallBar_dialog"
@@ -73,7 +73,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginStart="20dp">
+                    android:layout_marginStart="30dp">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/spaceBar_dialog"
@@ -112,7 +112,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginStart="20dp">
+                    android:layout_marginStart="30dp">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/activityBar_dialog"
@@ -151,7 +151,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginStart="20dp">
+                    android:layout_marginStart="30dp">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/wifiBar_dialog"
@@ -190,7 +190,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginStart="20dp">
+                    android:layout_marginStart="30dp">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/cleanBar_dialog"
