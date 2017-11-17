@@ -14,6 +14,7 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -210,6 +211,7 @@ public class MainActivity extends AppCompatActivity
 
         floatingActionMenu = findViewById(R.id.menu);
         toolbar2 = findViewById(R.id.toolbar2);
+        final CardView cardToolbar = findViewById(R.id.cardToolbar);
         final Toolbar locationToolbar = findViewById(R.id.location_toolbar);
 
         //get bottom sheet behavior from bottom sheet view
@@ -221,7 +223,7 @@ public class MainActivity extends AppCompatActivity
                 if(newState == BottomSheetBehavior.STATE_COLLAPSED) {
 
                     floatingActionMenu.setVisibility(View.VISIBLE);
-                    toolbar.setVisibility(View.VISIBLE);
+                    cardToolbar.setVisibility(View.VISIBLE);
                     toolbar2.setVisibility(View.VISIBLE);
                     setSupportActionBar(toolbar);
                     getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
@@ -232,7 +234,7 @@ public class MainActivity extends AppCompatActivity
                 } else if(newState == BottomSheetBehavior.STATE_EXPANDED) {
 
                     floatingActionMenu.setVisibility(View.GONE);
-                    toolbar.setVisibility(View.GONE);
+                    cardToolbar.setVisibility(View.GONE);
                     toolbar2.setVisibility(View.GONE);
                     setSupportActionBar(locationToolbar);
                     getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back);
@@ -254,13 +256,13 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 floatingActionMenu.setAlpha(1 - slideOffset);
-                toolbar.setAlpha(1 - slideOffset);
+                cardToolbar.setAlpha(1 - slideOffset);
                 toolbar2.setAlpha(1-slideOffset);
                 if((1 - slideOffset) < .05) {
-                    toolbar.setVisibility(View.GONE);
+                    cardToolbar.setVisibility(View.GONE);
                     toolbar2.setVisibility(View.GONE);
                 } else {
-                    toolbar.setVisibility(View.VISIBLE);
+                    cardToolbar.setVisibility(View.VISIBLE);
                     toolbar2.setVisibility(View.VISIBLE);
                 }
             }
@@ -373,6 +375,7 @@ public class MainActivity extends AppCompatActivity
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         setMapType();
+                                        saveMapType();
                                     }
                                 }
                     )
@@ -448,6 +451,7 @@ public class MainActivity extends AppCompatActivity
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        mMap.getUiSettings().setCompassEnabled(false);
 
         mMap.setOnCameraMoveStartedListener(this);
         mMap.setOnMarkerClickListener(this);
