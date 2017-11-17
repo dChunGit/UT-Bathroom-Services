@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:rb="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:padding="15dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/overall_dialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Overall"
+                    android:layout_margin="7dp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginStart="20dp">
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/overallBar_dialog"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="true"
+                        android:layout_margin="2dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/up"
+                        android:layout_margin="7dp"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Space"
+                    android:layout_margin="7dp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="20dp">
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/spaceBar_dialog"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="true"
+                        android:layout_margin="2dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/up"
+                        android:layout_margin="7dp"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Activity"
+                    android:layout_margin="7dp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="20dp">
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/activityBar_dialog"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="true"
+                        android:layout_margin="2dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/up"
+                        android:layout_margin="7dp"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WiFi"
+                    android:layout_margin="7dp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="20dp">
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/wifiBar_dialog"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="true"
+                        android:layout_margin="2dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/up"
+                        android:layout_margin="7dp"
+                        />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cleanliness"
+                    android:layout_margin="7dp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="20dp">
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/cleanBar_dialog"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="true"
+                        android:layout_margin="2dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/up"
+                        android:layout_margin="7dp"
+                        />
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+</LinearLayout>
