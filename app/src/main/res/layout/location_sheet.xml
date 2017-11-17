@@ -23,7 +23,7 @@
             app:contentScrim="@color/colorPrimaryDark"
             app:expandedTitleMarginStart="48dp"
             app:expandedTitleMarginEnd="64dp"
-            android:theme="@style/AppTheme.AppBarOverlay" >
+            android:theme="@style/AppTheme.AppBarOverlayAlt" >
 
             <ImageView
                 android:id="@+id/main.backdrop"
@@ -50,7 +50,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
         <include layout="@layout/location"/>
+
     </android.support.v4.widget.NestedScrollView>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -7,8 +7,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_height="match_parent">
 
         <fragment
             android:id="@+id/map"
@@ -27,21 +26,28 @@
         android:elevation="4dp"
         android:background="@color/white">
 
-        <include layout="@layout/location_sheet"/> <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        <include layout="@layout/location_sheet"/>
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar2"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/toolbar2"
+                android:layout_width="match_parent"
+                android:text="No Location"
+                android:gravity="center"
+                android:textSize="30sp"
+                android:textColor="@color/textColorAlt"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary"
+                android:theme="@style/AppTheme.PopupOverlay" />
+
+
+        </LinearLayout>
 
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

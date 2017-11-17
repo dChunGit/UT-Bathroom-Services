@@ -1,30 +1,25 @@
 package com.simplex.utbathroomservices;
 
-import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.SearchView;
+import android.support.v7.widget.CardView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -33,14 +28,13 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
-import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
-import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -48,13 +42,17 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.iarcuschin.simpleratingbar.SimpleRatingBar;
+import com.willy.ratingbar.ScaleRatingBar;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        GoogleMap.OnCameraMoveStartedListener, LocationCallback {
+        GoogleMap.OnCameraMoveStartedListener, LocationCallback, GoogleMap.OnMarkerClickListener {
     //TODO: Save current location and update
     //TODO: Variable update rate
     //TODO: Favorites activity
@@ -63,10 +61,11 @@ public class MainActivity extends AppCompatActivity
     //TODO: Settings/About/Help Activity
     //TODO: Firebase integration, search widget integration
     //TODO: Bar graph, key features, reviews recyclerview
-    String SAVELOCATION = "SAVE LOCATION";
-    String LOCATIONGRANTED = "LOCATION GRANTED";
-    String FOLLOW = "FOLLOW";
-    String ZOOM = "ZOOM";
+    final String SAVELOCATION = "SAVE LOCATION";
+    final String LOCATIONGRANTED = "LOCATION GRANTED";
+    final String FOLLOW = "FOLLOW";
+    final String ZOOM = "ZOOM";
+    final String BOTTOMSHEET = "BOTTOMSHEET";
 
     private BottomSheetBehavior bottomSheetBehavior;
 
@@ -79,7 +78,8 @@ public class MainActivity extends AppCompatActivity
     private boolean followPerson;
     private int maptype = GoogleMap.MAP_TYPE_NORMAL;
     private float zoomLevel;
-    private Toolbar toolbar, toolbar2;
+    private Toolbar toolbar;
+    private TextView toolbar2;
     private DrawerLayout drawerLayout;
     private FloatingActionMenu floatingActionMenu;
 
@@ -120,11 +120,15 @@ public class MainActivity extends AppCompatActivity
         Intent mIntent = new Intent(this, LocationService.class);
         bindService(mIntent, mConnection, BIND_AUTO_CREATE);
 
+        RelativeLayout bottomSheetLayout = findViewById(R.id.locationSheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+
         if(savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(SAVELOCATION);
             mLocationPermissionGranted = savedInstanceState.getBoolean(LOCATIONGRANTED);
             followPerson = savedInstanceState.getBoolean(FOLLOW);
             zoomLevel = savedInstanceState.getFloat(ZOOM);
+            bottomSheetBehavior.setState(savedInstanceState.getInt(BOTTOMSHEET));
         }
 
         setFont();
@@ -205,13 +209,12 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        RelativeLayout bottomSheetLayout = findViewById(R.id.locationSheet);
         floatingActionMenu = findViewById(R.id.menu);
         toolbar2 = findViewById(R.id.toolbar2);
+        final CardView cardToolbar = findViewById(R.id.cardToolbar);
         final Toolbar locationToolbar = findViewById(R.id.location_toolbar);
 
         //get bottom sheet behavior from bottom sheet view
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetCallback() {
 
             @Override
@@ -220,22 +223,26 @@ public class MainActivity extends AppCompatActivity
                 if(newState == BottomSheetBehavior.STATE_COLLAPSED) {
 
                     floatingActionMenu.setVisibility(View.VISIBLE);
-                    toolbar.setVisibility(View.VISIBLE);
+                    cardToolbar.setVisibility(View.VISIBLE);
                     toolbar2.setVisibility(View.VISIBLE);
                     setSupportActionBar(toolbar);
                     getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
                     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                     getSupportActionBar().setHomeButtonEnabled(true);
+                    getSupportActionBar().setTitle(getString(R.string.title_activity_map));
 
                 } else if(newState == BottomSheetBehavior.STATE_EXPANDED) {
 
                     floatingActionMenu.setVisibility(View.GONE);
-                    toolbar.setVisibility(View.GONE);
+                    cardToolbar.setVisibility(View.GONE);
                     toolbar2.setVisibility(View.GONE);
                     setSupportActionBar(locationToolbar);
                     getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back);
                     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setTitle("Peter O'Donnell Jr.");
                     getSupportActionBar().setHomeButtonEnabled(true);
+
+                    setReview();
 
 
                 } else if(newState == BottomSheetBehavior.STATE_DRAGGING) {
@@ -249,13 +256,13 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 floatingActionMenu.setAlpha(1 - slideOffset);
-                toolbar.setAlpha(1 - slideOffset);
+                cardToolbar.setAlpha(1 - slideOffset);
                 toolbar2.setAlpha(1-slideOffset);
                 if((1 - slideOffset) < .05) {
-                    toolbar.setVisibility(View.GONE);
+                    cardToolbar.setVisibility(View.GONE);
                     toolbar2.setVisibility(View.GONE);
                 } else {
-                    toolbar.setVisibility(View.VISIBLE);
+                    cardToolbar.setVisibility(View.VISIBLE);
                     toolbar2.setVisibility(View.VISIBLE);
                 }
             }
@@ -267,6 +274,20 @@ public class MainActivity extends AppCompatActivity
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
+    }
+
+    private void setReview() {
+        SimpleRatingBar overallRating = findViewById(R.id.stars);
+        overallRating.setRating(4.3f);
+        ScaleRatingBar spaceBar = findViewById(R.id.spaceBar);
+        ScaleRatingBar activityBar = findViewById(R.id.activityBar);
+        ScaleRatingBar wifiBar = findViewById(R.id.wifiBar);
+        ScaleRatingBar cleanBar = findViewById(R.id.cleanBar);
+
+        spaceBar.setRating(3);
+        activityBar.setRating(4);
+        wifiBar.setRating(2);
+        cleanBar.setRating(5);
     }
 
     private void setUpMap() {
@@ -293,6 +314,7 @@ public class MainActivity extends AppCompatActivity
         outState.putBoolean(LOCATIONGRANTED, mLocationPermissionGranted);
         outState.putBoolean(FOLLOW, followPerson);
         outState.putFloat(ZOOM, zoomLevel);
+        outState.putInt(BOTTOMSHEET, bottomSheetBehavior.getState());
     }
 
     @Override
@@ -312,9 +334,9 @@ public class MainActivity extends AppCompatActivity
         if(bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
             getMenuInflater().inflate(R.menu.map, menu);
 
-            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            /*SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));*/
         }
 
         return true;
@@ -325,23 +347,41 @@ public class MainActivity extends AppCompatActivity
 
         int id = item.getItemId();
 
-        if(id == android.R.id.home) {
-            if(bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+        if (id == android.R.id.home) {
+            if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
                 drawerLayout.openDrawer(GravityCompat.START);
             } else {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
             return true;
-        }  else if (id == R.id.action_settings) {
+        } else if (id == R.id.action_settings) {
             Intent settings = new Intent(this, Settings.class);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
             return true;
+        } else if(id == R.id.action_search) {
+
+            return true;
         } else if(id == R.id.action_maptype) {
 
-            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View mapDialogView = inflater.inflate(R.layout.map_dialog, null);
+            MaterialDialog mapDialog = new MaterialDialog.Builder(this)
+                    .customView(R.layout.map_dialog, false)
+                    .cancelable(true)
+                    .title("MAP TYPE")
+                    .negativeText("Cancel")
+                    .positiveText("Ok")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                    @Override
+                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                        setMapType();
+                                        saveMapType();
+                                    }
+                                }
+                    )
+                    .show();
+
+            View mapDialogView = mapDialog.getCustomView();
 
             LinearLayout street = mapDialogView.findViewById(R.id.street);
             LinearLayout satellite = mapDialogView.findViewById(R.id.satellite);
@@ -373,22 +413,6 @@ public class MainActivity extends AppCompatActivity
                 streetRb.setChecked(false);
                 satRb.setChecked(true);
             }
-
-            new MaterialStyledDialog.Builder(this)
-                    .setCustomView(mapDialogView)
-                    .setCancelable(true)
-                    .setTitle("CHOOSE MAP TYPE")
-                    .setStyle(Style.HEADER_WITH_TITLE)
-                    .setNegativeText("Cancel")
-                    .setPositiveText("Ok")
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        setMapType();
-                                    }
-                                }
-                    )
-                    .show();
 
         }
 
@@ -427,15 +451,18 @@ public class MainActivity extends AppCompatActivity
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        mMap.getUiSettings().setCompassEnabled(false);
 
         mMap.setOnCameraMoveStartedListener(this);
+        mMap.setOnMarkerClickListener(this);
 
         setMapType();
         moveCamera();
 
         //Add markers
-        /*LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));*/
+        LatLng sydney = new LatLng(30.286791, -97.7365);
+        MarkerOptions options = new MarkerOptions().position(sydney).title("POB 1");
+        mMap.addMarker(options);
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
@@ -466,6 +493,14 @@ public class MainActivity extends AppCompatActivity
             }
         }
         updateLocationUI();
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        if(toolbar2 != null) {
+            toolbar2.setText(marker.getTitle());
+        }
+        return false;
     }
 
     private void updateLocationUI() {

@@ -9,10 +9,6 @@
         android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
 
         <LinearLayout
             android:id="@+id/street"
@@ -100,5 +96,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
+
     </LinearLayout>
 </RelativeLayout>
