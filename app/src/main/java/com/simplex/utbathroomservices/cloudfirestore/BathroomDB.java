@@ -19,8 +19,8 @@ import java.util.ArrayList;
 public class BathroomDB {
     FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
 
-    public void addBathroomToDB(Location location, String building, String floor, String space, Integer numberStalls, Integer wifiQuality, Integer busyness, Rating rating){
-        Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,  wifiQuality,  busyness,  rating);
+    public void addBathroomToDB(Location location, String building, String floor, String space, Integer numberStalls, Integer wifiQuality, Integer busyness, Rating rating, String [] image){
+        Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,  wifiQuality,  busyness,  rating, image);
         mFireStore.collection("bathroom").add(b);
 
     }
