@@ -2,6 +2,9 @@ package com.simplex.utbathroomservices.cloudfirestore;
 
 import android.location.Location;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * Created by zoeng on 11/10/17.
  */
@@ -13,12 +16,9 @@ public class WaterFountain {
     String temperature;
     boolean isBottleRefillStation;
     String taste;
-    Rating rating;
+    Integer overallRating; // 1 to 5 scale
+    ArrayList<Rating> rating;
     String [] image;
-
-    public WaterFountain(){
-
-    }
 
     @Override
     public String toString() {
@@ -29,19 +29,32 @@ public class WaterFountain {
                 ", temperature='" + temperature + '\'' +
                 ", isBottleRefillStation=" + isBottleRefillStation +
                 ", taste='" + taste + '\'' +
-                ", rating=" + rating +
+                ", overallRating=" + overallRating +
                 '}';
     }
 
-    public WaterFountain(Location location, String building, String floor, String temperature, boolean isBottleRefillStation, String taste, Rating rating, String [] image) {
+    public WaterFountain(){
+
+    }
+
+    public WaterFountain(Location location, String building, String floor, String temperature, boolean isBottleRefillStation, String taste, Integer overallRating, ArrayList<Rating> rating, String[] image) {
         this.location = location;
         this.building = building;
         this.floor = floor;
         this.temperature = temperature;
         this.isBottleRefillStation = isBottleRefillStation;
         this.taste = taste;
+        this.overallRating = overallRating;
         this.rating = rating;
         this.image = image;
+    }
+
+    public Integer getOverallRating() {
+        return overallRating;
+    }
+
+    public void setOverallRating(Integer overallRating) {
+        this.overallRating = overallRating;
     }
 
     public Location getLocation() {
@@ -93,11 +106,11 @@ public class WaterFountain {
         this.taste = taste;
     }
 
-    public Rating getRating() {
+    public ArrayList<Rating> getRating() {
         return rating;
     }
 
-    public void setRating(Rating rating) {
+    public void setRating(ArrayList<Rating> rating) {
         this.rating = rating;
     }
 
