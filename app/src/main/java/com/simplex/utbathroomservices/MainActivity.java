@@ -45,6 +45,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
+import com.simplex.utbathroomservices.location.LocationCallback;
+import com.simplex.utbathroomservices.location.LocationService;
 import com.willy.ratingbar.ScaleRatingBar;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
@@ -361,6 +363,30 @@ public class MainActivity extends AppCompatActivity
 
             return true;
         } else if(id == R.id.action_search) {
+            MaterialDialog searchDialog = new MaterialDialog.Builder(this)
+                    .customView(R.layout.filter_dialog, true)
+                    .cancelable(true)
+                    .title("QUICK SEARCH")
+                    .negativeText("Cancel")
+                    .positiveText("Search")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            if(which == DialogAction.POSITIVE) {
+                                Toast.makeText(getApplicationContext(), "Searching", Toast.LENGTH_LONG).show();
+                            }
+                            View filterDialogView = dialog.getCustomView();
+                            ScaleRatingBar overallDialog = filterDialogView.findViewById(R.id.overallBar_dialog);
+                            ScaleRatingBar spaceDialog = filterDialogView.findViewById(R.id.spaceBar_dialog);
+                            ScaleRatingBar activityDialog = filterDialogView.findViewById(R.id.activityBar_dialog);
+                            ScaleRatingBar wifiDialog= filterDialogView.findViewById(R.id.wifiBar_dialog);
+                            ScaleRatingBar cleanDialog = filterDialogView.findViewById(R.id.cleanBar_dialog);
+
+                            System.out.println(overallDialog.getRating() + " " + spaceDialog.getRating() + " " + activityDialog.getRating() +
+                                " " + wifiDialog.getRating() + " " + cleanDialog.getRating());
+                        }
+                    })
+                    .show();
 
             return true;
         } else if(id == R.id.action_maptype) {

@@ -1,4 +1,4 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.location;
 
 import android.app.Service;
 import android.content.Context;
@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -66,11 +65,6 @@ public class LocationService extends Service implements LocationUpdateListener{
                 locationCallback.updateLocationGUI(location);
             }
         }
-    }
-
-    @Override
-    public void updateLocationName(String localityName, Location location) {
-        //googleLocationService.stopLocationUpdates();
     }
 
     IBinder mBinder = new LocalBinder();

@@ -1,4 +1,4 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.location;
 
 import android.location.Location;
 
@@ -7,5 +7,5 @@ import android.location.Location;
  */
 
 public interface LocationCallback {
-    public void updateLocationGUI(Location location);
+    void updateLocationGUI(Location location);
 }
