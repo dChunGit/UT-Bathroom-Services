@@ -35,7 +35,9 @@ public class Bathroom {
 
     }
 
-    public Bathroom(Location location, String building, String floor, String space, Integer numberStalls, Integer wifiQuality, Integer busyness, Rating rating, String[] image) {
+    public Bathroom(Location location, String building, String floor, String space,
+                    Integer numberStalls, Integer wifiQuality, Integer busyness,
+                    Rating rating, String[] image) {
         this.location = location;
         this.building = building;
         this.floor = floor;

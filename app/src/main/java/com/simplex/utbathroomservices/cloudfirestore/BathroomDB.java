@@ -19,13 +19,20 @@ import java.util.ArrayList;
 public class BathroomDB {
     FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
 
-    public void addBathroomToDB(Location location, String building, String floor, String space, Integer numberStalls, Integer wifiQuality, Integer busyness, Rating rating, String [] image){
-        Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,  wifiQuality,  busyness,  rating, image);
+    public void addBathroomToDB(Location location, String building, String floor, String space,
+                                Integer numberStalls, Integer wifiQuality, Integer busyness,
+                                Rating rating, String [] image){
+        Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,
+                wifiQuality,  busyness,  rating, image);
         mFireStore.collection("bathroom").add(b);
 
     }
 
-public ArrayList<Bathroom> getAllBathrooms(){
+    public void addBathroomRating(Rating rating) {
+
+    }
+
+    public ArrayList<Bathroom> getAllBathrooms(){
         final ArrayList<Bathroom> results= new ArrayList<Bathroom>();
         mFireStore.collection("bathroom")
             .get()
