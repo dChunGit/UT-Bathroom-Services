@@ -32,14 +32,19 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".Onboarding"
+        <activity
+            android:name=".Onboarding"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Settings"
             android:theme="@style/AppTheme" />
 
-        <activity android:name=".Settings"
-            android:theme="@style/AppTheme" />
         <service
             android:name=".location.LocationService"
-            android:enabled="true"/>
+            android:enabled="true" />
+
+        <activity android:name=".Favorites" />
+        <activity android:name=".Search"></activity>
     </application>
 
 </manifest>

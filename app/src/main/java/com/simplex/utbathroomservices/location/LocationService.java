@@ -23,7 +23,6 @@ public class LocationService extends Service implements LocationUpdateListener{
         //start the handler for getting locations
         //create component
         updateLocation(this);
-        //updateLocation(MainActivity.this);
     }
 
     @Override
@@ -58,9 +57,6 @@ public class LocationService extends Service implements LocationUpdateListener{
     @Override
     public void updateLocation(Location location) {
         if (location != null) {
-            /*Toast.makeText(getApplicationContext(),
-                    "updated location: " + location.getLatitude() + " " + location.getLongitude(),
-                    Toast.LENGTH_SHORT).show();*/
             if(locationCallback != null) {
                 locationCallback.updateLocationGUI(location);
             }
