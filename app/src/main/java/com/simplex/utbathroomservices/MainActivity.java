@@ -453,6 +453,10 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.favorites) {
 
+            Intent settings = new Intent(this, Favorites.class);
+            startActivity(settings);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
         } else if (id == R.id.advanced_search) {
 
         } else if (id == R.id.settings) {

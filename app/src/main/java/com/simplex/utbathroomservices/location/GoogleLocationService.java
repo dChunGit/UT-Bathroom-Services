@@ -24,10 +24,10 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  */
 public class GoogleLocationService {
     private GoogleServicesCallbacks callbacks = new GoogleServicesCallbacks();
-    Context activity;
-    LocationUpdateListener locationUpdateListener;
-    protected GoogleApiClient mGoogleApiClient;
-    protected LocationRequest mLocationRequest;
+    private Context activity;
+    private LocationUpdateListener locationUpdateListener;
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
 
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 7000;
 
