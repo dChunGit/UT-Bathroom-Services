@@ -47,7 +47,7 @@ public class SearchFragment extends Fragment {
             searchCallback = (SearchCallback) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement onUpdateListener");
         }
 
     }

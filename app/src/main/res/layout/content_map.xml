@@ -9,11 +9,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <fragment
+        <FrameLayout
             android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
 
     </RelativeLayout>
 
@@ -28,12 +28,11 @@
 
         <include layout="@layout/location_sheet"/>
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:theme="@style/AppTheme.AppBarOverlay">
-
 
             <TextView
                 android:id="@+id/toolbar2"
@@ -46,8 +45,16 @@
                 android:background="@color/colorPrimary"
                 android:theme="@style/AppTheme.PopupOverlay" />
 
+            <com.wang.avi.AVLoadingIndicatorView
+                android:id="@+id/sync"
+                android:layout_marginStart="14dp"
+                android:layout_centerVertical="true"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                app:indicatorName="BallSpinFadeLoaderIndicator"
+                />
 
-        </LinearLayout>
+        </RelativeLayout>
 
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

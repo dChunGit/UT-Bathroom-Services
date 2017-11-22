@@ -20,7 +20,14 @@ import java.util.ArrayList;
  */
 
 public class BathroomDB {
+    ArrayList<Bathroom> results= new ArrayList<>();
     FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
+
+    private DatabaseCallback databaseCallback;
+
+    public BathroomDB(DatabaseCallback callback) {
+        databaseCallback = callback;
+    }
   
     public void addBathroomToDB(Location location, String building, String floor, String space, Integer numberStalls, Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating, ArrayList<Rating> rating, String[] image){
         Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,  wifiQuality,  busyness,cleanliness, overallRating , rating, image);
@@ -71,163 +78,70 @@ public class BathroomDB {
                 });
     }
 
-    public void addBathroomRating(Rating rating) {
+    public void getAllBathrooms(){
+        mFireStore.collection("bathroom")
+                .get()
+                .addOnCompleteListener(new OnCompleteListenerGet());
 
     }
 
-    public ArrayList<Bathroom> getAllBathrooms(){
-        final ArrayList<Bathroom> results= new ArrayList<Bathroom>();
-        mFireStore.collection("bathroom")
-            .get()
-            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        for (DocumentSnapshot document : task.getResult()) {
-                            Log.d("Success", document.getId() + " => " + document.getData());
-                            Bathroom bathroom = document.toObject(Bathroom.class);
-                            results.add(bathroom);
-
-                        }
-                    } else {
-                        Log.d("Error", "Error getting documents: ", task.getException());
-                    }
-                }
-            });
-        return results;
-}
-
-    public ArrayList<Bathroom> getBathroomByBuilding(String building){
-        final ArrayList<Bathroom> results= new ArrayList<Bathroom>();
+    public void getBathroomByBuilding(String building){
         mFireStore.collection("bathroom")
                 .whereEqualTo("building", building)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                Bathroom bathroom = document.toObject(Bathroom.class);
-                                results.add(bathroom);
+                .addOnCompleteListener(new OnCompleteListenerGet());
 
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
     }
-    public ArrayList<Bathroom> getBathroomByBuildingAndFloor(String building, String floor){
-        final ArrayList<Bathroom> results= new ArrayList<Bathroom>();
+    public void getBathroomByBuildingAndFloor(String building, String floor){
         mFireStore.collection("bathroom")
                 .whereEqualTo("building", building)
                 .whereEqualTo("floor", floor)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                Bathroom bathroom = document.toObject(Bathroom.class);
-                                results.add(bathroom);
+                .addOnCompleteListener(new OnCompleteListenerGet());
 
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
     }
-    public ArrayList<Bathroom> getBathroomByOverallRating(Integer overallRating){
-        final ArrayList<Bathroom> results= new ArrayList<Bathroom>();
+    public void getBathroomByOverallRating(Integer overallRating){
         mFireStore.collection("bathroom")
                 .whereGreaterThanOrEqualTo("overallRating", overallRating)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                Bathroom bathroom = document.toObject(Bathroom.class);
-                                results.add(bathroom);
+                .addOnCompleteListener(new OnCompleteListenerGet());
 
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
     }
-    public ArrayList<Bathroom> getBathroomByCleanliness(Integer cleanliness){
-        final ArrayList<Bathroom> results= new ArrayList<Bathroom>();
+    public void getBathroomByCleanliness(Integer cleanliness){
         mFireStore.collection("bathroom")
                 .whereGreaterThanOrEqualTo("cleanliness", cleanliness)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                Bathroom bathroom = document.toObject(Bathroom.class);
-                                results.add(bathroom);
+                .addOnCompleteListener(new OnCompleteListenerGet());
 
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
     }
-    public ArrayList<Bathroom> getBathroomByBusyness(Integer busyness){
-        final ArrayList<Bathroom> results= new ArrayList<Bathroom>();
+    public void getBathroomByBusyness(Integer busyness){
         mFireStore.collection("bathroom")
                 .whereLessThanOrEqualTo("busyness", busyness)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                Bathroom bathroom = document.toObject(Bathroom.class);
-                                results.add(bathroom);
+                .addOnCompleteListener(new OnCompleteListenerGet());
 
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
     }
-    public ArrayList<Bathroom> getBathroomByWifiQuality(Integer wifiQuality){
-        final ArrayList<Bathroom> results= new ArrayList<Bathroom>();
+    public void getBathroomByWifiQuality(Integer wifiQuality){
         mFireStore.collection("bathroom")
                 .whereGreaterThanOrEqualTo("wifiQuality", wifiQuality)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                Bathroom bathroom = document.toObject(Bathroom.class);
-                                results.add(bathroom);
+                .addOnCompleteListener(new OnCompleteListenerGet());
+    }
 
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
+    class OnCompleteListenerGet implements OnCompleteListener<QuerySnapshot> {
+
+        @Override
+        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot document : task.getResult()) {
+                    Log.d("Success", document.getId() + " => " + document.getData());
+                    Bathroom bathroom = document.toObject(Bathroom.class);
+                    results.add(bathroom);
+                }
+            } else {
+                Log.d("Error", "Error getting documents: ", task.getException());
+            }
+            databaseCallback.updateFinished(results);
+        }
     }
 }
