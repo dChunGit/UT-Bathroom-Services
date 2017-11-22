@@ -29,7 +29,7 @@ public class GoogleLocationService {
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 7000;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
 
     public GoogleLocationService(Context activity) {
         this.locationUpdateListener = (LocationUpdateListener) activity;

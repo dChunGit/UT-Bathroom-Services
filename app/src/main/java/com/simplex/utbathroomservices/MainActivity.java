@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -45,16 +46,22 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
+import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
+import com.simplex.utbathroomservices.fragments.UpdateFragment;
 import com.simplex.utbathroomservices.location.LocationCallback;
 import com.simplex.utbathroomservices.location.LocationService;
+import com.wang.avi.AVLoadingIndicatorView;
 import com.willy.ratingbar.ScaleRatingBar;
+
+import java.util.ArrayList;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        GoogleMap.OnCameraMoveStartedListener, LocationCallback, GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnCameraMoveStartedListener, LocationCallback, GoogleMap.OnMarkerClickListener,
+        UpdateFragment.onUpdateListener {
     //TODO: Save current location and update
     //TODO: Variable update rate
     //TODO: Favorites activity
@@ -69,8 +76,6 @@ public class MainActivity extends AppCompatActivity
     final String ZOOM = "ZOOM";
     final String BOTTOMSHEET = "BOTTOMSHEET";
 
-    private BottomSheetBehavior bottomSheetBehavior;
-
     private GoogleMap mMap;
     private final LatLng mDefaultLocation = new LatLng(30.286310, -97.739560);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -80,10 +85,21 @@ public class MainActivity extends AppCompatActivity
     private boolean followPerson;
     private int maptype = GoogleMap.MAP_TYPE_NORMAL;
     private float zoomLevel;
+
+    private BottomSheetBehavior bottomSheetBehavior;
     private Toolbar toolbar;
     private TextView toolbar2;
     private DrawerLayout drawerLayout;
     private FloatingActionMenu floatingActionMenu;
+    private AVLoadingIndicatorView sync;
+
+    private UpdateFragment updateFragment;
+    private FragmentManager fragmentManager;
+    private static final String TAG_TASK_FRAGMENT = "updateFragment";
+
+
+    private long mBackPressed;
+    private static final int TIME_INTERVAL = 2000;
 
     boolean mBounded;
     LocationService mServer;
@@ -136,6 +152,7 @@ public class MainActivity extends AppCompatActivity
         setFont();
         setUpUI();
         setUpMap();
+        updateEntries();
     }
 
     private void setFont() {
@@ -152,6 +169,8 @@ public class MainActivity extends AppCompatActivity
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.title_activity_map));
+
+        sync = findViewById(R.id.sync);
 
         final FloatingActionButton location = findViewById(R.id.location);
         location.setOnClickListener(new View.OnClickListener() {
@@ -276,6 +295,7 @@ public class MainActivity extends AppCompatActivity
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
+
     }
 
     private void setReview() {
@@ -297,12 +317,29 @@ public class MainActivity extends AppCompatActivity
         getMapType();
 
         // Get map asynchronously and add callback
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        /*SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mapFragment.getMapAsync(this);*/
+        new Thread(() -> {
+            try {
+                final SupportMapFragment supportMapFragment = SupportMapFragment.newInstance();
+                getSupportFragmentManager().beginTransaction().add(R.id.map, supportMapFragment).commit();
+                runOnUiThread(() -> supportMapFragment.getMapAsync(MainActivity.this));
+
+            } catch (Exception e) {
+                //log map load exception
+            }
+        }).start();
 
         // Current location setup
         mFusedLocationProviderApi = LocationServices.FusedLocationApi;
+    }
+
+    private void updateEntries() {
+        if(updateFragment == null) {
+            updateFragment = UpdateFragment.newInstance();
+            fragmentManager.beginTransaction().add(updateFragment, TAG_TASK_FRAGMENT).commit();
+        }
     }
 
     @Override
@@ -324,8 +361,21 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if(bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
         } else {
-            super.onBackPressed();
+            //if time interval within specified
+            if (mBackPressed + TIME_INTERVAL > System.currentTimeMillis())
+            {
+                super.onBackPressed();
+            }
+            else {
+                Toast.makeText(getBaseContext(), getString(R.string.back), Toast.LENGTH_SHORT).show();
+            }
+
+            mBackPressed = System.currentTimeMillis();
         }
     }
 
@@ -621,6 +671,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onUpdateFinish(ArrayList<Bathroom> results) {
+        System.out.println(results);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
     }
@@ -645,4 +700,5 @@ public class MainActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
     }
+
 }

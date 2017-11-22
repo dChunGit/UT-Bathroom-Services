@@ -1,12 +1,10 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.fragments;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-
-import java.util.ArrayList;
 
 /**
  * Created by dchun on 11/19/17.
@@ -47,7 +45,7 @@ public class SearchFragment extends Fragment {
             searchCallback = (SearchCallback) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement onUpdateListener");
         }
 
     }
