@@ -18,10 +18,10 @@ public class SearchFragment extends Fragment {
     private Search search;
 
     public interface SearchCallback {
-        void onPreExecute();
-        void onProgressUpdate();
-        void onCancelled();
-        void onPostExecute();
+        void onPreExecuteSearch();
+        void onProgressUpdateSearch();
+        void onCancelledSearch();
+        void onPostExecuteSearch();
     }
 
     public SearchFragment() {
@@ -93,23 +93,23 @@ public class SearchFragment extends Fragment {
 
         protected void onPreExecute() {
             // Proxy the call to the Activity.
-            searchCallback.onPreExecute();
+            searchCallback.onPreExecuteSearch();
             asyncRunning = true;
         }
 
         protected void onProgressUpdate(Integer... percent) {
-            searchCallback.onProgressUpdate();
+            searchCallback.onProgressUpdateSearch();
         }
 
         protected void onCancelled() {
             //System.out.println("Cancel in async");
             cancel(true);
-            searchCallback.onCancelled();
+            searchCallback.onCancelledSearch();
             asyncRunning = false;
         }
 
         protected void onPostExecute(Integer success) {
-            searchCallback.onPostExecute();
+            searchCallback.onPostExecuteSearch();
             asyncRunning = false;
         }
 

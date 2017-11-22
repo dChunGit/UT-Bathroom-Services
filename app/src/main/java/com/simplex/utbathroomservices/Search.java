@@ -27,17 +27,17 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
     }
 
     @Override
-    public void onPreExecute() {
+    public void onPreExecuteSearch() {
 
     }
 
     @Override
-    public void onProgressUpdate() {
+    public void onProgressUpdateSearch() {
 
     }
 
     @Override
-    public void onCancelled() {
+    public void onCancelledSearch() {
         try {
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
         } catch (Exception e) {
@@ -47,7 +47,12 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
     }
 
     @Override
-    public void onPostExecute() {
+    public void onPostExecuteSearch() {
+        try {
+            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
+        } catch (Exception e) {
 
+        }
+        searchFragment = null;
     }
 }
