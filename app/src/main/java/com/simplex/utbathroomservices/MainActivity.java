@@ -47,6 +47,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
+import com.simplex.utbathroomservices.cloudfirestore.Rating;
+import com.simplex.utbathroomservices.fragments.SearchFragment;
 import com.simplex.utbathroomservices.fragments.UpdateFragment;
 import com.simplex.utbathroomservices.location.LocationCallback;
 import com.simplex.utbathroomservices.location.LocationService;
@@ -54,6 +56,8 @@ import com.wang.avi.AVLoadingIndicatorView;
 import com.willy.ratingbar.ScaleRatingBar;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -97,6 +101,7 @@ public class MainActivity extends AppCompatActivity
     private FragmentManager fragmentManager;
     private static final String TAG_TASK_FRAGMENT = "updateFragment";
 
+    private HashMap<String, Bathroom> firebaseRatings;
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
@@ -140,6 +145,9 @@ public class MainActivity extends AppCompatActivity
 
         RelativeLayout bottomSheetLayout = findViewById(R.id.locationSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+
+        fragmentManager = getSupportFragmentManager();
+        updateFragment = (UpdateFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
 
         if(savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(SAVELOCATION);
@@ -263,9 +271,6 @@ public class MainActivity extends AppCompatActivity
                     getSupportActionBar().setTitle("Peter O'Donnell Jr.");
                     getSupportActionBar().setHomeButtonEnabled(true);
 
-                    setReview();
-
-
                 } else if(newState == BottomSheetBehavior.STATE_DRAGGING) {
 
                     floatingActionMenu.setVisibility(View.VISIBLE);
@@ -298,18 +303,35 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void setReview() {
+    private void setReview(Object location) {
+        float orate = 0f;
+        int space = 0, activity = 0, wifi = 0, clean = 0;
+        ArrayList<Rating> ratings = new ArrayList<>();
+        String[] imageUrls = new String[0];
+
+        if(location instanceof Bathroom) {
+            Bathroom bathroom = (Bathroom) location;
+            orate = bathroom.getOverallRating();
+            //space = bathroom.getSpace();
+            //stalls = bathroom.getNumberStalls();
+            activity = bathroom.getBusyness();
+            wifi = bathroom.getWifiQuality();
+            clean = bathroom.getCleanliness();
+            ratings = bathroom.getRating();
+            imageUrls = bathroom.getImage();
+        }
+
         SimpleRatingBar overallRating = findViewById(R.id.stars);
-        overallRating.setRating(4.3f);
+        overallRating.setRating(orate);
         ScaleRatingBar spaceBar = findViewById(R.id.spaceBar);
         ScaleRatingBar activityBar = findViewById(R.id.activityBar);
         ScaleRatingBar wifiBar = findViewById(R.id.wifiBar);
         ScaleRatingBar cleanBar = findViewById(R.id.cleanBar);
 
-        spaceBar.setRating(3);
-        activityBar.setRating(4);
-        wifiBar.setRating(2);
-        cleanBar.setRating(5);
+        spaceBar.setRating(space);
+        activityBar.setRating(activity);
+        wifiBar.setRating(wifi);
+        cleanBar.setRating(clean);
     }
 
     private void setUpMap() {
@@ -339,6 +361,9 @@ public class MainActivity extends AppCompatActivity
         if(updateFragment == null) {
             updateFragment = UpdateFragment.newInstance();
             fragmentManager.beginTransaction().add(updateFragment, TAG_TASK_FRAGMENT).commit();
+            if(sync != null) {
+                sync.smoothToShow();
+            }
         }
     }
 
@@ -386,9 +411,6 @@ public class MainActivity extends AppCompatActivity
         if(bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
             getMenuInflater().inflate(R.menu.map, menu);
 
-            /*SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));*/
         }
 
         return true;
@@ -413,7 +435,7 @@ public class MainActivity extends AppCompatActivity
 
             return true;
         } else if(id == R.id.action_search) {
-            MaterialDialog searchDialog = new MaterialDialog.Builder(this)
+            new MaterialDialog.Builder(this)
                     .customView(R.layout.filter_dialog, true)
                     .cancelable(true)
                     .title("QUICK SEARCH")
@@ -539,11 +561,6 @@ public class MainActivity extends AppCompatActivity
         setMapType();
         moveCamera();
 
-        //Add markers
-        LatLng sydney = new LatLng(30.286791, -97.7365);
-        MarkerOptions options = new MarkerOptions().position(sydney).title("POB 1");
-        mMap.addMarker(options);
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     private void checkPermissions() {
@@ -579,6 +596,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onMarkerClick(final Marker marker) {
         if(toolbar2 != null) {
             toolbar2.setText(marker.getTitle());
+            setReview(firebaseRatings.get(marker.getTitle()));
         }
         return false;
     }
@@ -669,15 +687,37 @@ public class MainActivity extends AppCompatActivity
             mMap.setMapType(maptype);
         }
     }
+    private void addMarkers(LinkedList<MarkerOptions> markers) {
+
+        for(MarkerOptions markerOptions : markers) {
+            mMap.addMarker(markerOptions);
+        }
+
+    }
 
     @Override
-    public void onUpdateFinish(ArrayList<Bathroom> results) {
-        System.out.println(results);
+    public void onUpdateFinish(HashMap<String, Bathroom> results, LinkedList<MarkerOptions> markers) {
+        runOnUiThread(() -> {
+            if(sync != null) {
+                sync.smoothToHide();
+            }
+            firebaseRatings = results;
+            System.out.println(firebaseRatings);
+            //addMarkers(markers);
+
+        });
     }
 
     @Override
     public void onDestroy() {
+
         super.onDestroy();
+        try {
+            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
+        } catch (Exception e) {
+
+        }
+        updateFragment = null;
     }
 
     @Override

@@ -1,26 +1,29 @@
 package com.simplex.utbathroomservices.fragments;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import com.simplex.utbathroomservices.R;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
 import com.simplex.utbathroomservices.cloudfirestore.DatabaseCallback;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class UpdateFragment extends Fragment implements DatabaseCallback{
 
     public interface onUpdateListener {
-        void onUpdateFinish(ArrayList<Bathroom> results);
+        void onUpdateFinish(HashMap<String, Bathroom> results, LinkedList<MarkerOptions> markers);
     }
 
     private onUpdateListener mListener;
+    private HashMap<String, Bathroom> processedResults = new HashMap<>();
+    private LinkedList<MarkerOptions> markerOptions = new LinkedList<>();
 
     public UpdateFragment() {
         // Required empty public constructor
@@ -33,17 +36,8 @@ public class UpdateFragment extends Fragment implements DatabaseCallback{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         startUpdate();
-
         setRetainInstance(true);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_update, container, false);
     }
 
     @Override
@@ -64,8 +58,30 @@ public class UpdateFragment extends Fragment implements DatabaseCallback{
 
     @Override
     public void updateFinished(ArrayList<Bathroom> r) {
-        mListener.onUpdateFinish(r);
+        new Thread(() -> {
+            for(Bathroom b : r) {
+                processedResults.put(b.getBuilding() + " " + b.getFloor(), b);
+            }
+            setUpMarkers();
+            mListener.onUpdateFinish(processedResults, markerOptions);
+        }).start();
     }
+
+    private void setUpMarkers() {
+        for(String title : processedResults.keySet()) {
+
+            Bathroom bathroom = processedResults.get(title);
+            System.out.println(title);
+            Location location = bathroom.getLocation();
+            if(location != null) {
+                LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
+                MarkerOptions options = new MarkerOptions().position(sydney).title(title);
+                markerOptions.add(options);
+            }
+        }
+
+    }
+
 
     @Override
     public void onDetach() {
