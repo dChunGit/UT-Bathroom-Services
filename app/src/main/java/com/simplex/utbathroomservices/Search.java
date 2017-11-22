@@ -4,6 +4,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.simplex.utbathroomservices.fragments.SearchFragment;
+
 public class Search extends AppCompatActivity implements SearchFragment.SearchCallback{
     private SearchFragment searchFragment;
     private FragmentManager fragmentManager;

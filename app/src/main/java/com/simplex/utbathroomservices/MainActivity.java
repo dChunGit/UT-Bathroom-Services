@@ -47,6 +47,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
+import com.simplex.utbathroomservices.fragments.UpdateFragment;
 import com.simplex.utbathroomservices.location.LocationCallback;
 import com.simplex.utbathroomservices.location.LocationService;
 import com.wang.avi.AVLoadingIndicatorView;
