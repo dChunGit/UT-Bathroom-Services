@@ -1,4 +1,4 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.location;
 
 import android.location.Location;
 
@@ -10,6 +10,5 @@ public interface LocationUpdateListener {
     void canReceiveLocationUpdates();
     void cannotReceiveLocationUpdates();
     void updateLocation(Location location);
-    void updateLocationName(String localityName, Location location);
 
 }
