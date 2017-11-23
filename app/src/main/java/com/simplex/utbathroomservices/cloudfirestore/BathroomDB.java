@@ -29,11 +29,12 @@ public class BathroomDB {
         databaseCallback = callback;
     }
   
-    public void addBathroomToDB(Location location, String building, String floor, String space, Integer numberStalls, Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating, ArrayList<Rating> rating, String[] image){
+    public void addBathroomToDB(Location location, String building, String floor, String space, String numberStalls, Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating, ArrayList<Rating> rating, String[] image){
         Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,  wifiQuality,  busyness,cleanliness, overallRating , rating, image);
         mFireStore.collection("bathroom").add(b);
 
     }
+
     public void addReviewForBathroom(Bathroom b, String review){
         final ArrayList<String> id= new ArrayList<String>();
         mFireStore.collection("bathroom")
@@ -54,26 +55,26 @@ public class BathroomDB {
                             for (DocumentSnapshot document : task.getResult()) {
                                 id.add(document.getId());
                             }
+                            Rating rating= new Rating(review);
+                            b.rating.add(rating);
+                            DocumentReference bathroomRef = mFireStore.collection("bathroom").document(id.get(0));
+                            bathroomRef
+                                    .update("rating", b.rating)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d("Success", "DocumentSnapshot successfully updated!");
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w("Error", "Error updating document", e);
+                                        }
+                                    });
                         } else {
                             Log.d("Error", "Error getting documents: ", task.getException());
                         }
-                    }
-                });
-        Rating rating= new Rating(review);
-        b.rating.add(rating);
-        DocumentReference bathroomRef = mFireStore.collection("bathroom").document(id.get(0));
-        bathroomRef
-                .update("rating", b.rating)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("Success", "DocumentSnapshot successfully updated!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("Error", "Error updating document", e);
                     }
                 });
     }
@@ -92,6 +93,7 @@ public class BathroomDB {
                 .addOnCompleteListener(new OnCompleteListenerGet());
 
     }
+
     public void getBathroomByBuildingAndFloor(String building, String floor){
         mFireStore.collection("bathroom")
                 .whereEqualTo("building", building)
@@ -100,6 +102,7 @@ public class BathroomDB {
                 .addOnCompleteListener(new OnCompleteListenerGet());
 
     }
+
     public void getBathroomByOverallRating(Integer overallRating){
         mFireStore.collection("bathroom")
                 .whereGreaterThanOrEqualTo("overallRating", overallRating)
@@ -107,6 +110,7 @@ public class BathroomDB {
                 .addOnCompleteListener(new OnCompleteListenerGet());
 
     }
+
     public void getBathroomByCleanliness(Integer cleanliness){
         mFireStore.collection("bathroom")
                 .whereGreaterThanOrEqualTo("cleanliness", cleanliness)
@@ -114,6 +118,7 @@ public class BathroomDB {
                 .addOnCompleteListener(new OnCompleteListenerGet());
 
     }
+
     public void getBathroomByBusyness(Integer busyness){
         mFireStore.collection("bathroom")
                 .whereLessThanOrEqualTo("busyness", busyness)
@@ -121,6 +126,7 @@ public class BathroomDB {
                 .addOnCompleteListener(new OnCompleteListenerGet());
 
     }
+
     public void getBathroomByWifiQuality(Integer wifiQuality){
         mFireStore.collection("bathroom")
                 .whereGreaterThanOrEqualTo("wifiQuality", wifiQuality)

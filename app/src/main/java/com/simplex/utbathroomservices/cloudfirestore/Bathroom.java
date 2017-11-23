@@ -16,7 +16,7 @@ public class Bathroom {
     String building;
     String floor;
     String space;
-    Integer numberStalls;
+    String numberStalls;
     Integer wifiQuality; // 1 to 5 scale
     Integer busyness; // 1 to 5 scale
     Integer cleanliness; // 1 to 5 scale
@@ -28,7 +28,7 @@ public class Bathroom {
 
     }
 
-    public Bathroom(Location location, String building, String floor, String space, Integer numberStalls, Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating, ArrayList<Rating> rating, String[] image) {
+    public Bathroom(Location location, String building, String floor, String space, String numberStalls, Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating, ArrayList<Rating> rating, String[] image) {
         this.location = location;
         this.building = building;
         this.floor = floor;
@@ -87,11 +87,11 @@ public class Bathroom {
         this.space = space;
     }
 
-    public Integer getNumberStalls() {
+    public String getNumberStalls() {
         return numberStalls;
     }
 
-    public void setNumberStalls(Integer numberStalls) {
+    public void setNumberStalls(String numberStalls) {
         this.numberStalls = numberStalls;
     }
 
