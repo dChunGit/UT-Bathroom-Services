@@ -65,25 +65,25 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         setContentView(R.layout.activity_add);
         System.out.println(getIntent().getExtras());
 
-        /*try {
+        try {
             location = getIntent().getParcelableExtra("Location");
-        } catch (NullPointerException e) {
-            System.out.println("Null location");
-        }*/
+        } catch (Exception e) {
+            System.out.println("Location Not Sent or Something Else");
+        }
 
         try{
             sentRatings = getIntent().getParcelableArrayListExtra("Ratings");
             System.out.println(sentRatings);
-        } catch (NullPointerException e) {
-            System.out.println("Null Ratings");
+        } catch (Exception e) {
+            System.out.println("Ratings malformed");
         }
 
-        /*new Thread(() -> {
+        new Thread(() -> {
             for(Bathroom b : sentRatings) {
-                //firebaseRatings.put(b.getBuilding() + " " + b.getFloor(), b);
+                firebaseRatings.put(b.getBuilding() + " " + b.getFloor(), b);
             }
-            //System.out.println(firebaseRatings);
-        }).start();*/
+            System.out.println(firebaseRatings);
+        }).start();
 
         setUpUI();
     }
@@ -98,7 +98,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
         FloatingActionButton imagefab = findViewById(R.id.imagefab);
         imagefab.setOnClickListener((view) -> {
-            Toast.makeText(this, "Add Image", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Add Image", Toast.LENGTH_SHORT).show();
         });
 
         setUpSpinners();
@@ -150,11 +150,11 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 switch(i) {
                     case 0: {
                         type = "Bathroom";
-                        Toast.makeText(this, "Bathroom Selected", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Bathroom Selected", Toast.LENGTH_SHORT).show();
                     } break;
                     case 1: {
                         type = "Fountain";
-                        Toast.makeText(this, "Water Fountain Selected", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Water Fountain Selected", Toast.LENGTH_SHORT).show();
                     }
                 }
             } break;
@@ -163,31 +163,31 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 switch(i) {
                     case 0: {
                         stallnum = 0;
-                        Toast.makeText(this, "None", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "None", Toast.LENGTH_SHORT).show();
                     } break;
                     case 1: {
                         stallnum = 1;
-                        Toast.makeText(this, "1", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "1", Toast.LENGTH_SHORT).show();
                     } break;
                     case 2: {
                         stallnum = 2;
-                        Toast.makeText(this, "2", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "2", Toast.LENGTH_SHORT).show();
                     } break;
                     case 3: {
                         stallnum = 3;
-                        Toast.makeText(this, "3", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "3", Toast.LENGTH_SHORT).show();
                     } break;
                     case 4: {
                         stallnum = 4;
-                        Toast.makeText(this, "4", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "4", Toast.LENGTH_SHORT).show();
                     } break;
                     case 5: {
                         stallnum = 5;
-                        Toast.makeText(this, "5", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "5", Toast.LENGTH_SHORT).show();
                     } break;
                     case 6: {
                         //stallnum = "Custom";
-                        Toast.makeText(this, "Custom", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Custom", Toast.LENGTH_SHORT).show();
                     }
                 }
             } break;
@@ -196,23 +196,23 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 switch(i) {
                     case 0: {
                         space = "XSmall";
-                        Toast.makeText(this, "XSmall", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "XSmall", Toast.LENGTH_SHORT).show();
                     } break;
                     case 1: {
                         space = "Small";
-                        Toast.makeText(this, "Small", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Small", Toast.LENGTH_SHORT).show();
                     } break;
                     case 2: {
                         space = "Medium";
-                        Toast.makeText(this, "Medium", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Medium", Toast.LENGTH_SHORT).show();
                     } break;
                     case 3: {
                         space = "Large";
-                        Toast.makeText(this, "Large", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Large", Toast.LENGTH_SHORT).show();
                     } break;
                     case 4: {
                         space = "XLarge";
-                        Toast.makeText(this, "XLarge", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "XLarge", Toast.LENGTH_SHORT).show();
                     }
                 }
             }

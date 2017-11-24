@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(settings);
                 overridePendingTransition(R.anim.fadein, R.anim.fadeout);
             } else {
-                Toast.makeText(this, "Please wait until sync is complete", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Please wait until sync is complete", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -443,7 +443,7 @@ public class MainActivity extends AppCompatActivity
                     .positiveText("Search")
                     .onPositive((dialog, which) -> {
                         if(which == DialogAction.POSITIVE) {
-                            Toast.makeText(getApplicationContext(), "Searching", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Searching", Toast.LENGTH_SHORT).show();
                         }
                         View filterDialogView = dialog.getCustomView();
                         ScaleRatingBar overallDialog = filterDialogView.findViewById(R.id.overallBar_dialog);

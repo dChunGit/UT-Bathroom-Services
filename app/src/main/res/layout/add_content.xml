@@ -292,7 +292,10 @@
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine"
                     android:gravity="top|left"
-                    android:scrollbars="vertical"/>
+                    android:hint="Type Here..."
+                    android:textSize="12sp"
+                    android:scrollbars="vertical"
+                    android:background="@android:color/transparent"/>
 
             </LinearLayout>
 
