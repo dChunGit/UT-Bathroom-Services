@@ -18,17 +18,19 @@ import com.github.clans.fab.FloatingActionButton;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
+import com.willy.ratingbar.ScaleRatingBar;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Add extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
+public class Add extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
 
     private Location location;
+    private String type, building, floorNumber, space;
+    private int stallnum;
 
     private String[] buildings = {"ADH", "AF1", "AF2", "AFP", "AHG", "ANB", "AND", "ARC", "ART", "ATT",
             "BAT", "BEL", "BEN", "BGH", "BHD", "BIO", "BLD", "BMA", "BMC", "BME", "BMS", "BOT",
@@ -51,35 +53,42 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             "UNB", "UPB", "USS", "UTA", "UTC", "UTX", "VRX", "WAG", "WAT", "WCH", "WCS", "WEL",
             "WGB", "WIN", "WMB", "WRW", "WWH"};
     private ConcurrentHashMap<String, Bathroom> firebaseRatings = new ConcurrentHashMap<>();
-    private ArrayList<Bathroom> sentRatings;
+    private ArrayList<Bathroom> sentRatings = new ArrayList<>();
 
     private AutoCompleteTextView autoCompleteTextView;
-    private EditText editText;
+    private EditText editText, commentsEditText;
+    private ScaleRatingBar overall, activity, wifi, cleanliness;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
+        System.out.println(getIntent().getExtras());
 
-
-        try {
-            location = (Location) getIntent().getExtras().get("Location");
+        /*try {
+            location = getIntent().getParcelableExtra("Location");
         } catch (NullPointerException e) {
             System.out.println("Null location");
-        }
+        }*/
 
         try{
-            sentRatings = (ArrayList) getIntent().getExtras().get("Ratings");
+            sentRatings = getIntent().getParcelableArrayListExtra("Ratings");
+            System.out.println(sentRatings);
         } catch (NullPointerException e) {
             System.out.println("Null Ratings");
         }
 
-        new Thread(() -> {
+        /*new Thread(() -> {
             for(Bathroom b : sentRatings) {
-                firebaseRatings.put(b.getBuilding() + " " + b.getFloor(), b);
+                //firebaseRatings.put(b.getBuilding() + " " + b.getFloor(), b);
             }
-            System.out.println(firebaseRatings);
-        }).start();
+            //System.out.println(firebaseRatings);
+        }).start();*/
+
+        setUpUI();
+    }
+
+    private void setUpUI() {
 
         Toolbar toolbar = findViewById(R.id.addbar);
         setSupportActionBar(toolbar);
@@ -87,6 +96,21 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
 
+        FloatingActionButton imagefab = findViewById(R.id.imagefab);
+        imagefab.setOnClickListener((view) -> {
+            Toast.makeText(this, "Add Image", Toast.LENGTH_LONG).show();
+        });
+
+        setUpSpinners();
+
+        overall = findViewById(R.id.overallBar_add);
+        activity = findViewById(R.id.activityBar_add);
+        wifi = findViewById(R.id.wifiBar_add);
+        cleanliness = findViewById(R.id.cleanBar_add);
+        commentsEditText = findViewById(R.id.comments);
+    }
+
+    private void setUpSpinners() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, buildings);
         autoCompleteTextView = findViewById(R.id.completeBuilding);
@@ -110,31 +134,86 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         stallspinner.setAdapter(stalladapter);
         spacespinner.setAdapter(spaceadapter);
 
-        FloatingActionButton imagefab = findViewById(R.id.imagefab);
-        imagefab.setOnClickListener((view) -> {
-            Toast.makeText(this, "Add Image", Toast.LENGTH_LONG).show();
-        });
+        typespinner.setOnItemSelectedListener(this);
 
+        stallspinner.setOnItemSelectedListener(this);
+
+        spacespinner.setOnItemSelectedListener(this);
     }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        System.out.println(adapterView.getId());
         switch(adapterView.getId()) {
             case R.id.typespinner: {
+                System.out.println("TypeSpinner");
                 switch(i) {
-                    case 0: Toast.makeText(this, "Bathroom Selected", Toast.LENGTH_LONG).show(); break;
-                    case 1: Toast.makeText(this, "Water Fountain Selected", Toast.LENGTH_LONG).show();
+                    case 0: {
+                        type = "Bathroom";
+                        Toast.makeText(this, "Bathroom Selected", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 1: {
+                        type = "Fountain";
+                        Toast.makeText(this, "Water Fountain Selected", Toast.LENGTH_LONG).show();
+                    }
                 }
             } break;
             case R.id.stallpicker: {
+                System.out.println("StallSpinner");
                 switch(i) {
-                    case 0: Toast.makeText(this, "None", Toast.LENGTH_LONG).show(); break;
-                    case 1: Toast.makeText(this, "1", Toast.LENGTH_LONG).show(); break;
-                    case 2: Toast.makeText(this, "2", Toast.LENGTH_LONG).show(); break;
-                    case 3: Toast.makeText(this, "3", Toast.LENGTH_LONG).show(); break;
-                    case 4: Toast.makeText(this, "4", Toast.LENGTH_LONG).show(); break;
-                    case 5: Toast.makeText(this, "5", Toast.LENGTH_LONG).show(); break;
-                    case 6: Toast.makeText(this, "Custom", Toast.LENGTH_LONG).show();
+                    case 0: {
+                        stallnum = 0;
+                        Toast.makeText(this, "None", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 1: {
+                        stallnum = 1;
+                        Toast.makeText(this, "1", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 2: {
+                        stallnum = 2;
+                        Toast.makeText(this, "2", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 3: {
+                        stallnum = 3;
+                        Toast.makeText(this, "3", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 4: {
+                        stallnum = 4;
+                        Toast.makeText(this, "4", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 5: {
+                        stallnum = 5;
+                        Toast.makeText(this, "5", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 6: {
+                        //stallnum = "Custom";
+                        Toast.makeText(this, "Custom", Toast.LENGTH_LONG).show();
+                    }
+                }
+            } break;
+            case R.id.spacePicker: {
+                System.out.println("SpaceSpinner");
+                switch(i) {
+                    case 0: {
+                        space = "XSmall";
+                        Toast.makeText(this, "XSmall", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 1: {
+                        space = "Small";
+                        Toast.makeText(this, "Small", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 2: {
+                        space = "Medium";
+                        Toast.makeText(this, "Medium", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 3: {
+                        space = "Large";
+                        Toast.makeText(this, "Large", Toast.LENGTH_LONG).show();
+                    } break;
+                    case 4: {
+                        space = "XLarge";
+                        Toast.makeText(this, "XLarge", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         }
@@ -163,19 +242,24 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             }
             case R.id.action_save: {
                 BathroomDB bathroomDB = new BathroomDB();
-                String building = autoCompleteTextView.getText().toString();
-                String floorRoom = editText.getText().toString();
+                building = autoCompleteTextView.getText().toString();
+                floorNumber = editText.getText().toString();
 
                 //if is a location already
-                if(firebaseRatings != null) {
-                    if(firebaseRatings.containsKey(building + " " + floorRoom)) {
-                        //bathroomDB.addReviewForBathroom();
-                    } else {
-                        //bathroomDB.addBathroomToDB(location, building, floorRoom, );
-                    }/*Location location, String building, String floor, String space,
-                            String numberStalls, Integer wifiQuality, Integer busyness,
-                            Integer cleanliness, Integer overallRating, ArrayList< Rating > rating,
-                            String[] image*/
+                if(firebaseRatings.containsKey(building + " " + floorNumber)) {
+                    //bathroomDB.addReviewForBathroom();
+                } else {
+                    ArrayList<Rating> newRating = new ArrayList<>();
+                    Rating rating = new Rating(commentsEditText.getText().toString());
+                    newRating.add(rating);
+
+                    if(type.equals("Bathroom")) {
+                        bathroomDB.addBathroomToDB(null, building, floorNumber, space, stallnum,
+                                wifi.getNumStars(), activity.getNumStars(), overall.getNumStars(),
+                                cleanliness.getNumStars(), newRating, new ArrayList<>());
+                        finish();
+                        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+                    }
                 }
             }
         }
@@ -187,6 +271,8 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         //if time interval within specified
         if (mBackPressed + TIME_INTERVAL > System.currentTimeMillis()) {
             super.onBackPressed();
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
         } else {
             Toast.makeText(getBaseContext(), "Press CLOSE again to discard review", Toast.LENGTH_SHORT).show();
         }

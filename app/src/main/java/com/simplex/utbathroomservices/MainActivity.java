@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity
 
     private HashMap<String, Bathroom> firebaseRatings;
     private LinkedList<Bathroom> firebaseList;
+    private boolean syncing = false, locUpdate = false;
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
@@ -195,15 +196,20 @@ public class MainActivity extends AppCompatActivity
 
         FloatingActionButton addLocation = findViewById(R.id.newLocation);
         addLocation.setOnClickListener((view) -> {
-
-            Intent settings = new Intent(MainActivity.this, Add.class);
-            //not ideal, should make location parcelable or something
-            if(mLastKnownLocation != null) {
-                settings.putExtra("Location", mLastKnownLocation);
+            if(!syncing && locUpdate) {
+                Intent settings = new Intent(MainActivity.this, Add.class);
+                //not ideal, should make location parcelable or something
+                if (mLastKnownLocation != null) {
+                    System.out.println("Putting in extra " + mLastKnownLocation.toString());
+                    settings.putExtra("Location", mLastKnownLocation);
+                }
+                //System.out.println(firebaseList);
+                settings.putExtra("Ratings", firebaseList);
+                startActivity(settings);
+                overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+            } else {
+                Toast.makeText(this, "Please wait until sync is complete", Toast.LENGTH_LONG).show();
             }
-            settings.putExtra("Ratings", firebaseList);
-            startActivity(settings);
-            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
         });
 
         FloatingActionButton zoomOut = findViewById(R.id.zoomOut);
@@ -221,6 +227,9 @@ public class MainActivity extends AppCompatActivity
                 mMap.moveCamera(CameraUpdateFactory.zoomIn());
             }
         });
+
+        FloatingActionButton refresh = findViewById(R.id.refresh);
+        refresh.setOnClickListener((view) -> updateEntries());
 
         drawerLayout = findViewById(R.id.drawer_layout);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
@@ -296,7 +305,8 @@ public class MainActivity extends AppCompatActivity
         float orate = 0f;
         int space = 0, activity = 0, wifi = 0, clean = 0;
         ArrayList<Rating> ratings = new ArrayList<>();
-        String[] imageUrls = new String[0];
+        ArrayList<String> imageUrls = new ArrayList<>();
+        //String[] imageUrls = new String[0];
 
         if(location instanceof Bathroom) {
             Bathroom bathroom = (Bathroom) location;
@@ -348,6 +358,7 @@ public class MainActivity extends AppCompatActivity
 
     private void updateEntries() {
         if(updateFragment == null) {
+            syncing = true;
             updateFragment = UpdateFragment.newInstance();
             fragmentManager.beginTransaction().add(updateFragment, TAG_TASK_FRAGMENT).commit();
             if(sync != null) {
@@ -587,7 +598,7 @@ public class MainActivity extends AppCompatActivity
                 mMap.setMyLocationEnabled(true);
             } else {
                 mMap.setMyLocationEnabled(false);
-                mLastKnownLocation = null;
+                //mLastKnownLocation = null;
                 //checkPermissions();
             }
         } catch (SecurityException e)  {
@@ -602,12 +613,14 @@ public class MainActivity extends AppCompatActivity
                     Location current = mFusedLocationProviderApi.getLastLocation(mServer.getCurrentLocation());
                     if (current != null) {
                         mLastKnownLocation = current;
+                        locUpdate = true;
                     } else {
                         Log.i("Location", "Current location is null");
                         mMap.getUiSettings().setMyLocationButtonEnabled(false);
                     }
                 } else {
                     mLastKnownLocation = location;
+                    locUpdate = true;
                 }
 
 
@@ -684,6 +697,8 @@ public class MainActivity extends AppCompatActivity
             firebaseList = resultsList;
             System.out.println(firebaseRatings);
             //addMarkers(markers);
+            updateFragment = null;
+            syncing = false;
 
         });
     }

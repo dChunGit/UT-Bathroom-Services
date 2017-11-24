@@ -33,12 +33,12 @@ public class BathroomDB {
     public BathroomDB() {}
   
     public void addBathroomToDB(Location location, String building, String floor, String space,
-                                String numberStalls, Integer wifiQuality, Integer busyness,
+                                Integer numberStalls, Integer wifiQuality, Integer busyness,
                                 Integer cleanliness, Integer overallRating, ArrayList<Rating> rating,
-                                String[] image){
+                                ArrayList<String> image){
         Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,  wifiQuality,
                 busyness, cleanliness, overallRating , rating, image);
-        mFireStore.collection("bathroom").add(b);
+        mFireStore.collection("bathroom").document(building + " " + floor).set(b);
 
     }
 

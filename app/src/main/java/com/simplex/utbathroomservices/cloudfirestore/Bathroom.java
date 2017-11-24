@@ -17,21 +17,21 @@ public class Bathroom implements Parcelable{
     String building;
     String floor;
     String space;
-    String numberStalls;
+    Integer numberStalls;
     Integer wifiQuality; // 1 to 5 scale
     Integer busyness; // 1 to 5 scale
     Integer cleanliness; // 1 to 5 scale
     Integer overallRating; // 1 to 5 scale
     ArrayList<Rating> rating;
-    String[] image;
+    ArrayList<String> image;
 
     public Bathroom() {
 
     }
 
-    public Bathroom(Location location, String building, String floor, String space, String numberStalls,
+    public Bathroom(Location location, String building, String floor, String space, Integer numberStalls,
                     Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating,
-                    ArrayList<Rating> rating, String[] image) {
+                    ArrayList<Rating> rating, ArrayList<String> image) {
         this.location = location;
         this.building = building;
         this.floor = floor;
@@ -81,11 +81,11 @@ public class Bathroom implements Parcelable{
         this.space = space;
     }
 
-    public String getNumberStalls() {
+    public Integer getNumberStalls() {
         return numberStalls;
     }
 
-    public void setNumberStalls(String numberStalls) {
+    public void setNumberStalls(Integer numberStalls) {
         this.numberStalls = numberStalls;
     }
 
@@ -119,11 +119,11 @@ public class Bathroom implements Parcelable{
         this.location = location;
     }
 
-    public String[] getImage() {
+    public ArrayList<String> getImage() {
         return image;
     }
 
-    public void setImage(String[] image) {
+    public void setImage(ArrayList<String> image) {
         this.image = image;
     }
 
@@ -154,7 +154,7 @@ public class Bathroom implements Parcelable{
         parcel.writeString(building);
         parcel.writeString(floor);
         parcel.writeString(space);
-        parcel.writeString(numberStalls);
+        parcel.writeValue(numberStalls);
         parcel.writeValue(wifiQuality);
         parcel.writeValue(busyness);
         parcel.writeValue(cleanliness);
@@ -164,7 +164,11 @@ public class Bathroom implements Parcelable{
         } else {
             parcel.writeTypedArray(new Rating[0], i);
         }
-        parcel.writeStringArray(image);
+        if(image != null) {
+            parcel.writeStringArray(image.toArray(new String[image.size()]));
+        } else {
+            parcel.writeStringArray(new String[0]);
+        }
     }
 
     private Bathroom(Parcel in) {
@@ -172,7 +176,7 @@ public class Bathroom implements Parcelable{
         building = in.readString();
         floor = in.readString();
         space = in.readString();
-        numberStalls = in.readString();
+        numberStalls = (Integer) in.readValue(Integer.class.getClassLoader());
         wifiQuality = (Integer) in.readValue(Integer.class.getClassLoader());
         busyness = (Integer) in.readValue(Integer.class.getClassLoader());
         cleanliness = (Integer) in.readValue(Integer.class.getClassLoader());
@@ -181,9 +185,14 @@ public class Bathroom implements Parcelable{
         if(tempRating.length == 0) {
             rating = null;
         } else {
-            rating = new ArrayList<>(Arrays.asList(in.createTypedArray(Rating.CREATOR)));
+            rating = new ArrayList<>(Arrays.asList(tempRating));
         }
-        image = in.createStringArray();
+        String[] tempImage = in.createStringArray();
+        if(tempImage.length == 0) {
+            image = null;
+        } else {
+            image = new ArrayList<>(Arrays.asList(tempImage));
+        }
     }
 
     public static final Parcelable.Creator<Bathroom> CREATOR = new Parcelable.Creator<Bathroom>() {
