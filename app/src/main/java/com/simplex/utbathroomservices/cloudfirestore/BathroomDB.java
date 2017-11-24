@@ -14,13 +14,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by zoeng on 11/10/17.
  */
 
 public class BathroomDB {
-    ArrayList<Bathroom> results= new ArrayList<>();
+    LinkedList<Bathroom> results= new LinkedList<>();
     FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
 
     private DatabaseCallback databaseCallback;
@@ -28,9 +29,15 @@ public class BathroomDB {
     public BathroomDB(DatabaseCallback callback) {
         databaseCallback = callback;
     }
+
+    public BathroomDB() {}
   
-    public void addBathroomToDB(Location location, String building, String floor, String space, String numberStalls, Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating, ArrayList<Rating> rating, String[] image){
-        Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,  wifiQuality,  busyness,cleanliness, overallRating , rating, image);
+    public void addBathroomToDB(Location location, String building, String floor, String space,
+                                String numberStalls, Integer wifiQuality, Integer busyness,
+                                Integer cleanliness, Integer overallRating, ArrayList<Rating> rating,
+                                String[] image){
+        Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,  wifiQuality,
+                busyness, cleanliness, overallRating , rating, image);
         mFireStore.collection("bathroom").add(b);
 
     }
@@ -48,33 +55,30 @@ public class BathroomDB {
                 .whereEqualTo("cleanliness", b.getCleanliness())
                 .whereEqualTo("overallRating", b.getOverallRating())
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                id.add(document.getId());
-                            }
-                            Rating rating= new Rating(review);
-                            b.rating.add(rating);
-                            DocumentReference bathroomRef = mFireStore.collection("bathroom").document(id.get(0));
-                            bathroomRef
-                                    .update("rating", b.rating)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            Log.d("Success", "DocumentSnapshot successfully updated!");
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.w("Error", "Error updating document", e);
-                                        }
-                                    });
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
+                .addOnCompleteListener((task) -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            id.add(document.getId());
                         }
+                        Rating rating= new Rating(review);
+                        b.rating.add(rating);
+                        DocumentReference bathroomRef = mFireStore.collection("bathroom").document(id.get(0));
+                        bathroomRef
+                                .update("rating", b.rating)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d("Success", "DocumentSnapshot successfully updated!");
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w("Error", "Error updating document", e);
+                                    }
+                                });
+                    } else {
+                        Log.d("Error", "Error getting documents: ", task.getException());
                     }
                 });
     }
@@ -147,7 +151,9 @@ public class BathroomDB {
             } else {
                 Log.d("Error", "Error getting documents: ", task.getException());
             }
-            databaseCallback.updateFinished(results);
+            if(databaseCallback != null) {
+                databaseCallback.updateFinished(results);
+            }
         }
     }
 }

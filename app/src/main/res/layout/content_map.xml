@@ -14,7 +14,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -23,16 +22,13 @@
         android:layout_height="match_parent"
         app:behavior_peekHeight="?attr/actionBarSize"
         app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
-        android:elevation="4dp"
         android:background="@color/white">
 
         <include layout="@layout/location_sheet"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/toolbar2"
@@ -42,8 +38,7 @@
                 android:textSize="30sp"
                 android:textColor="@color/textColorAlt"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorPrimary"
-                android:theme="@style/AppTheme.PopupOverlay" />
+                android:background="@color/colorPrimary"/>
 
             <com.wang.avi.AVLoadingIndicatorView
                 android:id="@+id/sync"
@@ -51,8 +46,7 @@
                 android:layout_centerVertical="true"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                app:indicatorName="PacmanIndicator"
-                />
+                app:indicatorName="PacmanIndicator" />
 
         </RelativeLayout>
 

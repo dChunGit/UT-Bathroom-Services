@@ -18,7 +18,7 @@ import java.util.LinkedList;
 public class UpdateFragment extends Fragment implements DatabaseCallback{
 
     public interface onUpdateListener {
-        void onUpdateFinish(HashMap<String, Bathroom> results, LinkedList<MarkerOptions> markers);
+        void onUpdateFinish(HashMap<String, Bathroom> results, LinkedList<Bathroom> resultsList, LinkedList<MarkerOptions> markers);
     }
 
     private onUpdateListener mListener;
@@ -57,13 +57,13 @@ public class UpdateFragment extends Fragment implements DatabaseCallback{
     }
 
     @Override
-    public void updateFinished(ArrayList<Bathroom> r) {
+    public void updateFinished(LinkedList<Bathroom> r) {
         new Thread(() -> {
             for(Bathroom b : r) {
                 processedResults.put(b.getBuilding() + " " + b.getFloor(), b);
             }
             setUpMarkers();
-            mListener.onUpdateFinish(processedResults, markerOptions);
+            mListener.onUpdateFinish(processedResults, r, markerOptions);
         }).start();
     }
 

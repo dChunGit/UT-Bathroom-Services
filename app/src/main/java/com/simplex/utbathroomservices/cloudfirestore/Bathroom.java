@@ -1,6 +1,8 @@
 package com.simplex.utbathroomservices.cloudfirestore;
 
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +11,7 @@ import java.util.Arrays;
  * Created by zoeng on 11/10/17.
  */
 
-public class Bathroom {
-
+public class Bathroom implements Parcelable{
 
     Location location;
     String building;
@@ -28,7 +29,9 @@ public class Bathroom {
 
     }
 
-    public Bathroom(Location location, String building, String floor, String space, String numberStalls, Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating, ArrayList<Rating> rating, String[] image) {
+    public Bathroom(Location location, String building, String floor, String space, String numberStalls,
+                    Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating,
+                    ArrayList<Rating> rating, String[] image) {
         this.location = location;
         this.building = building;
         this.floor = floor;
@@ -41,10 +44,6 @@ public class Bathroom {
         this.rating = rating;
         this.image = image;
     }
-
-
-
-
 
     @Override
     public String toString() {
@@ -64,7 +63,6 @@ public class Bathroom {
         return building;
     }
 
-
     public void setBuilding(String building) {
         this.building = building;
     }
@@ -77,11 +75,7 @@ public class Bathroom {
         this.floor = floor;
     }
 
-
-    public String getSpace() {
-        return space;
-
-    }
+    public String getSpace() { return space; }
 
     public void setSpace(String space) {
         this.space = space;
@@ -119,10 +113,7 @@ public class Bathroom {
         this.rating = rating;
     }
 
-    public Location getLocation() {
-
-        return location;
-    }
+    public Location getLocation() { return location; }
 
     public void setLocation(Location location) {
         this.location = location;
@@ -151,4 +142,60 @@ public class Bathroom {
     public void setOverallRating(Integer overallRating) {
         this.overallRating = overallRating;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeParcelable(location, i);
+        parcel.writeString(building);
+        parcel.writeString(floor);
+        parcel.writeString(space);
+        parcel.writeString(numberStalls);
+        parcel.writeValue(wifiQuality);
+        parcel.writeValue(busyness);
+        parcel.writeValue(cleanliness);
+        parcel.writeValue(overallRating);
+        if(rating != null) {
+            parcel.writeTypedArray(rating.toArray(new Rating[rating.size()]), i);
+        } else {
+            parcel.writeTypedArray(new Rating[0], i);
+        }
+        parcel.writeStringArray(image);
+    }
+
+    private Bathroom(Parcel in) {
+        location = in.readParcelable(Location.class.getClassLoader());
+        building = in.readString();
+        floor = in.readString();
+        space = in.readString();
+        numberStalls = in.readString();
+        wifiQuality = (Integer) in.readValue(Integer.class.getClassLoader());
+        busyness = (Integer) in.readValue(Integer.class.getClassLoader());
+        cleanliness = (Integer) in.readValue(Integer.class.getClassLoader());
+        overallRating = (Integer) in.readValue(Integer.class.getClassLoader());
+        Rating[] tempRating = in.createTypedArray(Rating.CREATOR);
+        if(tempRating.length == 0) {
+            rating = null;
+        } else {
+            rating = new ArrayList<>(Arrays.asList(in.createTypedArray(Rating.CREATOR)));
+        }
+        image = in.createStringArray();
+    }
+
+    public static final Parcelable.Creator<Bathroom> CREATOR = new Parcelable.Creator<Bathroom>() {
+
+        @Override
+        public Bathroom createFromParcel(Parcel parcel) {
+            return new Bathroom(parcel);
+        }
+
+        @Override
+        public Bathroom[] newArray(int i) {
+            return new Bathroom[i];
+        }
+    };
 }

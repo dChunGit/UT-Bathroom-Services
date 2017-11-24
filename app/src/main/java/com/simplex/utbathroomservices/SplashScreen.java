@@ -20,7 +20,7 @@ import com.wang.avi.AVLoadingIndicatorView;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
-public class Onboarding extends AppCompatActivity implements OnMapReadyCallback{
+public class SplashScreen extends AppCompatActivity implements OnMapReadyCallback{
 
     private AVLoadingIndicatorView avLoadingIndicatorView;
     private TextView done;
@@ -86,14 +86,14 @@ public class Onboarding extends AppCompatActivity implements OnMapReadyCallback{
                 done.startAnimation(animationFadeIn);
             }
 
-        }, 2500);
+        }, 1500);
 
         handler.postDelayed(() -> {
 
             startActivity(main);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
-        }, 3000);
+        }, 2000);
 
         //Toast.makeText(this, "Loaded", Toast.LENGTH_LONG).show();
 

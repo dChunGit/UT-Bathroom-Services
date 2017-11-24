@@ -27,17 +27,16 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".Onboarding"
+            android:name=".SplashScreen"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme"
-            android:noHistory="true">
+            android:noHistory="true"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".Settings"
             android:theme="@style/AppTheme" />
@@ -46,8 +45,13 @@
             android:name=".location.LocationService"
             android:enabled="true" />
 
-        <activity android:name=".Favorites" />
-        <activity android:name=".Search"></activity>
+        <activity android:name=".Favorites"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".Search"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".Add"
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>
