@@ -35,11 +35,11 @@
     <string name="tastePrompt">Select Taste</string>
 
     <string-array name="taste_array">
-        <item>1) Wow</item>
-        <item>2) Pretty Good</item>
-        <item>3) Meh</item>
-        <item>4) Not Great</item>
-        <item>5) Disgusting</item>
+        <item>Wow</item>
+        <item>Pretty Good</item>
+        <item>Meh</item>
+        <item>Not Great</item>
+        <item>Disgusting</item>
     </string-array>
 
     <string-array name="temp_array">

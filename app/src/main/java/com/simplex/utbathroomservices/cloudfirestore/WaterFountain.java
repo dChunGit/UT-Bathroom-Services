@@ -30,6 +30,7 @@ public class WaterFountain implements Parcelable {
                 "location=" + location +
                 ", building='" + building + '\'' +
                 ", floor='" + floor + '\'' +
+                ", reviews='" + reviews + '\'' +
                 ", temperature='" + temperature + '\'' +
                 ", isBottleRefillStation=" + isBottleRefillStation +
                 ", taste='" + taste + '\'' +
@@ -41,10 +42,11 @@ public class WaterFountain implements Parcelable {
 
     }
 
-    public WaterFountain(Location location, String building, String floor, String temperature, boolean isBottleRefillStation, String taste, Integer overallRating, ArrayList<Rating> rating, ArrayList<String> image) {
+    public WaterFountain(Location location, String building, String floor, Integer reviews, String temperature, boolean isBottleRefillStation, String taste, Integer overallRating, ArrayList<Rating> rating, ArrayList<String> image) {
         this.location = location;
         this.building = building;
         this.floor = floor;
+        this.reviews = reviews;
         this.temperature = temperature;
         this.isBottleRefillStation = isBottleRefillStation;
         this.taste = taste;

@@ -210,7 +210,8 @@ public class MainActivity extends AppCompatActivity
                     settings.putExtra("Location", mLastKnownLocation);
                 }
                 //System.out.println(bathroomLinkedList);
-                settings.putExtra("Ratings", bathroomLinkedList);
+                settings.putExtra("BRatings", bathroomLinkedList);
+                settings.putExtra("WRatings", fountainLinkedList);
                 startActivity(settings);
                 overridePendingTransition(R.anim.fadein, R.anim.fadeout);
             } else {
@@ -700,7 +701,7 @@ public class MainActivity extends AppCompatActivity
             //addMarkers(markers);
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
-            
+
             if(!doFountain) {
                 syncing = false;
                 if(sync != null) {
