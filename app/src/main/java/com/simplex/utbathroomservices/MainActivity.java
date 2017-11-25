@@ -67,14 +67,13 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleMap.OnCameraMoveStartedListener, LocationCallback, GoogleMap.OnMarkerClickListener,
         UpdateFragment.onUpdateListener {
-    //TODO: Save current location and update
-    //TODO: Variable update rate
     //TODO: Favorites activity
     //TODO: Reviews activity
     //TODO: Search Activity
     //TODO: Settings/About/Help Activity
-    //TODO: Firebase integration, search widget integration
     //TODO: Bar graph, key features, reviews recyclerview
+    //TODO: Camera API
+    //TODO: Custom updates
     final String SAVELOCATION = "SAVE LOCATION";
     final String LOCATIONGRANTED = "LOCATION GRANTED";
     final String FOLLOW = "FOLLOW";
