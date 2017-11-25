@@ -183,6 +183,7 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setTitle(getString(R.string.title_activity_map));
 
         sync = findViewById(R.id.sync);
+        floatingActionMenu = findViewById(R.id.menu);
 
         final FloatingActionButton location = findViewById(R.id.location);
         location.setOnClickListener((view) ->{
@@ -191,12 +192,15 @@ public class MainActivity extends AppCompatActivity
                 followPerson = true;
                 updateLocationUI();
                 setDeviceLocation(null);
+                floatingActionMenu.close(true);
             }
         });
 
         FloatingActionButton addLocation = findViewById(R.id.newLocation);
         addLocation.setOnClickListener((view) -> {
             if(!syncing && locUpdate) {
+
+                floatingActionMenu.close(true);
                 Intent settings = new Intent(MainActivity.this, Add.class);
                 //not ideal, should make location parcelable or something
                 if (mLastKnownLocation != null) {
@@ -239,7 +243,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        floatingActionMenu = findViewById(R.id.menu);
         toolbar2 = findViewById(R.id.toolbar2);
         final CardView cardToolbar = findViewById(R.id.cardToolbar);
         final Toolbar locationToolbar = findViewById(R.id.location_toolbar);

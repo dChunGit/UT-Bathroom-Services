@@ -1,5 +1,6 @@
 package com.simplex.utbathroomservices;
 
+import android.content.Context;
 import android.location.Location;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -7,13 +8,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.clans.fab.FloatingActionButton;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
@@ -31,6 +37,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     private Location location;
     private String type, building, floorNumber, space;
     private int stallnum;
+    private boolean customStallSelect = false;
 
     private String[] buildings = {"ADH", "AF1", "AF2", "AFP", "AHG", "ANB", "AND", "ARC", "ART", "ATT",
             "BAT", "BEL", "BEN", "BGH", "BHD", "BIO", "BLD", "BMA", "BMC", "BME", "BMS", "BOT",
@@ -58,6 +65,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     private AutoCompleteTextView autoCompleteTextView;
     private EditText editText, commentsEditText;
     private ScaleRatingBar overall, activity, wifi, cleanliness;
+    private TextView displayStall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +103,8 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         getSupportActionBar().setTitle(getString(R.string.title_addActivity));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
+
+        displayStall = findViewById(R.id.customDisplay);
 
         FloatingActionButton imagefab = findViewById(R.id.imagefab);
         imagefab.setOnClickListener((view) -> {
@@ -135,9 +145,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         spacespinner.setAdapter(spaceadapter);
 
         typespinner.setOnItemSelectedListener(this);
-
         stallspinner.setOnItemSelectedListener(this);
-
         spacespinner.setOnItemSelectedListener(this);
     }
 
@@ -148,72 +156,36 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             case R.id.typespinner: {
                 System.out.println("TypeSpinner");
                 switch(i) {
-                    case 0: {
-                        type = "Bathroom";
-                        Toast.makeText(this, "Bathroom Selected", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 1: {
-                        type = "Fountain";
-                        Toast.makeText(this, "Water Fountain Selected", Toast.LENGTH_SHORT).show();
-                    }
+                    case 0: type = "Bathroom"; break;
+                    case 1: type = "Fountain";
                 }
             } break;
             case R.id.stallpicker: {
                 System.out.println("StallSpinner");
+                displayStall.setVisibility(View.INVISIBLE);
+                customStallSelect = false;
+
                 switch(i) {
-                    case 0: {
-                        stallnum = 0;
-                        Toast.makeText(this, "None", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 1: {
-                        stallnum = 1;
-                        Toast.makeText(this, "1", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 2: {
-                        stallnum = 2;
-                        Toast.makeText(this, "2", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 3: {
-                        stallnum = 3;
-                        Toast.makeText(this, "3", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 4: {
-                        stallnum = 4;
-                        Toast.makeText(this, "4", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 5: {
-                        stallnum = 5;
-                        Toast.makeText(this, "5", Toast.LENGTH_SHORT).show();
-                    } break;
+                    case 0: stallnum = 0; break;
+                    case 1: stallnum = 1; break;
+                    case 2: stallnum = 2; break;
+                    case 3: stallnum = 3; break;
+                    case 4: stallnum = 4; break;
+                    case 5: stallnum = 5; break;
                     case 6: {
-                        //stallnum = "Custom";
-                        Toast.makeText(this, "Custom", Toast.LENGTH_SHORT).show();
+                        displayStall.setVisibility(View.VISIBLE);
+                        customStallSelect = true;
                     }
                 }
             } break;
             case R.id.spacePicker: {
                 System.out.println("SpaceSpinner");
                 switch(i) {
-                    case 0: {
-                        space = "XSmall";
-                        Toast.makeText(this, "XSmall", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 1: {
-                        space = "Small";
-                        Toast.makeText(this, "Small", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 2: {
-                        space = "Medium";
-                        Toast.makeText(this, "Medium", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 3: {
-                        space = "Large";
-                        Toast.makeText(this, "Large", Toast.LENGTH_SHORT).show();
-                    } break;
-                    case 4: {
-                        space = "XLarge";
-                        Toast.makeText(this, "XLarge", Toast.LENGTH_SHORT).show();
-                    }
+                    case 0: space = "XSmall"; break;
+                    case 1: space = "Small"; break;
+                    case 2: space = "Medium"; break;
+                    case 3: space = "Large"; break;
+                    case 4: space = "XLarge";
                 }
             }
         }
@@ -241,7 +213,6 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 return true;
             }
             case R.id.action_save: {
-                BathroomDB bathroomDB = new BathroomDB();
                 building = autoCompleteTextView.getText().toString();
                 floorNumber = editText.getText().toString();
 
@@ -252,9 +223,23 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                     ArrayList<Rating> newRating = new ArrayList<>();
                     Rating rating = new Rating(commentsEditText.getText().toString());
                     newRating.add(rating);
+                    if(customStallSelect) {
+                        try {
+                            int temp = Integer.valueOf(displayStall.getText().toString());
+                            if (temp >= 0) {
+                                stallnum = temp;
+                            } else {
+                                Toast.makeText(this, "Please Enter a Valid Number", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            //not a number
+                            Toast.makeText(this, "Please Enter a Valid Number", Toast.LENGTH_SHORT).show();
+                        }
+                    }
 
                     if(type.equals("Bathroom")) {
-                        bathroomDB.addBathroomToDB(null, building, floorNumber, space, stallnum,
+                        BathroomDB bathroomDB = new BathroomDB();
+                        bathroomDB.addBathroomToDB(location, building, floorNumber, space, stallnum,
                                 wifi.getNumStars(), activity.getNumStars(), overall.getNumStars(),
                                 cleanliness.getNumStars(), newRating, new ArrayList<>());
                         finish();
