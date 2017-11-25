@@ -239,13 +239,14 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
                     if(type.equals("Bathroom")) {
                         BathroomDB bathroomDB = new BathroomDB();
-                        bathroomDB.addBathroomToDB(location, building, floorNumber, space, stallnum,
+                        bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
                                 wifi.getNumStars(), activity.getNumStars(), overall.getNumStars(),
                                 cleanliness.getNumStars(), newRating, new ArrayList<>());
-                        finish();
-                        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
                     }
                 }
+
+                finish();
+                overridePendingTransition(R.anim.fadein, R.anim.fadeout);
             }
         }
         return super.onOptionsItemSelected(item);

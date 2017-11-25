@@ -16,6 +16,7 @@ public class Bathroom implements Parcelable{
     Location location;
     String building;
     String floor;
+    Integer reviews; //Number of reviews
     String space;
     Integer numberStalls;
     Integer wifiQuality; // 1 to 5 scale
@@ -29,12 +30,13 @@ public class Bathroom implements Parcelable{
 
     }
 
-    public Bathroom(Location location, String building, String floor, String space, Integer numberStalls,
+    public Bathroom(Location location, String building, String floor, Integer reviews, String space, Integer numberStalls,
                     Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating,
                     ArrayList<Rating> rating, ArrayList<String> image) {
         this.location = location;
         this.building = building;
         this.floor = floor;
+        this.reviews = reviews;
         this.space = space;
         this.numberStalls = numberStalls;
         this.wifiQuality = wifiQuality;
@@ -51,6 +53,7 @@ public class Bathroom implements Parcelable{
                 "location=" + location +
                 ", building='" + building + '\'' +
                 ", floor='" + floor + '\'' +
+                ", reviews='" + reviews + "\'" +
                 ", space='" + space + '\'' +
                 ", numberStalls=" + numberStalls +
                 ", wifiQuality=" + wifiQuality +
@@ -73,6 +76,14 @@ public class Bathroom implements Parcelable{
 
     public void setFloor(String floor) {
         this.floor = floor;
+    }
+
+    public Integer getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Integer reviews) {
+        this.reviews = reviews;
     }
 
     public String getSpace() { return space; }
@@ -153,6 +164,7 @@ public class Bathroom implements Parcelable{
         parcel.writeParcelable(location, i);
         parcel.writeString(building);
         parcel.writeString(floor);
+        parcel.writeValue(reviews);
         parcel.writeString(space);
         parcel.writeValue(numberStalls);
         parcel.writeValue(wifiQuality);
@@ -175,6 +187,7 @@ public class Bathroom implements Parcelable{
         location = in.readParcelable(Location.class.getClassLoader());
         building = in.readString();
         floor = in.readString();
+        reviews = (Integer) in.readValue(Integer.class.getClassLoader());
         space = in.readString();
         numberStalls = (Integer) in.readValue(Integer.class.getClassLoader());
         wifiQuality = (Integer) in.readValue(Integer.class.getClassLoader());

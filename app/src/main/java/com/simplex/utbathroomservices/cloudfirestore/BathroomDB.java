@@ -32,11 +32,11 @@ public class BathroomDB {
 
     public BathroomDB() {}
   
-    public void addBathroomToDB(Location location, String building, String floor, String space,
+    public void addBathroomToDB(Location location, String building, String floor, Integer reviews, String space,
                                 Integer numberStalls, Integer wifiQuality, Integer busyness,
                                 Integer cleanliness, Integer overallRating, ArrayList<Rating> rating,
                                 ArrayList<String> image){
-        Bathroom b= new Bathroom( location,  building,  floor,  space,  numberStalls,  wifiQuality,
+        Bathroom b= new Bathroom( location,  building,  floor,  reviews, space,  numberStalls,  wifiQuality,
                 busyness, cleanliness, overallRating , rating, image);
         mFireStore.collection("bathroom").document(building + " " + floor).set(b);
 
