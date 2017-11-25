@@ -1,29 +1,32 @@
 package com.simplex.utbathroomservices;
 
-import android.content.Context;
+import android.animation.LayoutTransition;
 import android.location.Location;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
-import android.widget.NumberPicker;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.clans.fab.FloatingActionButton;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
+import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+import com.simplex.utbathroomservices.cloudfirestore.WaterFountainDB;
 import com.willy.ratingbar.ScaleRatingBar;
 
 import java.util.ArrayList;
@@ -35,9 +38,9 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     private static final int TIME_INTERVAL = 2000;
 
     private Location location;
-    private String type, building, floorNumber, space;
+    private String type, building, floorNumber, space, temp, taste;
     private int stallnum;
-    private boolean customStallSelect = false;
+    private boolean customStallSelect = false, isFillable;
 
     private String[] buildings = {"ADH", "AF1", "AF2", "AFP", "AHG", "ANB", "AND", "ARC", "ART", "ATT",
             "BAT", "BEL", "BEN", "BGH", "BHD", "BIO", "BLD", "BMA", "BMC", "BME", "BMS", "BOT",
@@ -59,13 +62,17 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             "TCP", "TES", "TMM", "TNH", "TR1", "TR2", "TRG", "TSB", "TSC", "TSG", "UA9", "UIL",
             "UNB", "UPB", "USS", "UTA", "UTC", "UTX", "VRX", "WAG", "WAT", "WCH", "WCS", "WEL",
             "WGB", "WIN", "WMB", "WRW", "WWH"};
-    private ConcurrentHashMap<String, Bathroom> firebaseRatings = new ConcurrentHashMap<>();
-    private ArrayList<Bathroom> sentRatings = new ArrayList<>();
+    private ConcurrentHashMap<String, Bathroom> firebaseBRatings = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, WaterFountain> firebaseWRatings = new ConcurrentHashMap<>();
+    private ArrayList<Bathroom> sentBRatings = new ArrayList<>();
+    private ArrayList<WaterFountain> sentWRatings = new ArrayList<>();
 
     private AutoCompleteTextView autoCompleteTextView;
     private EditText editText, commentsEditText;
     private ScaleRatingBar overall, activity, wifi, cleanliness;
     private TextView displayStall;
+    private CardView bathroomLL, fountainLL;
+    private SwitchCompat switchRefill;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,17 +87,31 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         }
 
         try{
-            sentRatings = getIntent().getParcelableArrayListExtra("Ratings");
-            System.out.println(sentRatings);
+            sentBRatings = getIntent().getParcelableArrayListExtra("BRatings");
+            System.out.println(sentBRatings);
         } catch (Exception e) {
-            System.out.println("Ratings malformed");
+            System.out.println("BRatings malformed");
+        }
+
+        try{
+            sentWRatings = getIntent().getParcelableArrayListExtra("WRatings");
+            System.out.println(sentWRatings);
+        } catch (Exception e) {
+            System.out.println("WRatings malformed");
         }
 
         new Thread(() -> {
-            for(Bathroom b : sentRatings) {
-                firebaseRatings.put(b.getBuilding() + " " + b.getFloor(), b);
+            for(Bathroom b : sentBRatings) {
+                firebaseBRatings.put(b.getBuilding() + " " + b.getFloor(), b);
             }
-            System.out.println(firebaseRatings);
+            System.out.println(firebaseBRatings);
+        }).start();
+
+        new Thread(() -> {
+            for(WaterFountain w : sentWRatings) {
+                firebaseWRatings.put(w.getBuilding() + " " + w.getFloor(), w);
+            }
+            System.out.println(firebaseWRatings);
         }).start();
 
         setUpUI();
@@ -105,12 +126,25 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
 
         displayStall = findViewById(R.id.customDisplay);
+        bathroomLL = findViewById(R.id.bathcard);
+        fountainLL = findViewById(R.id.fountaincard);
+
+        ((ViewGroup) findViewById(R.id.parentAnim)).getLayoutTransition()
+                .enableTransitionType(LayoutTransition.CHANGING);
+        ((ViewGroup) findViewById(R.id.bathcard)).getLayoutTransition()
+                .enableTransitionType(LayoutTransition.CHANGING);
+        ((ViewGroup) findViewById(R.id.fountaincard)).getLayoutTransition()
+                .enableTransitionType(LayoutTransition.CHANGING);
 
         FloatingActionButton imagefab = findViewById(R.id.imagefab);
         imagefab.setOnClickListener((view) -> {
             Toast.makeText(this, "Add Image", Toast.LENGTH_SHORT).show();
         });
 
+        switchRefill = findViewById(R.id.refillStation);
+        switchRefill.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isFillable = isChecked;
+        });
         setUpSpinners();
 
         overall = findViewById(R.id.overallBar_add);
@@ -131,22 +165,34 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         Spinner typespinner = findViewById(R.id.typespinner);
         Spinner stallspinner = findViewById(R.id.stallpicker);
         Spinner spacespinner = findViewById(R.id.spacePicker);
+        Spinner tempspinner = findViewById(R.id.tempPicker);
+        Spinner tastespinner = findViewById(R.id.tastePicker);
         ArrayAdapter<CharSequence> spinneradapter = ArrayAdapter.createFromResource(this,
                 R.array.type_array, R.layout.spinner_item);
         ArrayAdapter<CharSequence> stalladapter = ArrayAdapter.createFromResource(this,
                 R.array.stall_array, R.layout.spinner_item);
         ArrayAdapter<CharSequence> spaceadapter = ArrayAdapter.createFromResource(this,
                 R.array.space_array, R.layout.spinner_item);
+        ArrayAdapter<CharSequence> tempadapter = ArrayAdapter.createFromResource(this,
+                R.array.temp_array, R.layout.spinner_item);
+        ArrayAdapter<CharSequence> tasteadapter = ArrayAdapter.createFromResource(this,
+                R.array.taste_array, R.layout.spinner_item);
         spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stalladapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spaceadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        tempadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        tasteadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typespinner.setAdapter(spinneradapter);
         stallspinner.setAdapter(stalladapter);
         spacespinner.setAdapter(spaceadapter);
+        tempspinner.setAdapter(tempadapter);
+        tastespinner.setAdapter(tasteadapter);
 
         typespinner.setOnItemSelectedListener(this);
         stallspinner.setOnItemSelectedListener(this);
         spacespinner.setOnItemSelectedListener(this);
+        tempspinner.setOnItemSelectedListener(this);
+        tastespinner.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -156,8 +202,16 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             case R.id.typespinner: {
                 System.out.println("TypeSpinner");
                 switch(i) {
-                    case 0: type = "Bathroom"; break;
-                    case 1: type = "Fountain";
+                    case 0: {
+                        type = "Bathroom";
+                        bathroomLL.setVisibility(View.VISIBLE);
+                        fountainLL.setVisibility(View.GONE);
+                    } break;
+                    case 1: {
+                        type = "Fountain";
+                        fountainLL.setVisibility(View.VISIBLE);
+                        bathroomLL.setVisibility(View.GONE);
+                    }
                 }
             } break;
             case R.id.stallpicker: {
@@ -186,6 +240,26 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                     case 2: space = "Medium"; break;
                     case 3: space = "Large"; break;
                     case 4: space = "XLarge";
+                }
+            } break;
+            case R.id.tempPicker: {
+                System.out.println("TempSpinner");
+                switch(i) {
+                    case 0: temp = "cold"; break;
+                    case 1: temp = "cool"; break;
+                    case 2: temp = "lukewarm"; break;
+                    case 3: temp = "warm"; break;
+                    case 4: temp = "hot";
+                }
+            } break;
+            case R.id.tastePicker: {
+                System.out.println("TasteSpinner");
+                switch(i) {
+                    case 0: taste = "Wow"; break;
+                    case 1: taste = "Pretty Good"; break;
+                    case 2: taste = "Meh"; break;
+                    case 3: taste = "Not Great"; break;
+                    case 4: taste = "Disgusting";
                 }
             }
         }
@@ -217,8 +291,10 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 floorNumber = editText.getText().toString();
 
                 //if is a location already
-                if(firebaseRatings.containsKey(building + " " + floorNumber)) {
+                if(firebaseBRatings.containsKey(building + " " + floorNumber)) {
                     //bathroomDB.addReviewForBathroom();
+                } else if(firebaseWRatings.containsKey(building + " " + floorNumber)) {
+                    //
                 } else {
                     ArrayList<Rating> newRating = new ArrayList<>();
                     Rating rating = new Rating(commentsEditText.getText().toString());
@@ -238,10 +314,18 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                     }
 
                     if(type.equals("Bathroom")) {
+
                         BathroomDB bathroomDB = new BathroomDB();
                         bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
                                 wifi.getNumStars(), activity.getNumStars(), overall.getNumStars(),
                                 cleanliness.getNumStars(), newRating, new ArrayList<>());
+
+                    } else if(type.equals("Fountain")) {
+
+                        WaterFountainDB waterFountainDB = new WaterFountainDB();
+                        waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
+                                isFillable, taste, overall.getNumStars(), newRating, new ArrayList<>());
+
                     }
                 }
 

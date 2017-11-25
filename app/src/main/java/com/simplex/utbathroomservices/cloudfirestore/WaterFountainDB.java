@@ -14,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by zoeng on 11/10/17.
@@ -21,17 +22,23 @@ import java.util.ArrayList;
 
 
 public class WaterFountainDB {
-    private FirebaseFirestore mFireStore;
+    private FirebaseFirestore mFireStore = FirebaseFirestore.getInstance();
+    private LinkedList<WaterFountain> results = new LinkedList<>();
 
-    public WaterFountainDB() {
-        mFireStore = FirebaseFirestore.getInstance();
+    private DatabaseCallback databaseCallback;
+
+    public WaterFountainDB(DatabaseCallback callback) {
+        databaseCallback = callback;
     }
 
-    public void addWaterFountainToDB(Location location, String building, String floor, String temperature, boolean isBottleRefillStation, String taste, Integer overallRating,ArrayList<Rating> rating, String[] image) {
-        WaterFountain wf = new WaterFountain(location, building, floor, temperature, isBottleRefillStation, taste, overallRating,rating, image);
-        mFireStore.collection("waterfountain").add(wf);
+    public WaterFountainDB() {}
+
+    public void addWaterFountainToDB(Location location, String building, String floor, Integer reviews, String temperature, boolean isBottleRefillStation, String taste, Integer overallRating,ArrayList<Rating> rating, ArrayList<String> image) {
+        WaterFountain wf = new WaterFountain(location, building, floor, reviews, temperature, isBottleRefillStation, taste, overallRating,rating, image);
+        mFireStore.collection("waterfountain").document(building + " " + floor).set(wf);
 
     }
+
     public void addReviewForWaterFountain(WaterFountain wf, String review){
         final ArrayList<String> id= new ArrayList<String>();
         mFireStore.collection("waterfountain")
@@ -50,206 +57,106 @@ public class WaterFountainDB {
                             for (DocumentSnapshot document : task.getResult()) {
                                 id.add(document.getId());
                             }
+                            Rating rating= new Rating(review);
+                            wf.getRating().add(rating);
+                            DocumentReference waterFountainRef = mFireStore.collection("waterfountain").document(id.get(0));
+                            waterFountainRef
+                                    .update("rating", wf.getRating())
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d("Success", "DocumentSnapshot successfully updated!");
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w("Error", "Error updating document", e);
+                                        }
+                                    });
                         } else {
                             Log.d("Error", "Error getting documents: ", task.getException());
                         }
                     }
                 });
-        Rating rating= new Rating(review);
-        wf.rating.add(rating);
-        DocumentReference waterFountainRef = mFireStore.collection("waterfountain").document(id.get(0));
-        waterFountainRef
-                .update("rating", wf.rating)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("Success", "DocumentSnapshot successfully updated!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("Error", "Error updating document", e);
-                    }
-                });
     }
-    public ArrayList<WaterFountain> getAllWaterFountains() {
-        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
+
+    public void getAllWaterFountains() {
         mFireStore.collection("waterfountain")
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                WaterFountain waterFountain = document.toObject(WaterFountain.class);
-                                results.add(waterFountain);
-
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
+                .addOnCompleteListener(new OnCompleteListenerGet());
     }
 
-    public ArrayList<WaterFountain> getWaterFountainsByBuilding(String building) {
-        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
+    public void getWaterFountainsByBuilding(String building) {
         mFireStore.collection("waterfountain")
                 .whereEqualTo("building", building)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                WaterFountain waterFountain = document.toObject(WaterFountain.class);
-                                results.add(waterFountain);
-
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
+                .addOnCompleteListener(new OnCompleteListenerGet());
     }
 
-    public ArrayList<WaterFountain> getWaterFountainsByBuildingAndFloor(String building, String floor) {
-        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
+    public void getWaterFountainsByBuildingAndFloor(String building, String floor) {
         mFireStore.collection("waterfountain")
                 .whereEqualTo("building", building)
                 .whereEqualTo("floor", floor)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                WaterFountain waterFountain = document.toObject(WaterFountain.class);
-                                results.add(waterFountain);
-
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
+                .addOnCompleteListener(new OnCompleteListenerGet());
     }
-    public ArrayList<WaterFountain> getWaterFountainsByTaste(String taste){
-        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
+
+    public void getWaterFountainsByTaste(String taste){
         mFireStore.collection("waterfountain")
                 .whereEqualTo("taste", taste)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                WaterFountain waterFountain = document.toObject(WaterFountain.class);
-                                results.add(waterFountain);
-
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
+                .addOnCompleteListener(new OnCompleteListenerGet());
     }
-    public ArrayList<WaterFountain> getWaterFountainsByTemperature(String temperature){
-        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
+
+    public void getWaterFountainsByTemperature(String temperature){
         mFireStore.collection("waterfountain")
                 .whereEqualTo("temperature", temperature)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                WaterFountain waterFountain = document.toObject(WaterFountain.class);
-                                results.add(waterFountain);
-
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
+                .addOnCompleteListener(new OnCompleteListenerGet());
     }
-    public ArrayList<WaterFountain> getWaterFountainsByTasteAndTemperature(String taste, String temperature){
-        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
+
+    public void getWaterFountainsByTasteAndTemperature(String taste, String temperature){
         mFireStore.collection("waterfountain")
                 .whereEqualTo("taste", taste)
                 .whereEqualTo("temperature", temperature)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                WaterFountain waterFountain = document.toObject(WaterFountain.class);
-                                results.add(waterFountain);
-
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
+                .addOnCompleteListener(new OnCompleteListenerGet());
     }
-    public ArrayList<WaterFountain> getWaterFountainsByOverallRating(Integer overallRating){
+
+    public void getWaterFountainsByOverallRating(Integer overallRating){
         final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
         mFireStore.collection("waterfountain")
                 .whereGreaterThanOrEqualTo("overallRating", overallRating)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                WaterFountain waterFountain = document.toObject(WaterFountain.class);
-                                results.add(waterFountain);
-
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
+                .addOnCompleteListener(new OnCompleteListenerGet());
     }
-    public ArrayList<WaterFountain> getWaterFountainsByIsWaterBottleStation(Boolean isBottleRefillStation){
-        final ArrayList<WaterFountain> results = new ArrayList<WaterFountain>();
+
+    public void getWaterFountainsByIsWaterBottleStation(Boolean isBottleRefillStation){
         mFireStore.collection("waterfountain")
                 .whereEqualTo("isBottleRefillStation", isBottleRefillStation)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d("Success", document.getId() + " => " + document.getData());
-                                WaterFountain waterFountain = document.toObject(WaterFountain.class);
-                                results.add(waterFountain);
+                .addOnCompleteListener(new OnCompleteListenerGet());
+    }
 
-                            }
-                        } else {
-                            Log.d("Error", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return results;
+    class OnCompleteListenerGet implements OnCompleteListener<QuerySnapshot> {
+
+        @Override
+        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot document : task.getResult()) {
+                    Log.d("Success", document.getId() + " => " + document.getData());
+                    WaterFountain waterFountain = document.toObject(WaterFountain.class);
+                    results.add(waterFountain);
+
+                }
+            } else {
+                Log.d("Error", "Error getting documents: ", task.getException());
+            }
+
+            if(databaseCallback != null) {
+                databaseCallback.updateFinishedF(results);
+            }
+        }
     }
 }

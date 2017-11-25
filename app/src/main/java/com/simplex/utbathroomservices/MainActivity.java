@@ -49,7 +49,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
-import com.simplex.utbathroomservices.fragments.SearchFragment;
+import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.fragments.UpdateFragment;
 import com.simplex.utbathroomservices.location.LocationCallback;
 import com.simplex.utbathroomservices.location.LocationService;
@@ -59,6 +59,7 @@ import com.willy.ratingbar.ScaleRatingBar;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -101,8 +102,10 @@ public class MainActivity extends AppCompatActivity
     private FragmentManager fragmentManager;
     private static final String TAG_TASK_FRAGMENT = "updateFragment";
 
-    private HashMap<String, Bathroom> firebaseRatings;
-    private LinkedList<Bathroom> firebaseList;
+    private HashMap<String, Bathroom> firebaseBRatings = new HashMap<>();
+    private HashMap<String, WaterFountain> firebaseWRatings = new HashMap<>();
+    private LinkedList<Bathroom> bathroomLinkedList = new LinkedList<>();
+    private LinkedList<WaterFountain> fountainLinkedList = new LinkedList<>();
     private boolean syncing = false, locUpdate = false;
 
     private long mBackPressed;
@@ -158,7 +161,7 @@ public class MainActivity extends AppCompatActivity
             zoomLevel = savedInstanceState.getFloat(ZOOM);
             bottomSheetBehavior.setState(savedInstanceState.getInt(BOTTOMSHEET));
         } else {
-            updateEntries();
+            updateEntries("Update");
         }
 
         setFont();
@@ -206,8 +209,9 @@ public class MainActivity extends AppCompatActivity
                     System.out.println("Putting in extra " + mLastKnownLocation.toString());
                     settings.putExtra("Location", mLastKnownLocation);
                 }
-                //System.out.println(firebaseList);
-                settings.putExtra("Ratings", firebaseList);
+                //System.out.println(bathroomLinkedList);
+                settings.putExtra("BRatings", bathroomLinkedList);
+                settings.putExtra("WRatings", fountainLinkedList);
                 startActivity(settings);
                 overridePendingTransition(R.anim.fadein, R.anim.fadeout);
             } else {
@@ -232,7 +236,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         FloatingActionButton refresh = findViewById(R.id.refresh);
-        refresh.setOnClickListener((view) -> updateEntries());
+        refresh.setOnClickListener((view) -> updateEntries("Update"));
 
         drawerLayout = findViewById(R.id.drawer_layout);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
@@ -358,10 +362,10 @@ public class MainActivity extends AppCompatActivity
         mFusedLocationProviderApi = LocationServices.FusedLocationApi;
     }
 
-    private void updateEntries() {
+    private void updateEntries(String type) {
         if(updateFragment == null) {
             syncing = true;
-            updateFragment = UpdateFragment.newInstance();
+            updateFragment = UpdateFragment.newInstance(type);
             fragmentManager.beginTransaction().add(updateFragment, TAG_TASK_FRAGMENT).commit();
             if(sync != null) {
                 sync.smoothToShow();
@@ -586,7 +590,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onMarkerClick(final Marker marker) {
         if(toolbar2 != null) {
             toolbar2.setText(marker.getTitle());
-            setReview(firebaseRatings.get(marker.getTitle()));
+            setReview(firebaseBRatings.get(marker.getTitle()));
         }
         return false;
     }
@@ -688,20 +692,45 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onUpdateFinish(HashMap<String, Bathroom> results, LinkedList<Bathroom> resultsList, LinkedList<MarkerOptions> markers) {
+    public void onUpdateBFinish(HashMap<String, Bathroom> firebaseUpdate, LinkedList<Bathroom> resultsList, LinkedList<MarkerOptions> markers, boolean doFountain) {
+        runOnUiThread(() -> {
+            firebaseBRatings = firebaseUpdate;
+            bathroomLinkedList = resultsList;
+
+            System.out.println(firebaseBRatings);
+            //addMarkers(markers);
+            updateFragment = null;
+            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
+
+            if(!doFountain) {
+                syncing = false;
+                if(sync != null) {
+                    Handler handler = new Handler();
+                    handler.postDelayed(() -> sync.smoothToHide(), 1000);
+                }
+            } else {
+                updateEntries("Fountain");
+            }
+
+        });
+    }
+
+    @Override
+    public void onUpdateWFinish(HashMap<String, WaterFountain> firebaseUpdate, LinkedList<WaterFountain> resultsList, LinkedList<MarkerOptions> markers) {
         runOnUiThread(() -> {
             if(sync != null) {
                 Handler handler = new Handler();
-                handler.postDelayed(() -> sync.smoothToHide(), 2000);
+                handler.postDelayed(() -> sync.smoothToHide(), 1000);
             }
+            firebaseWRatings = firebaseUpdate;
+            fountainLinkedList = resultsList;
 
-            firebaseRatings = results;
-            firebaseList = resultsList;
-            System.out.println(firebaseRatings);
+            System.out.println(firebaseWRatings);
             //addMarkers(markers);
             updateFragment = null;
-            syncing = false;
+            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 
+            syncing = false;
         });
     }
 

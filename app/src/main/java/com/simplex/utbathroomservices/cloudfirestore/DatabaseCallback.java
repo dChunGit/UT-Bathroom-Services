@@ -6,5 +6,6 @@ import java.util.LinkedList;
  * Created by dchun on 11/22/17.
  */
 public interface DatabaseCallback {
-    void updateFinished(LinkedList<Bathroom> r);
+    void updateFinishedB(LinkedList<Bathroom> r);
+    void updateFinishedF(LinkedList<WaterFountain> r);
 }
