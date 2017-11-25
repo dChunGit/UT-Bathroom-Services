@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -35,9 +36,9 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     private static final int TIME_INTERVAL = 2000;
 
     private Location location;
-    private String type, building, floorNumber, space;
+    private String type, building, floorNumber, space, temp, taste;
     private int stallnum;
-    private boolean customStallSelect = false;
+    private boolean customStallSelect = false, isFillable;
 
     private String[] buildings = {"ADH", "AF1", "AF2", "AFP", "AHG", "ANB", "AND", "ARC", "ART", "ATT",
             "BAT", "BEL", "BEN", "BGH", "BHD", "BIO", "BLD", "BMA", "BMC", "BME", "BMS", "BOT",
@@ -66,6 +67,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     private EditText editText, commentsEditText;
     private ScaleRatingBar overall, activity, wifi, cleanliness;
     private TextView displayStall;
+    private LinearLayout bathroomLL, fountainLL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +107,8 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
 
         displayStall = findViewById(R.id.customDisplay);
+        bathroomLL = findViewById(R.id.bathroomAdd);
+        fountainLL = findViewById(R.id.fountainAdd);
 
         FloatingActionButton imagefab = findViewById(R.id.imagefab);
         imagefab.setOnClickListener((view) -> {
@@ -131,22 +135,28 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         Spinner typespinner = findViewById(R.id.typespinner);
         Spinner stallspinner = findViewById(R.id.stallpicker);
         Spinner spacespinner = findViewById(R.id.spacePicker);
+        Spinner tempspinner = findViewById(R.id.tempPicker);
         ArrayAdapter<CharSequence> spinneradapter = ArrayAdapter.createFromResource(this,
                 R.array.type_array, R.layout.spinner_item);
         ArrayAdapter<CharSequence> stalladapter = ArrayAdapter.createFromResource(this,
                 R.array.stall_array, R.layout.spinner_item);
         ArrayAdapter<CharSequence> spaceadapter = ArrayAdapter.createFromResource(this,
                 R.array.space_array, R.layout.spinner_item);
+        ArrayAdapter<CharSequence> tempadapter = ArrayAdapter.createFromResource(this,
+                R.array.temp_array, R.layout.spinner_item);
         spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         stalladapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spaceadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        tempadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typespinner.setAdapter(spinneradapter);
         stallspinner.setAdapter(stalladapter);
         spacespinner.setAdapter(spaceadapter);
+        tempspinner.setAdapter(tempadapter);
 
         typespinner.setOnItemSelectedListener(this);
         stallspinner.setOnItemSelectedListener(this);
         spacespinner.setOnItemSelectedListener(this);
+        tempspinner.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -156,8 +166,16 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             case R.id.typespinner: {
                 System.out.println("TypeSpinner");
                 switch(i) {
-                    case 0: type = "Bathroom"; break;
-                    case 1: type = "Fountain";
+                    case 0: {
+                        type = "Bathroom";
+                        bathroomLL.setVisibility(View.VISIBLE);
+                        fountainLL.setVisibility(View.GONE);
+                    } break;
+                    case 1: {
+                        type = "Fountain";
+                        bathroomLL.setVisibility(View.GONE);
+                        fountainLL.setVisibility(View.VISIBLE);
+                    }
                 }
             } break;
             case R.id.stallpicker: {
@@ -186,6 +204,16 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                     case 2: space = "Medium"; break;
                     case 3: space = "Large"; break;
                     case 4: space = "XLarge";
+                }
+            } break;
+            case R.id.tempPicker: {
+                System.out.println("TempSpinner");
+                switch(i) {
+                    case 0: temp = "cold"; break;
+                    case 1: temp = "cool"; break;
+                    case 2: temp = "lukewarm"; break;
+                    case 3: temp = "warm"; break;
+                    case 4: temp = "hot";
                 }
             }
         }

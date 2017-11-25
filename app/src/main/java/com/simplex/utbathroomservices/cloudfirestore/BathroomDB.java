@@ -21,8 +21,8 @@ import java.util.LinkedList;
  */
 
 public class BathroomDB {
-    LinkedList<Bathroom> results= new LinkedList<>();
-    FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
+    private LinkedList<Bathroom> results= new LinkedList<>();
+    private FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
 
     private DatabaseCallback databaseCallback;
 
@@ -43,7 +43,7 @@ public class BathroomDB {
     }
 
     public void addReviewForBathroom(Bathroom b, String review){
-        final ArrayList<String> id= new ArrayList<String>();
+        final ArrayList<String> id= new ArrayList<>();
         mFireStore.collection("bathroom")
                 .whereEqualTo("building", b.getBuilding())
                 .whereEqualTo("floor", b.getFloor())
@@ -61,10 +61,10 @@ public class BathroomDB {
                             id.add(document.getId());
                         }
                         Rating rating= new Rating(review);
-                        b.rating.add(rating);
+                        b.getRating().add(rating);
                         DocumentReference bathroomRef = mFireStore.collection("bathroom").document(id.get(0));
                         bathroomRef
-                                .update("rating", b.rating)
+                                .update("rating", b.getRating())
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -152,7 +152,7 @@ public class BathroomDB {
                 Log.d("Error", "Error getting documents: ", task.getException());
             }
             if(databaseCallback != null) {
-                databaseCallback.updateFinished(results);
+                databaseCallback.updateFinishedB(results);
             }
         }
     }

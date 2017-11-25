@@ -31,6 +31,24 @@
     <string name="spinnerprompt">Select Type</string>
     <string name="stallprompt">Select Number</string>
     <string name="spaceprompt">Select Space</string>
+    <string name="tempPrompt">Select Temp</string>
+    <string name="tastePrompt">Select Taste</string>
+
+    <string-array name="taste_array">
+        <item>1) Wow</item>
+        <item>2) Pretty Good</item>
+        <item>3) Meh</item>
+        <item>4) Not Great</item>
+        <item>5) Disgusting</item>
+    </string-array>
+
+    <string-array name="temp_array">
+        <item>Cold</item>
+        <item>Cool</item>
+        <item>Lukewarm</item>
+        <item>Warm</item>
+        <item>Hot</item>
+    </string-array>
 
     <string-array name="type_array">
         <item>Bathroom</item>
