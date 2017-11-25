@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -102,6 +103,8 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG_TASK_FRAGMENT = "updateFragment";
 
     private HashMap<String, Bathroom> firebaseRatings;
+    private LinkedList<Bathroom> firebaseList;
+    private boolean syncing = false, locUpdate = false;
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
@@ -155,12 +158,13 @@ public class MainActivity extends AppCompatActivity
             followPerson = savedInstanceState.getBoolean(FOLLOW);
             zoomLevel = savedInstanceState.getFloat(ZOOM);
             bottomSheetBehavior.setState(savedInstanceState.getInt(BOTTOMSHEET));
+        } else {
+            updateEntries();
         }
 
         setFont();
         setUpUI();
         setUpMap();
-        updateEntries();
     }
 
     private void setFont() {
@@ -179,56 +183,57 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setTitle(getString(R.string.title_activity_map));
 
         sync = findViewById(R.id.sync);
+        floatingActionMenu = findViewById(R.id.menu);
 
         final FloatingActionButton location = findViewById(R.id.location);
-        location.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                checkPermissions();
-                if(mLocationPermissionGranted) {
-                    followPerson = true;
-                    updateLocationUI();
-                    setDeviceLocation(null);
-                }
+        location.setOnClickListener((view) ->{
+            checkPermissions();
+            if(mLocationPermissionGranted) {
+                followPerson = true;
+                updateLocationUI();
+                setDeviceLocation(null);
+                floatingActionMenu.close(true);
             }
         });
 
         FloatingActionButton addLocation = findViewById(R.id.newLocation);
-        addLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                checkPermissions();
-                if(mLocationPermissionGranted) {
-                    if(mLastKnownLocation != null) {
-                        Toast.makeText(getApplicationContext(),
-                                mLastKnownLocation.getLatitude() + " " + mLastKnownLocation.getLongitude(),
-                                Toast.LENGTH_LONG).show();
-                    }
+        addLocation.setOnClickListener((view) -> {
+            if(!syncing && locUpdate) {
+
+                floatingActionMenu.close(true);
+                Intent settings = new Intent(MainActivity.this, Add.class);
+                //not ideal, should make location parcelable or something
+                if (mLastKnownLocation != null) {
+                    System.out.println("Putting in extra " + mLastKnownLocation.toString());
+                    settings.putExtra("Location", mLastKnownLocation);
                 }
+                //System.out.println(firebaseList);
+                settings.putExtra("Ratings", firebaseList);
+                startActivity(settings);
+                overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+            } else {
+                Toast.makeText(this, "Please wait until sync is complete", Toast.LENGTH_SHORT).show();
             }
         });
 
         FloatingActionButton zoomOut = findViewById(R.id.zoomOut);
-        zoomOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-               zoomLevel--;
-               if(mMap != null) {
-                   mMap.moveCamera(CameraUpdateFactory.zoomOut());
-               }
-            }
+        zoomOut.setOnClickListener((view) -> {
+           zoomLevel--;
+           if(mMap != null) {
+               mMap.moveCamera(CameraUpdateFactory.zoomOut());
+           }
         });
 
         FloatingActionButton zoomIn = findViewById(R.id.zoomIn);
-        zoomIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                zoomLevel++;
-                if(mMap != null) {
-                    mMap.moveCamera(CameraUpdateFactory.zoomIn());
-                }
+        zoomIn.setOnClickListener((view) -> {
+            zoomLevel++;
+            if(mMap != null) {
+                mMap.moveCamera(CameraUpdateFactory.zoomIn());
             }
         });
+
+        FloatingActionButton refresh = findViewById(R.id.refresh);
+        refresh.setOnClickListener((view) -> updateEntries());
 
         drawerLayout = findViewById(R.id.drawer_layout);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
@@ -238,7 +243,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        floatingActionMenu = findViewById(R.id.menu);
         toolbar2 = findViewById(R.id.toolbar2);
         final CardView cardToolbar = findViewById(R.id.cardToolbar);
         final Toolbar locationToolbar = findViewById(R.id.location_toolbar);
@@ -268,7 +272,7 @@ public class MainActivity extends AppCompatActivity
                     setSupportActionBar(locationToolbar);
                     getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back);
                     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    getSupportActionBar().setTitle("Peter O'Donnell Jr.");
+                    getSupportActionBar().setTitle("");
                     getSupportActionBar().setHomeButtonEnabled(true);
 
                 } else if(newState == BottomSheetBehavior.STATE_DRAGGING) {
@@ -294,11 +298,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        toolbar2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            }
+        toolbar2.setOnClickListener((view) -> {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         });
 
     }
@@ -307,7 +308,8 @@ public class MainActivity extends AppCompatActivity
         float orate = 0f;
         int space = 0, activity = 0, wifi = 0, clean = 0;
         ArrayList<Rating> ratings = new ArrayList<>();
-        String[] imageUrls = new String[0];
+        ArrayList<String> imageUrls = new ArrayList<>();
+        //String[] imageUrls = new String[0];
 
         if(location instanceof Bathroom) {
             Bathroom bathroom = (Bathroom) location;
@@ -359,6 +361,7 @@ public class MainActivity extends AppCompatActivity
 
     private void updateEntries() {
         if(updateFragment == null) {
+            syncing = true;
             updateFragment = UpdateFragment.newInstance();
             fragmentManager.beginTransaction().add(updateFragment, TAG_TASK_FRAGMENT).commit();
             if(sync != null) {
@@ -441,22 +444,19 @@ public class MainActivity extends AppCompatActivity
                     .title("QUICK SEARCH")
                     .negativeText("Cancel")
                     .positiveText("Search")
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            if(which == DialogAction.POSITIVE) {
-                                Toast.makeText(getApplicationContext(), "Searching", Toast.LENGTH_LONG).show();
-                            }
-                            View filterDialogView = dialog.getCustomView();
-                            ScaleRatingBar overallDialog = filterDialogView.findViewById(R.id.overallBar_dialog);
-                            ScaleRatingBar spaceDialog = filterDialogView.findViewById(R.id.spaceBar_dialog);
-                            ScaleRatingBar activityDialog = filterDialogView.findViewById(R.id.activityBar_dialog);
-                            ScaleRatingBar wifiDialog= filterDialogView.findViewById(R.id.wifiBar_dialog);
-                            ScaleRatingBar cleanDialog = filterDialogView.findViewById(R.id.cleanBar_dialog);
-
-                            System.out.println(overallDialog.getRating() + " " + spaceDialog.getRating() + " " + activityDialog.getRating() +
-                                " " + wifiDialog.getRating() + " " + cleanDialog.getRating());
+                    .onPositive((dialog, which) -> {
+                        if(which == DialogAction.POSITIVE) {
+                            Toast.makeText(getApplicationContext(), "Searching", Toast.LENGTH_SHORT).show();
                         }
+                        View filterDialogView = dialog.getCustomView();
+                        ScaleRatingBar overallDialog = filterDialogView.findViewById(R.id.overallBar_dialog);
+                        ScaleRatingBar spaceDialog = filterDialogView.findViewById(R.id.spaceBar_dialog);
+                        ScaleRatingBar activityDialog = filterDialogView.findViewById(R.id.activityBar_dialog);
+                        ScaleRatingBar wifiDialog= filterDialogView.findViewById(R.id.wifiBar_dialog);
+                        ScaleRatingBar cleanDialog = filterDialogView.findViewById(R.id.cleanBar_dialog);
+
+                        System.out.println(overallDialog.getRating() + " " + spaceDialog.getRating() + " " + activityDialog.getRating() +
+                            " " + wifiDialog.getRating() + " " + cleanDialog.getRating());
                     })
                     .show();
 
@@ -469,13 +469,10 @@ public class MainActivity extends AppCompatActivity
                     .title("MAP TYPE")
                     .negativeText("Cancel")
                     .positiveText("Ok")
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        setMapType();
-                                        saveMapType();
-                                    }
-                                }
+                    .onPositive((dialog, which) -> {
+                            setMapType();
+                            saveMapType();
+                        }
                     )
                     .show();
 
@@ -486,22 +483,16 @@ public class MainActivity extends AppCompatActivity
             final RadioButton streetRb = mapDialogView.findViewById(R.id.streetbutton);
             final RadioButton satRb = mapDialogView.findViewById(R.id.satellitebutton);
 
-            street.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    maptype = GoogleMap.MAP_TYPE_NORMAL;
-                    streetRb.setChecked(true);
-                    satRb.setChecked(false);
-                }
+            street.setOnClickListener((view) -> {
+                maptype = GoogleMap.MAP_TYPE_NORMAL;
+                streetRb.setChecked(true);
+                satRb.setChecked(false);
             });
 
-            satellite.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    maptype = GoogleMap.MAP_TYPE_HYBRID;
-                    streetRb.setChecked(false);
-                    satRb.setChecked(true);
-                }
+            satellite.setOnClickListener((view) -> {
+                maptype = GoogleMap.MAP_TYPE_HYBRID;
+                streetRb.setChecked(false);
+                satRb.setChecked(true);
             });
 
             if(maptype == GoogleMap.MAP_TYPE_NORMAL) {
@@ -610,7 +601,7 @@ public class MainActivity extends AppCompatActivity
                 mMap.setMyLocationEnabled(true);
             } else {
                 mMap.setMyLocationEnabled(false);
-                mLastKnownLocation = null;
+                //mLastKnownLocation = null;
                 //checkPermissions();
             }
         } catch (SecurityException e)  {
@@ -625,12 +616,14 @@ public class MainActivity extends AppCompatActivity
                     Location current = mFusedLocationProviderApi.getLastLocation(mServer.getCurrentLocation());
                     if (current != null) {
                         mLastKnownLocation = current;
+                        locUpdate = true;
                     } else {
                         Log.i("Location", "Current location is null");
                         mMap.getUiSettings().setMyLocationButtonEnabled(false);
                     }
                 } else {
                     mLastKnownLocation = location;
+                    locUpdate = true;
                 }
 
 
@@ -696,14 +689,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onUpdateFinish(HashMap<String, Bathroom> results, LinkedList<MarkerOptions> markers) {
+    public void onUpdateFinish(HashMap<String, Bathroom> results, LinkedList<Bathroom> resultsList, LinkedList<MarkerOptions> markers) {
         runOnUiThread(() -> {
             if(sync != null) {
-                sync.smoothToHide();
+                Handler handler = new Handler();
+                handler.postDelayed(() -> sync.smoothToHide(), 2000);
             }
+
             firebaseRatings = results;
+            firebaseList = resultsList;
             System.out.println(firebaseRatings);
             //addMarkers(markers);
+            updateFragment = null;
+            syncing = false;
 
         });
     }
