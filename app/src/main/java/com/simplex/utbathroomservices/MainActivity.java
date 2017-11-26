@@ -66,7 +66,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        GoogleMap.OnCameraMoveStartedListener, LocationCallback, GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnCameraMoveStartedListener, ServiceFragment.UpdateLocationListener, GoogleMap.OnMarkerClickListener,
         UpdateFragment.onUpdateListener {
     //TODO: Favorites activity
     //TODO: Reviews activity
@@ -80,6 +80,9 @@ public class MainActivity extends AppCompatActivity
     final String FOLLOW = "FOLLOW";
     final String ZOOM = "ZOOM";
     final String BOTTOMSHEET = "BOTTOMSHEET";
+    final String LOADING = "LOADING";
+    final String TOOLBAR = "TOOLBAR";
+    private boolean whichtoolbar = false;
 
     private GoogleMap mMap;
     private final LatLng mDefaultLocation = new LatLng(30.286310, -97.739560);
@@ -92,15 +95,18 @@ public class MainActivity extends AppCompatActivity
     private float zoomLevel;
 
     private BottomSheetBehavior bottomSheetBehavior;
-    private Toolbar toolbar;
+    private Toolbar toolbar, locationToolbar;
+    private CardView cardToolbar;
     private TextView toolbar2;
     private DrawerLayout drawerLayout;
     private FloatingActionMenu floatingActionMenu;
     private AVLoadingIndicatorView sync;
 
     private UpdateFragment updateFragment;
+    private ServiceFragment serviceFragment;
     private FragmentManager fragmentManager;
     private static final String TAG_TASK_FRAGMENT = "updateFragment";
+    private static final String TAG_LOC_FRAGMENT = "locationFragment";
 
     private HashMap<String, Bathroom> firebaseBRatings = new HashMap<>();
     private HashMap<String, WaterFountain> firebaseWRatings = new HashMap<>();
@@ -110,27 +116,6 @@ public class MainActivity extends AppCompatActivity
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
-
-    boolean mBounded;
-    LocationService mServer;
-
-    ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.e("BINDER", "SERVICE UNBOUND");
-            mBounded = false;
-            mServer = null;
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.e("BINDER", "SERVICE BOUND");
-            mBounded = true;
-            LocationService.LocalBinder mLocalBinder = (LocationService.LocalBinder)service;
-            mServer = mLocalBinder.getServerInstance();
-            mServer.setCallbacks(MainActivity.this);
-        }
-    };
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -143,16 +128,25 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_map);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        sync = findViewById(R.id.sync);
         followPerson = true;
         zoomLevel = 17f;
-        Intent mIntent = new Intent(this, LocationService.class);
-        bindService(mIntent, mConnection, BIND_AUTO_CREATE);
 
         RelativeLayout bottomSheetLayout = findViewById(R.id.locationSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
 
         fragmentManager = getSupportFragmentManager();
         updateFragment = (UpdateFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
+        serviceFragment = (ServiceFragment) fragmentManager.findFragmentByTag(TAG_LOC_FRAGMENT);
+
+        if(serviceFragment == null) {
+            serviceFragment = ServiceFragment.newInstance();
+            fragmentManager.beginTransaction().add(serviceFragment, TAG_LOC_FRAGMENT).commit();
+        }
+
+        setFont();
+        setUpUI();
+        setUpMap();
 
         if(savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(SAVELOCATION);
@@ -160,13 +154,18 @@ public class MainActivity extends AppCompatActivity
             followPerson = savedInstanceState.getBoolean(FOLLOW);
             zoomLevel = savedInstanceState.getFloat(ZOOM);
             bottomSheetBehavior.setState(savedInstanceState.getInt(BOTTOMSHEET));
+            whichtoolbar = savedInstanceState.getBoolean(TOOLBAR);
+            if(whichtoolbar) {
+                setBottomSheetToolbar();
+            }
+            syncing = savedInstanceState.getBoolean(LOADING);
+            if(!syncing) {
+                sync.hide();
+            }
         } else {
             updateEntries("Update");
         }
 
-        setFont();
-        setUpUI();
-        setUpMap();
     }
 
     private void setFont() {
@@ -184,7 +183,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.title_activity_map));
 
-        sync = findViewById(R.id.sync);
         floatingActionMenu = findViewById(R.id.menu);
 
         final FloatingActionButton location = findViewById(R.id.location);
@@ -238,6 +236,15 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton refresh = findViewById(R.id.refresh);
         refresh.setOnClickListener((view) -> updateEntries("Update"));
 
+        android.support.design.widget.FloatingActionButton addfab = findViewById(R.id.addreview);
+        addfab.setOnClickListener((view) -> {
+            Intent settings = new Intent(MainActivity.this, Add.class);
+            //send bathroom
+            //settings.putExtra("Rating" + typeSelected, bathroom/fountain);
+            startActivity(settings);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+        });
+
         drawerLayout = findViewById(R.id.drawer_layout);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -247,8 +254,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         toolbar2 = findViewById(R.id.toolbar2);
-        final CardView cardToolbar = findViewById(R.id.cardToolbar);
-        final Toolbar locationToolbar = findViewById(R.id.location_toolbar);
+        cardToolbar = findViewById(R.id.cardToolbar);
+        locationToolbar = findViewById(R.id.location_toolbar);
 
         //get bottom sheet behavior from bottom sheet view
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetCallback() {
@@ -257,26 +264,10 @@ public class MainActivity extends AppCompatActivity
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
 
                 if(newState == BottomSheetBehavior.STATE_COLLAPSED) {
-
-                    floatingActionMenu.setVisibility(View.VISIBLE);
-                    cardToolbar.setVisibility(View.VISIBLE);
-                    toolbar2.setVisibility(View.VISIBLE);
-                    setSupportActionBar(toolbar);
-                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    getSupportActionBar().setHomeButtonEnabled(true);
-                    getSupportActionBar().setTitle(getString(R.string.title_activity_map));
+                    setTopSheetToolbar();
 
                 } else if(newState == BottomSheetBehavior.STATE_EXPANDED) {
-
-                    floatingActionMenu.setVisibility(View.GONE);
-                    cardToolbar.setVisibility(View.GONE);
-                    toolbar2.setVisibility(View.GONE);
-                    setSupportActionBar(locationToolbar);
-                    getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back);
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    getSupportActionBar().setTitle("");
-                    getSupportActionBar().setHomeButtonEnabled(true);
+                    setBottomSheetToolbar();
 
                 } else if(newState == BottomSheetBehavior.STATE_DRAGGING) {
 
@@ -305,6 +296,32 @@ public class MainActivity extends AppCompatActivity
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         });
 
+    }
+
+    private void setTopSheetToolbar() {
+
+        floatingActionMenu.setVisibility(View.VISIBLE);
+        cardToolbar.setVisibility(View.VISIBLE);
+        toolbar2.setVisibility(View.VISIBLE);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle(getString(R.string.title_activity_map));
+        whichtoolbar = false;
+    }
+
+    private void setBottomSheetToolbar() {
+
+        floatingActionMenu.setVisibility(View.GONE);
+        cardToolbar.setVisibility(View.GONE);
+        toolbar2.setVisibility(View.GONE);
+        setSupportActionBar(locationToolbar);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("");
+        getSupportActionBar().setHomeButtonEnabled(true);
+        whichtoolbar = true;
     }
 
     private void setReview(Object location) {
@@ -363,6 +380,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void updateEntries(String type) {
+        System.out.println("Call to update");
         if(updateFragment == null) {
             syncing = true;
             updateFragment = UpdateFragment.newInstance(type);
@@ -378,13 +396,13 @@ public class MainActivity extends AppCompatActivity
     {
         super.onSaveInstanceState(outState);
         System.out.println("TAG, onSavedInstanceState");
-        if(mLastKnownLocation != null) {
-            outState.putParcelable(SAVELOCATION, mLastKnownLocation);
-        }
+        outState.putParcelable(SAVELOCATION, mLastKnownLocation);
         outState.putBoolean(LOCATIONGRANTED, mLocationPermissionGranted);
         outState.putBoolean(FOLLOW, followPerson);
         outState.putFloat(ZOOM, zoomLevel);
         outState.putInt(BOTTOMSHEET, bottomSheetBehavior.getState());
+        outState.putBoolean(TOOLBAR, whichtoolbar);
+        outState.putBoolean(LOADING, syncing);
     }
 
     @Override
@@ -616,7 +634,10 @@ public class MainActivity extends AppCompatActivity
         try {
             if (mLocationPermissionGranted) {
                 if(location == null) {
-                    Location current = mFusedLocationProviderApi.getLastLocation(mServer.getCurrentLocation());
+                    Location current = null;
+                    if(serviceFragment != null) {
+                        current = mFusedLocationProviderApi.getLastLocation(serviceFragment.getCurrentLocation());
+                    }
                     if (current != null) {
                         mLastKnownLocation = current;
                         locUpdate = true;
@@ -641,7 +662,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void updateLocationGUI(Location location) {
+    public void onLocationUpdate(Location location) {
         updateLocationUI();
         setDeviceLocation(location);
     }
@@ -655,12 +676,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void moveCamera() {
-        if(mLastKnownLocation != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(mLastKnownLocation.getLatitude(),
-                            mLastKnownLocation.getLongitude()), zoomLevel));
-        } else {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, zoomLevel));
+        if(mMap != null) {
+            if (mLastKnownLocation != null) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(mLastKnownLocation.getLatitude(),
+                                mLastKnownLocation.getLongitude()), zoomLevel));
+            } else {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, zoomLevel));
+            }
         }
     }
 
@@ -743,17 +766,18 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
 
         }
+        try {
+            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_LOC_FRAGMENT)).commitAllowingStateLoss();
+        } catch (Exception e) {
+
+        }
+        serviceFragment = null;
         updateFragment = null;
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if(mBounded) {
-            mServer.setCallbacks(null); // unregister
-            unbindService(mConnection);
-            mBounded = false;
-        }
         saveMapType();
     }
 

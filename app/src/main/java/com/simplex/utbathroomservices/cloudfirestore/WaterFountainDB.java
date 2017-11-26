@@ -44,11 +44,6 @@ public class WaterFountainDB {
         mFireStore.collection("waterfountain")
                 .whereEqualTo("building", wf.getBuilding())
                 .whereEqualTo("floor", wf.getFloor())
-                .whereEqualTo("location", wf.getLocation())
-                .whereEqualTo("overallRating", wf.getOverallRating())
-                .whereEqualTo("temperature", wf.getTemperature())
-                .whereEqualTo("taste", wf.getTaste())
-                .whereEqualTo("isBottleRefillStation", wf.isBottleRefillStation())
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
