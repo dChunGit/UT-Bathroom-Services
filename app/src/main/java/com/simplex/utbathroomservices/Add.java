@@ -100,6 +100,14 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             System.out.println("WRatings malformed");
         }
 
+        if(sentBRatings == null) {
+            sentBRatings = new ArrayList<>();
+        }
+
+        if(sentWRatings == null) {
+            sentWRatings = new ArrayList<>();
+        }
+
         new Thread(() -> {
             for(Bathroom b : sentBRatings) {
                 firebaseBRatings.put(b.getBuilding() + " " + b.getFloor(), b);
@@ -316,14 +324,14 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                     if(type.equals("Bathroom")) {
 
                         BathroomDB bathroomDB = new BathroomDB();
-                        bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
+                        bathroomDB.addBathroomToDB(null, building, floorNumber, 1, space, stallnum,
                                 wifi.getNumStars(), activity.getNumStars(), overall.getNumStars(),
                                 cleanliness.getNumStars(), newRating, new ArrayList<>());
 
                     } else if(type.equals("Fountain")) {
 
                         WaterFountainDB waterFountainDB = new WaterFountainDB();
-                        waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
+                        waterFountainDB.addWaterFountainToDB(null, building, floorNumber, 1, temp,
                                 isFillable, taste, overall.getNumStars(), newRating, new ArrayList<>());
 
                     }

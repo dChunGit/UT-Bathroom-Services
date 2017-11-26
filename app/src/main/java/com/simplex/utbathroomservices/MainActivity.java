@@ -236,6 +236,15 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton refresh = findViewById(R.id.refresh);
         refresh.setOnClickListener((view) -> updateEntries("Update"));
 
+        android.support.design.widget.FloatingActionButton addfab = findViewById(R.id.addreview);
+        addfab.setOnClickListener((view) -> {
+            Intent settings = new Intent(MainActivity.this, Add.class);
+            //send bathroom
+            //settings.putExtra("Rating" + typeSelected, bathroom/fountain);
+            startActivity(settings);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+        });
+
         drawerLayout = findViewById(R.id.drawer_layout);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -624,9 +633,7 @@ public class MainActivity extends AppCompatActivity
     private void setDeviceLocation(Location location) {
         try {
             if (mLocationPermissionGranted) {
-                System.out.println("Permissions Granted");
                 if(location == null) {
-                    System.out.println("Location null");
                     Location current = null;
                     if(serviceFragment != null) {
                         current = mFusedLocationProviderApi.getLastLocation(serviceFragment.getCurrentLocation());
@@ -639,7 +646,6 @@ public class MainActivity extends AppCompatActivity
                         mMap.getUiSettings().setMyLocationButtonEnabled(false);
                     }
                 } else {
-                    System.out.println("Location good");
                     mLastKnownLocation = location;
                     locUpdate = true;
                 }
