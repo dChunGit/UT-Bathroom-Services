@@ -1,6 +1,8 @@
 package com.simplex.utbathroomservices;
 
 import android.animation.LayoutTransition;
+import android.app.Activity;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +41,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
     private Location location;
     private String type, building, floorNumber, space, temp, taste;
+    private int overallV, activityV, wifiV, cleanlinessV;
     private int stallnum;
     private boolean customStallSelect = false, isFillable;
 
@@ -185,6 +188,19 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         wifi = findViewById(R.id.wifiBar_add);
         cleanliness = findViewById(R.id.cleanBar_add);
         commentsEditText = findViewById(R.id.comments);
+
+        overall.setOnRatingChangeListener((ratingBar, rating) -> {
+            overallV = (int) rating;
+        });
+        activity.setOnRatingChangeListener((ratingBar, rating) -> {
+            activityV = (int) rating;
+        });
+        wifi.setOnRatingChangeListener((ratingBar, rating) -> {
+            wifiV = (int) rating;
+        });
+        cleanliness.setOnRatingChangeListener((ratingBar, rating) -> {
+            cleanlinessV = (int) rating;
+        });
     }
 
     private void setUpSpinners() {
@@ -350,14 +366,14 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
                         BathroomDB bathroomDB = new BathroomDB();
                         bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
-                                wifi.getNumStars(), activity.getNumStars(), overall.getNumStars(),
-                                cleanliness.getNumStars(), newRating, new ArrayList<>());
+                                wifiV, activityV, overallV,
+                                cleanlinessV, newRating, new ArrayList<>());
 
                     } else if(type.equals("Fountain")) {
 
                         WaterFountainDB waterFountainDB = new WaterFountainDB();
                         waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
-                                isFillable, taste, overall.getNumStars(), newRating, new ArrayList<>());
+                                isFillable, taste, overallV, newRating, new ArrayList<>());
 
                     }
                 }

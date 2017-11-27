@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity
     //TODO: Settings/About/Help Activity
     //TODO: Bar graph, key features, reviews recyclerview
     //TODO: Camera API
-    //TODO: Custom updates
+    //TODO: Create service to update entries periodically
     final String SAVELOCATION = "SAVE LOCATION";
     final String LOCATIONGRANTED = "LOCATION GRANTED";
     final String FOLLOW = "FOLLOW";
@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity
     final String LOADING = "LOADING";
     final String TOOLBAR = "TOOLBAR";
     private boolean whichtoolbar = false;
+    private static final int ADD_LOCATION = 0;
 
     private GoogleMap mMap;
     private final LatLng mDefaultLocation = new LatLng(30.286310, -97.739560);
@@ -109,6 +110,7 @@ public class MainActivity extends AppCompatActivity
     private LinkedList<Bathroom> bathroomLinkedList = new LinkedList<>();
     private LinkedList<WaterFountain> fountainLinkedList = new LinkedList<>();
     private LinkedList<String> buildings = new LinkedList<>();
+    private ArrayList<Marker> mapMarkers = new ArrayList<>();
     private boolean syncing = false, locUpdate = false;
     private String currentSelected;
 
@@ -215,7 +217,7 @@ public class MainActivity extends AppCompatActivity
                 settings.putExtra("BRatings", bathroomLinkedList);
                 settings.putExtra("WRatings", fountainLinkedList);
                 settings.putExtra("Buildings", buildings);
-                startActivity(settings);
+                startActivityForResult(settings, ADD_LOCATION);
                 overridePendingTransition(R.anim.fadein, R.anim.fadeout);
             } else {
                 Toast.makeText(this, "Please wait until sync is complete", Toast.LENGTH_SHORT).show();
@@ -247,7 +249,7 @@ public class MainActivity extends AppCompatActivity
             //send bathroom/fountain
             settings.putExtra("Selected", currentSelected);
             settings.putExtra("Buildings", buildings);
-            startActivity(settings);
+            startActivityForResult(settings, ADD_LOCATION);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
         });
 
@@ -331,6 +333,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setReview(Object location) {
+        System.out.println("Setting review " + location.toString());
         float orate = 0f;
         ArrayList<Rating> ratings = new ArrayList<>();
         ArrayList<String> imageUrls = new ArrayList<>();
@@ -373,15 +376,15 @@ public class MainActivity extends AppCompatActivity
             activityBar.setRating(activity);
             wifiBar.setRating(wifi);
             cleanBar.setRating(clean);
-            stallamount.setText(stalls);
+            stallamount.setText(String.valueOf(stalls));
 
             building.setText(bathroom.getBuilding());
             room.setText(bathroom.getFloor());
 
         } else if(location instanceof WaterFountain) {
 
-            bathroomreview.setVisibility(View.VISIBLE);
-            fountainreview.setVisibility(View.GONE);
+            bathroomreview.setVisibility(View.GONE);
+            fountainreview.setVisibility(View.VISIBLE);
             
             boolean refill;
             String taste, temperature;
@@ -400,22 +403,22 @@ public class MainActivity extends AppCompatActivity
             ScaleRatingBar tasteBar = findViewById(R.id.tasteBar);
             ScaleRatingBar tempBar = findViewById(R.id.tempBar);
 
-            switch(taste) {
-                case "cold": tasteT = 5; break;
-                case "cool": tasteT = 4; break;
-                case "lukewarm": tasteT = 3; break;
-                case "warm": tasteT = 2; break;
-                case "hot": tasteT = 1; break;
-                default: tasteT = 0;
+            switch(temperature) {
+                case "cold": tempT = 5; break;
+                case "cool": tempT = 4; break;
+                case "lukewarm": tempT = 3; break;
+                case "warm": tempT = 2; break;
+                case "hot": tempT = 1; break;
+                default: tempT = 0;
             }
 
-            switch(temperature) {
-                case "Wow": tempT = 5; break;
-                case "Pretty Good": tempT = 4; break;
-                case "Meh": tempT = 3; break;
-                case "Not Great": tempT = 2; break;
-                case "Disgusting": tempT = 1; break;
-                default: tempT = 0;
+            switch(taste) {
+                case "Wow": tasteT = 5; break;
+                case "Pretty Good": tasteT = 4; break;
+                case "Meh": tasteT = 3; break;
+                case "Not Great": tasteT = 2; break;
+                case "Disgusting": tasteT = 1; break;
+                default: tasteT = 0;
             }
 
             tasteBar.setRating(tasteT);
@@ -462,8 +465,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState)
-    {
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         System.out.println("TAG, onSavedInstanceState");
         outState.putParcelable(SAVELOCATION, mLastKnownLocation);
@@ -682,11 +684,12 @@ public class MainActivity extends AppCompatActivity
             toolbar2.setText(title);
             String[] splitter = title.split("@");
             String type = splitter[1];
-            String key = splitter[0];
+            String key = splitter[0].trim();
+            System.out.println(type);
 
-            if(type.equals("Bathroom")) {
+            if(type.contains("Bathroom")) {
                 setReview(firebaseBRatings.get(key));
-            } else if(type.equals("Fountain")) {
+            } else if(type.contains("Fountain")) {
                 setReview(firebaseWRatings.get(key));
             }
 
@@ -788,10 +791,19 @@ public class MainActivity extends AppCompatActivity
         }
     }
     private void addMarkers(LinkedList<MarkerOptions> markers) {
+        ArrayList<Marker> temp = new ArrayList<>();
 
         for(MarkerOptions markerOptions : markers) {
-            mMap.addMarker(markerOptions);
+            temp.add(mMap.addMarker(markerOptions));
         }
+
+        for(Marker m : mapMarkers) {
+            if(!temp.contains(m)) {
+                m.remove();
+            }
+        }
+        mapMarkers.clear();
+        mapMarkers = temp;
 
     }
 
@@ -803,7 +815,7 @@ public class MainActivity extends AppCompatActivity
             bathroomLinkedList = resultsList;
 
             System.out.println(firebaseBRatings);
-            //addMarkers(markers);
+            addMarkers(markers);
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 
@@ -828,7 +840,7 @@ public class MainActivity extends AppCompatActivity
             fountainLinkedList = resultsList;
 
             System.out.println(firebaseWRatings);
-            //addMarkers(markers);
+            addMarkers(markers);
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 

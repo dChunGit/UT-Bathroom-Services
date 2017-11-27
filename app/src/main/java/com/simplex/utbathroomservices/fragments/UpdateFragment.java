@@ -121,29 +121,32 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
 
     private <T> void setUpMarkers(LinkedList<T> results) {
         for(T item: results) {
-            Location location;
+            //Location location = new Location("mocked");
+            double longitude, latitude;
             String title, type;
             if(item instanceof Bathroom) {
                 Bathroom bathroom = (Bathroom) item;
                 title = bathroom.getBuilding() + " " + bathroom.getFloor();
                 System.out.println(title);
-                location = bathroom.getLocation();
+                longitude = bathroom.getLongitude();
+                latitude = bathroom.getLatitude();
+                //location = bathroom.getLocation();
                 type = "Bathroom";
 
             } else {
                 WaterFountain fountain = (WaterFountain) item;
                 title = fountain.getBuilding() + " " + fountain.getFloor();
                 System.out.println(title);
-                location = fountain.getLocation();
+                longitude = fountain.getLongitude();
+                latitude = fountain.getLatitude();
+                //location = fountain.getLocation();
                 type = "Fountain";
             }
 
-            if(location != null) {
-                LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
-                MarkerOptions options = new MarkerOptions().position(sydney).title(title + " @ " + type);
-                synchronized (this) {
-                    markerOptions.add(options);
-                }
+            LatLng sydney = new LatLng(latitude, longitude);
+            MarkerOptions options = new MarkerOptions().position(sydney).title(title + " @ " + type);
+            synchronized (this) {
+                markerOptions.add(options);
             }
 
         }

@@ -39,7 +39,7 @@
                     android:id="@+id/buildingname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="POB"/>
+                    android:text="N/A"/>
 
             </LinearLayout>
 
@@ -57,7 +57,7 @@
                     android:id="@+id/roomname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1"/>
+                    android:text="N/A"/>
             </LinearLayout>
 
         </LinearLayout>
@@ -90,7 +90,6 @@
                 android:layout_height="wrap_content"
                 app:srb_starSize="20dp"
                 app:srb_numberOfStars="5"
-                app:srb_rating="3.6"
                 app:srb_stepSize="0.1"
                 app:srb_borderColor="@color/colorAccent"
                 app:srb_fillColor="@color/colorAccent" />
@@ -130,7 +129,7 @@
                 android:id="@+id/numstalls"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="5"
+                android:text="N/A"
                 android:layout_margin="7dp"/>
 
             <View

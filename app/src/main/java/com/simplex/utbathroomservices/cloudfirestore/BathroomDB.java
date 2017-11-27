@@ -36,7 +36,7 @@ public class BathroomDB {
                                 Integer numberStalls, Integer wifiQuality, Integer busyness,
                                 Integer cleanliness, Integer overallRating, ArrayList<Rating> rating,
                                 ArrayList<String> image){
-        Bathroom b= new Bathroom( location,  building,  floor,  reviews, space,  numberStalls,  wifiQuality,
+        Bathroom b= new Bathroom(location.getLongitude(), location.getLatitude(),  building,  floor,  reviews, space,  numberStalls,  wifiQuality,
                 busyness, cleanliness, overallRating , rating, image);
         mFireStore.collection("bathroom").document(building + " " + floor).set(b);
 
@@ -47,13 +47,6 @@ public class BathroomDB {
         mFireStore.collection("bathroom")
                 .whereEqualTo("building", b.getBuilding())
                 .whereEqualTo("floor", b.getFloor())
-                .whereEqualTo("location", b.getLocation())
-                .whereEqualTo("space", b.getSpace())
-                .whereEqualTo("numberStalls", b.getNumberStalls())
-                .whereEqualTo("wifiQuality", b.getWifiQuality())
-                .whereEqualTo("busyness", b.getBusyness())
-                .whereEqualTo("cleanliness", b.getCleanliness())
-                .whereEqualTo("overallRating", b.getOverallRating())
                 .get()
                 .addOnCompleteListener((task) -> {
                     if (task.isSuccessful()) {

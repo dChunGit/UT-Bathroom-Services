@@ -33,8 +33,11 @@ public class WaterFountainDB {
 
     public WaterFountainDB() {}
 
-    public void addWaterFountainToDB(Location location, String building, String floor, Integer reviews, String temperature, boolean isBottleRefillStation, String taste, Integer overallRating,ArrayList<Rating> rating, ArrayList<String> image) {
-        WaterFountain wf = new WaterFountain(location, building, floor, reviews, temperature, isBottleRefillStation, taste, overallRating,rating, image);
+    public void addWaterFountainToDB(Location location, String building, String floor, Integer reviews,
+                                     String temperature, boolean isBottleRefillStation, String taste,
+                                     Integer overallRating,ArrayList<Rating> rating, ArrayList<String> image) {
+        WaterFountain wf = new WaterFountain(location.getLongitude(), location.getLatitude(), building, floor, reviews, temperature,
+                isBottleRefillStation, taste, overallRating,rating, image);
         mFireStore.collection("waterfountain").document(building + " " + floor).set(wf);
 
     }
