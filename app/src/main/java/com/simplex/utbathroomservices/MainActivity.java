@@ -1,15 +1,12 @@
 package com.simplex.utbathroomservices;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
@@ -50,16 +47,14 @@ import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+import com.simplex.utbathroomservices.fragments.ServiceFragment;
 import com.simplex.utbathroomservices.fragments.UpdateFragment;
-import com.simplex.utbathroomservices.location.LocationCallback;
-import com.simplex.utbathroomservices.location.LocationService;
 import com.wang.avi.AVLoadingIndicatorView;
 import com.willy.ratingbar.ScaleRatingBar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -74,7 +69,7 @@ public class MainActivity extends AppCompatActivity
     //TODO: Settings/About/Help Activity
     //TODO: Bar graph, key features, reviews recyclerview
     //TODO: Camera API
-    //TODO: Custom updates
+    //TODO: Create service to update entries periodically
     final String SAVELOCATION = "SAVE LOCATION";
     final String LOCATIONGRANTED = "LOCATION GRANTED";
     final String FOLLOW = "FOLLOW";
@@ -83,6 +78,7 @@ public class MainActivity extends AppCompatActivity
     final String LOADING = "LOADING";
     final String TOOLBAR = "TOOLBAR";
     private boolean whichtoolbar = false;
+    private static final int ADD_LOCATION = 0;
 
     private GoogleMap mMap;
     private final LatLng mDefaultLocation = new LatLng(30.286310, -97.739560);
@@ -97,10 +93,11 @@ public class MainActivity extends AppCompatActivity
     private BottomSheetBehavior bottomSheetBehavior;
     private Toolbar toolbar, locationToolbar;
     private CardView cardToolbar;
-    private TextView toolbar2;
+    private TextView toolbar2, building, room, stallamount, bottlerefill;
     private DrawerLayout drawerLayout;
     private FloatingActionMenu floatingActionMenu;
     private AVLoadingIndicatorView sync;
+    private LinearLayout bathroomreview, fountainreview;
 
     private UpdateFragment updateFragment;
     private ServiceFragment serviceFragment;
@@ -112,7 +109,10 @@ public class MainActivity extends AppCompatActivity
     private HashMap<String, WaterFountain> firebaseWRatings = new HashMap<>();
     private LinkedList<Bathroom> bathroomLinkedList = new LinkedList<>();
     private LinkedList<WaterFountain> fountainLinkedList = new LinkedList<>();
+    private LinkedList<String> buildings = new LinkedList<>();
+    private ArrayList<Marker> mapMarkers = new ArrayList<>();
     private boolean syncing = false, locUpdate = false;
+    private String currentSelected;
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
@@ -184,6 +184,12 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setTitle(getString(R.string.title_activity_map));
 
         floatingActionMenu = findViewById(R.id.menu);
+        building = findViewById(R.id.buildingname);
+        room = findViewById(R.id.roomname);
+        stallamount = findViewById(R.id.numstalls);
+        bathroomreview = findViewById(R.id.bathroomreview);
+        fountainreview = findViewById(R.id.fountainreview);
+        bottlerefill = findViewById(R.id.isbottlerefill);
 
         final FloatingActionButton location = findViewById(R.id.location);
         location.setOnClickListener((view) ->{
@@ -210,7 +216,8 @@ public class MainActivity extends AppCompatActivity
                 //System.out.println(bathroomLinkedList);
                 settings.putExtra("BRatings", bathroomLinkedList);
                 settings.putExtra("WRatings", fountainLinkedList);
-                startActivity(settings);
+                settings.putExtra("Buildings", buildings);
+                startActivityForResult(settings, ADD_LOCATION);
                 overridePendingTransition(R.anim.fadein, R.anim.fadeout);
             } else {
                 Toast.makeText(this, "Please wait until sync is complete", Toast.LENGTH_SHORT).show();
@@ -239,9 +246,10 @@ public class MainActivity extends AppCompatActivity
         android.support.design.widget.FloatingActionButton addfab = findViewById(R.id.addreview);
         addfab.setOnClickListener((view) -> {
             Intent settings = new Intent(MainActivity.this, Add.class);
-            //send bathroom
-            //settings.putExtra("Rating" + typeSelected, bathroom/fountain);
-            startActivity(settings);
+            //send bathroom/fountain
+            settings.putExtra("Selected", currentSelected);
+            settings.putExtra("Buildings", buildings);
+            startActivityForResult(settings, ADD_LOCATION);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
         });
 
@@ -325,35 +333,100 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setReview(Object location) {
+        System.out.println("Setting review " + location.toString());
         float orate = 0f;
-        int space = 0, activity = 0, wifi = 0, clean = 0;
         ArrayList<Rating> ratings = new ArrayList<>();
         ArrayList<String> imageUrls = new ArrayList<>();
-        //String[] imageUrls = new String[0];
+        SimpleRatingBar overallRating = findViewById(R.id.stars);
 
         if(location instanceof Bathroom) {
+
+            bathroomreview.setVisibility(View.VISIBLE);
+            fountainreview.setVisibility(View.GONE);
+            
+            int activity = 0, wifi = 0, clean = 0, stalls = 0, spaceT = 0;
+            String space;
+            
             Bathroom bathroom = (Bathroom) location;
             orate = bathroom.getOverallRating();
-            //space = bathroom.getSpace();
-            //stalls = bathroom.getNumberStalls();
+            space = bathroom.getSpace();
+            stalls = bathroom.getNumberStalls();
             activity = bathroom.getBusyness();
             wifi = bathroom.getWifiQuality();
             clean = bathroom.getCleanliness();
             ratings = bathroom.getRating();
             imageUrls = bathroom.getImage();
+
+            overallRating.setRating(orate);
+            ScaleRatingBar spaceBar = findViewById(R.id.spaceBar);
+            ScaleRatingBar activityBar = findViewById(R.id.activityBar);
+            ScaleRatingBar wifiBar = findViewById(R.id.wifiBar);
+            ScaleRatingBar cleanBar = findViewById(R.id.cleanBar);
+
+            switch(space) {
+                case "XSmall": spaceT = 1; break;
+                case "Small": spaceT = 2; break;
+                case "Medium": spaceT = 3; break;
+                case "Large": spaceT = 4; break;
+                case "XLarge": spaceT = 5; break;
+                default: spaceT = 0;
+            }
+
+            spaceBar.setRating(spaceT);
+            activityBar.setRating(activity);
+            wifiBar.setRating(wifi);
+            cleanBar.setRating(clean);
+            stallamount.setText(String.valueOf(stalls));
+
+            building.setText(bathroom.getBuilding());
+            room.setText(bathroom.getFloor());
+
+        } else if(location instanceof WaterFountain) {
+
+            bathroomreview.setVisibility(View.GONE);
+            fountainreview.setVisibility(View.VISIBLE);
+            
+            boolean refill;
+            String taste, temperature;
+            int tasteT = 0, tempT = 0;
+            
+            WaterFountain waterFountain = (WaterFountain) location;
+            refill = waterFountain.isBottleRefillStation();
+            taste = waterFountain.getTaste();
+            temperature = waterFountain.getTemperature();
+            orate = waterFountain.getOverallRating();
+            ratings = waterFountain.getRating();
+            imageUrls = waterFountain.getImage();
+
+            overallRating.setRating(orate);
+            bottlerefill.setText(String.valueOf(refill));
+            ScaleRatingBar tasteBar = findViewById(R.id.tasteBar);
+            ScaleRatingBar tempBar = findViewById(R.id.tempBar);
+
+            switch(temperature) {
+                case "cold": tempT = 5; break;
+                case "cool": tempT = 4; break;
+                case "lukewarm": tempT = 3; break;
+                case "warm": tempT = 2; break;
+                case "hot": tempT = 1; break;
+                default: tempT = 0;
+            }
+
+            switch(taste) {
+                case "Wow": tasteT = 5; break;
+                case "Pretty Good": tasteT = 4; break;
+                case "Meh": tasteT = 3; break;
+                case "Not Great": tasteT = 2; break;
+                case "Disgusting": tasteT = 1; break;
+                default: tasteT = 0;
+            }
+
+            tasteBar.setRating(tasteT);
+            tempBar.setRating(tempT);
+
+            building.setText(waterFountain.getBuilding());
+            room.setText(waterFountain.getFloor());
         }
-
-        SimpleRatingBar overallRating = findViewById(R.id.stars);
-        overallRating.setRating(orate);
-        ScaleRatingBar spaceBar = findViewById(R.id.spaceBar);
-        ScaleRatingBar activityBar = findViewById(R.id.activityBar);
-        ScaleRatingBar wifiBar = findViewById(R.id.wifiBar);
-        ScaleRatingBar cleanBar = findViewById(R.id.cleanBar);
-
-        spaceBar.setRating(space);
-        activityBar.setRating(activity);
-        wifiBar.setRating(wifi);
-        cleanBar.setRating(clean);
     }
 
     private void setUpMap() {
@@ -385,15 +458,14 @@ public class MainActivity extends AppCompatActivity
             syncing = true;
             updateFragment = UpdateFragment.newInstance(type);
             fragmentManager.beginTransaction().add(updateFragment, TAG_TASK_FRAGMENT).commit();
-            if(sync != null) {
+            if(sync != null && type.equalsIgnoreCase("Update")) {
                 sync.smoothToShow();
             }
         }
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState)
-    {
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         System.out.println("TAG, onSavedInstanceState");
         outState.putParcelable(SAVELOCATION, mLastKnownLocation);
@@ -607,8 +679,20 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onMarkerClick(final Marker marker) {
         if(toolbar2 != null) {
-            toolbar2.setText(marker.getTitle());
-            setReview(firebaseBRatings.get(marker.getTitle()));
+            String title = marker.getTitle();
+            currentSelected = title;
+            toolbar2.setText(title);
+            String[] splitter = title.split("@");
+            String type = splitter[1];
+            String key = splitter[0].trim();
+            System.out.println(type);
+
+            if(type.contains("Bathroom")) {
+                setReview(firebaseBRatings.get(key));
+            } else if(type.contains("Fountain")) {
+                setReview(firebaseWRatings.get(key));
+            }
+
         }
         return false;
     }
@@ -707,53 +791,85 @@ public class MainActivity extends AppCompatActivity
         }
     }
     private void addMarkers(LinkedList<MarkerOptions> markers) {
+        ArrayList<Marker> temp = new ArrayList<>();
 
         for(MarkerOptions markerOptions : markers) {
-            mMap.addMarker(markerOptions);
+            temp.add(mMap.addMarker(markerOptions));
         }
+
+        for(Marker m : mapMarkers) {
+            if(!temp.contains(m)) {
+                m.remove();
+            }
+        }
+        mapMarkers.clear();
+        mapMarkers = temp;
 
     }
 
     @Override
-    public void onUpdateBFinish(HashMap<String, Bathroom> firebaseUpdate, LinkedList<Bathroom> resultsList, LinkedList<MarkerOptions> markers, boolean doFountain) {
+    public void onUpdateBFinish(HashMap<String, Bathroom> firebaseUpdate, LinkedList<Bathroom> resultsList,
+                                LinkedList<MarkerOptions> markers, boolean doAll) {
         runOnUiThread(() -> {
             firebaseBRatings = firebaseUpdate;
             bathroomLinkedList = resultsList;
 
             System.out.println(firebaseBRatings);
-            //addMarkers(markers);
+            addMarkers(markers);
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 
-            if(!doFountain) {
+            if(!doAll) {
                 syncing = false;
                 if(sync != null) {
                     Handler handler = new Handler();
                     handler.postDelayed(() -> sync.smoothToHide(), 1000);
                 }
             } else {
-                updateEntries("Fountain");
+                updateEntries("Fountain|Update");
             }
 
         });
     }
 
     @Override
-    public void onUpdateWFinish(HashMap<String, WaterFountain> firebaseUpdate, LinkedList<WaterFountain> resultsList, LinkedList<MarkerOptions> markers) {
+    public void onUpdateWFinish(HashMap<String, WaterFountain> firebaseUpdate, LinkedList<WaterFountain> resultsList,
+                                LinkedList<MarkerOptions> markers, boolean doAll) {
         runOnUiThread(() -> {
-            if(sync != null) {
-                Handler handler = new Handler();
-                handler.postDelayed(() -> sync.smoothToHide(), 1000);
-            }
             firebaseWRatings = firebaseUpdate;
             fountainLinkedList = resultsList;
 
             System.out.println(firebaseWRatings);
-            //addMarkers(markers);
+            addMarkers(markers);
+            updateFragment = null;
+            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
+
+            if(!doAll) {
+                syncing = false;
+                if (sync != null) {
+                    Handler handler = new Handler();
+                    handler.postDelayed(() -> sync.smoothToHide(), 1000);
+                }
+            } else {
+                updateEntries("Buildings");
+            }
+        });
+    }
+
+    @Override
+    public void onUpdateBuildingFinish(LinkedList<String> b) {
+        runOnUiThread(() -> {
+
+            buildings = b;
+            System.out.println(buildings);
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 
             syncing = false;
+            if (sync != null) {
+                Handler handler = new Handler();
+                handler.postDelayed(() -> sync.smoothToHide(), 1000);
+            }
         });
     }
 

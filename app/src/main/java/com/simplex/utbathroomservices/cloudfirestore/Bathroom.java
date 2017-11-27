@@ -12,7 +12,8 @@ import java.util.ArrayList;
 
 public class Bathroom implements Parcelable {
 
-    Location location;
+    double longitude;
+    double latitude;
     String building;
     String floor;
     Integer reviews; //Number of reviews
@@ -29,10 +30,11 @@ public class Bathroom implements Parcelable {
 
     }
 
-    public Bathroom(Location location, String building, String floor, Integer reviews, String space, Integer numberStalls,
+    public Bathroom(double longitude, double latitude, String building, String floor, Integer reviews, String space, Integer numberStalls,
                     Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating,
                     ArrayList<Rating> rating, ArrayList<String> image) {
-        this.location = location;
+        this.longitude = longitude;
+        this.latitude = latitude;
         this.building = building;
         this.floor = floor;
         this.reviews = reviews;
@@ -49,7 +51,8 @@ public class Bathroom implements Parcelable {
     @Override
     public String toString() {
         return "Bathroom{" +
-                "location=" + location +
+                "longitude=" + longitude +
+                ", latitude=" + latitude+
                 ", building='" + building + '\'' +
                 ", floor='" + floor + '\'' +
                 ", reviews='" + reviews + "\'" +
@@ -83,6 +86,22 @@ public class Bathroom implements Parcelable {
 
     public void setReviews(Integer reviews) {
         this.reviews = reviews;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
     public String getSpace() { return space; }
@@ -123,12 +142,6 @@ public class Bathroom implements Parcelable {
         this.rating = rating;
     }
 
-    public Location getLocation() { return location; }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
     public ArrayList<String> getImage() {
         return image;
     }
@@ -153,8 +166,10 @@ public class Bathroom implements Parcelable {
         this.overallRating = overallRating;
     }
 
+
     protected Bathroom(Parcel in) {
-        location = (Location) in.readValue(Location.class.getClassLoader());
+        longitude = in.readDouble();
+        latitude = in.readDouble();
         building = in.readString();
         floor = in.readString();
         reviews = in.readByte() == 0x00 ? null : in.readInt();
@@ -165,13 +180,13 @@ public class Bathroom implements Parcelable {
         cleanliness = in.readByte() == 0x00 ? null : in.readInt();
         overallRating = in.readByte() == 0x00 ? null : in.readInt();
         if (in.readByte() == 0x01) {
-            rating = new ArrayList<>();
+            rating = new ArrayList<Rating>();
             in.readList(rating, Rating.class.getClassLoader());
         } else {
             rating = null;
         }
         if (in.readByte() == 0x01) {
-            image = new ArrayList<>();
+            image = new ArrayList<String>();
             in.readList(image, String.class.getClassLoader());
         } else {
             image = null;
@@ -185,7 +200,8 @@ public class Bathroom implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(location);
+        dest.writeDouble(longitude);
+        dest.writeDouble(latitude);
         dest.writeString(building);
         dest.writeString(floor);
         if (reviews == null) {

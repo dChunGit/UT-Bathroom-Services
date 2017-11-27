@@ -40,9 +40,10 @@
                 android:layout_weight="1"/>
 
             <TextView
+                android:id="@+id/buildingname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="POB"/>
+                android:text="N/A"/>
 
             <View
                 android:layout_width="0dp"
@@ -61,10 +62,10 @@
                 android:layout_weight="1"/>
 
             <TextView
+                android:id="@+id/roomname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1"/>
-
+                android:text="N/A"/>
 
             <View
                 android:layout_width="0dp"
@@ -103,7 +104,6 @@
                 android:layout_height="wrap_content"
                 app:srb_starSize="20dp"
                 app:srb_numberOfStars="5"
-                app:srb_rating="3.6"
                 app:srb_stepSize="0.1"
                 app:srb_borderColor="@color/colorAccent"
                 app:srb_fillColor="@color/colorAccent" />
@@ -115,10 +115,40 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/bathroomreview"
             android:padding="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Number of Stalls:"
+                    android:layout_margin="7dp"/>
+
+                <TextView
+                    android:id="@+id/numstalls"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="N/A"
+                    android:layout_margin="7dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ratings"
@@ -285,6 +315,129 @@
             </LinearLayout>
 
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/fountainreview"
+            android:padding="15dp"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Refill Station:"
+                    android:layout_margin="7dp"/>
+
+                <TextView
+                    android:id="@+id/isbottlerefill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Yes"
+                    android:layout_margin="7dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ratingsF"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"/>
+
+                    <TextView
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        android:text="Temperature"
+                        android:layout_margin="7dp"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"/>
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/tempBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="false"
+                        android:layout_margin="2dp"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"/>
+
+                    <TextView
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        android:text="Taste"
+                        android:layout_margin="7dp"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"/>
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/tasteBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="false"
+                        android:layout_margin="2dp"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"/>
+
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

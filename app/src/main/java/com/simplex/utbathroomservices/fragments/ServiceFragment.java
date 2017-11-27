@@ -1,4 +1,4 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.fragments;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.location.LocationCallback;
 import com.simplex.utbathroomservices.location.LocationService;
 

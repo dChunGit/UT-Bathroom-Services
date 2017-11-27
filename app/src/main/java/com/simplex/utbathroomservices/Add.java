@@ -1,6 +1,8 @@
 package com.simplex.utbathroomservices;
 
 import android.animation.LayoutTransition;
+import android.app.Activity;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -39,33 +41,16 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
     private Location location;
     private String type, building, floorNumber, space, temp, taste;
+    private int overallV, activityV, wifiV, cleanlinessV;
     private int stallnum;
     private boolean customStallSelect = false, isFillable;
 
-    private String[] buildings = {"ADH", "AF1", "AF2", "AFP", "AHG", "ANB", "AND", "ARC", "ART", "ATT",
-            "BAT", "BEL", "BEN", "BGH", "BHD", "BIO", "BLD", "BMA", "BMC", "BME", "BMS", "BOT",
-            "BRB", "BRG", "BSB", "BTL", "BUR", "BWY", "CAL", "CBA", "CCG", "CCJ", "CDA", "CDL",
-            "CEE", "CLA", "CLK", "CMA", "CMB", "CML", "COM", "CPB", "CPE", "CRB", "CRD", "CRH",
-            "CS3", "CS4", "CS5", "CS6", "CS7", "CSS", "CT1", "DCP", "DEV", "DFA", "DFF", "DPI",
-            "DTB", "E10", "E11", "E12", "E13", "E15", "E23", "E24", "E25", "ECG", "ECJ", "EER",
-            "EHZ", "EPS", "ERC", "ETC", "FAC", "FC1", "FC2", "FC3", "FC4", "FC5", "FC6", "FC7",
-            "FC8", "FC9", "FCS", "FDH", "FNT", "FSB", "G01", "G02", "G05", "G06", "G07", "G11",
-            "GAR", "GDC", "GEA", "GEB", "GOL", "GRC", "GRE", "GRF", "GRP", "GRS", "GSB", "GUG",
-            "GWB", "HCG", "HDB", "HLB", "HLP", "HMA", "HRC", "HRH", "HSM", "HSS", "HTB", "IC2",
-            "ICB", "IMA", "IMB", "IPF", "JCD", "JES", "JGB", "JHH", "JON", "KIN", "LAC", "LBJ",
-            "LCD", "LCH", "LDH", "LFH", "LLA", "LLB", "LLC", "LLD", "LLE", "LLF", "LS1", "LTD",
-            "LTH", "MAG", "MAI", "MB1", "MBB", "MEZ", "MFH", "MHD", "MMS", "MNC", "MRH", "MSB",
-            "MTC", "NEZ", "NHB", "NMS", "NOA", "NUR", "PA1", "PA3", "PA4", "PAC", "PAI", "PAR",
-            "PAT", "PB2", "PB5", "PB6", "PCL", "PH1", "PH2", "PHD", "PHR", "POB", "PPA", "PPE",
-            "PPL", "PRH", "QTR", "RHD", "RLM", "ROW", "RSC", "SAC", "SAG", "SBS", "SEA", "SER",
-            "SJG", "SJH", "SOF", "SRH", "SSB", "SSW", "STD", "SUT", "SW7", "SWG", "SZB", "TCC",
-            "TCP", "TES", "TMM", "TNH", "TR1", "TR2", "TRG", "TSB", "TSC", "TSG", "UA9", "UIL",
-            "UNB", "UPB", "USS", "UTA", "UTC", "UTX", "VRX", "WAG", "WAT", "WCH", "WCS", "WEL",
-            "WGB", "WIN", "WMB", "WRW", "WWH"};
+    private String[] buildings;
     private ConcurrentHashMap<String, Bathroom> firebaseBRatings = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, WaterFountain> firebaseWRatings = new ConcurrentHashMap<>();
     private ArrayList<Bathroom> sentBRatings = new ArrayList<>();
     private ArrayList<WaterFountain> sentWRatings = new ArrayList<>();
+    private ArrayList<String> buildingsList = new ArrayList<>();
 
     private AutoCompleteTextView autoCompleteTextView;
     private EditText editText, commentsEditText;
@@ -73,6 +58,9 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     private TextView displayStall;
     private CardView bathroomLL, fountainLL;
     private SwitchCompat switchRefill;
+    private Spinner typespinner, tempspinner, tastespinner, stallspinner, spacespinner;
+
+    private String editLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +88,24 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             System.out.println("WRatings malformed");
         }
 
+        try{
+            editLocation = getIntent().getStringExtra("Selected");
+        } catch (Exception e) {
+            System.out.println("Something");
+        }
+
+        try{
+            buildingsList = getIntent().getStringArrayListExtra("Buildings");
+        } catch (Exception e) {
+            System.out.println("Something else");
+        }
+
+        if(buildingsList == null) {
+            buildingsList = new ArrayList<>();
+        }
+
+        buildings = buildingsList.toArray(new String[buildingsList.size()]);
+
         if(sentBRatings == null) {
             sentBRatings = new ArrayList<>();
         }
@@ -123,6 +129,28 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         }).start();
 
         setUpUI();
+        setUpInfo();
+    }
+
+    private void setUpInfo() {
+
+        if(editLocation != null) {
+            String[] title = editLocation.split("@");
+            if(title[1].equals("Bathroom")) {
+                //if this doesn't work, post in new runnable
+                typespinner.setSelection(0);
+                Bathroom bathroom = firebaseBRatings.get(title[0]);
+                autoCompleteTextView.setText(bathroom.getBuilding());
+                editText.setText(bathroom.getFloor());
+
+            } else if(title[1].equals("Fountain")){
+                typespinner.setSelection(1);
+                WaterFountain waterFountain = firebaseWRatings.get(title[0]);
+                autoCompleteTextView.setText(waterFountain.getBuilding());
+                editText.setText(waterFountain.getFloor());
+            }
+        }
+
     }
 
     private void setUpUI() {
@@ -160,6 +188,19 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         wifi = findViewById(R.id.wifiBar_add);
         cleanliness = findViewById(R.id.cleanBar_add);
         commentsEditText = findViewById(R.id.comments);
+
+        overall.setOnRatingChangeListener((ratingBar, rating) -> {
+            overallV = (int) rating;
+        });
+        activity.setOnRatingChangeListener((ratingBar, rating) -> {
+            activityV = (int) rating;
+        });
+        wifi.setOnRatingChangeListener((ratingBar, rating) -> {
+            wifiV = (int) rating;
+        });
+        cleanliness.setOnRatingChangeListener((ratingBar, rating) -> {
+            cleanlinessV = (int) rating;
+        });
     }
 
     private void setUpSpinners() {
@@ -170,11 +211,11 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         autoCompleteTextView.setAdapter(adapter);
         editText = findViewById(R.id.roomNumber);
 
-        Spinner typespinner = findViewById(R.id.typespinner);
-        Spinner stallspinner = findViewById(R.id.stallpicker);
-        Spinner spacespinner = findViewById(R.id.spacePicker);
-        Spinner tempspinner = findViewById(R.id.tempPicker);
-        Spinner tastespinner = findViewById(R.id.tastePicker);
+        typespinner = findViewById(R.id.typespinner);
+        stallspinner = findViewById(R.id.stallpicker);
+        spacespinner = findViewById(R.id.spacePicker);
+        tempspinner = findViewById(R.id.tempPicker);
+        tastespinner = findViewById(R.id.tastePicker);
         ArrayAdapter<CharSequence> spinneradapter = ArrayAdapter.createFromResource(this,
                 R.array.type_array, R.layout.spinner_item);
         ArrayAdapter<CharSequence> stalladapter = ArrayAdapter.createFromResource(this,
@@ -324,15 +365,15 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                     if(type.equals("Bathroom")) {
 
                         BathroomDB bathroomDB = new BathroomDB();
-                        bathroomDB.addBathroomToDB(null, building, floorNumber, 1, space, stallnum,
-                                wifi.getNumStars(), activity.getNumStars(), overall.getNumStars(),
-                                cleanliness.getNumStars(), newRating, new ArrayList<>());
+                        bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
+                                wifiV, activityV, overallV,
+                                cleanlinessV, newRating, new ArrayList<>());
 
                     } else if(type.equals("Fountain")) {
 
                         WaterFountainDB waterFountainDB = new WaterFountainDB();
-                        waterFountainDB.addWaterFountainToDB(null, building, floorNumber, 1, temp,
-                                isFillable, taste, overall.getNumStars(), newRating, new ArrayList<>());
+                        waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
+                                isFillable, taste, overallV, newRating, new ArrayList<>());
 
                     }
                 }

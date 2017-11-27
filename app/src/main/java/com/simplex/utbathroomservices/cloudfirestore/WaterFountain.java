@@ -13,7 +13,8 @@ import java.util.Arrays;
 
 public class WaterFountain implements Parcelable {
 
-    Location location;
+    double longitude;
+    double latitude;
     String building;
     String floor;
     Integer reviews;
@@ -27,7 +28,8 @@ public class WaterFountain implements Parcelable {
     @Override
     public String toString() {
         return "WaterFountain{" +
-                "location=" + location +
+                "longitude=" + longitude +
+                ", latitude=" + latitude+
                 ", building='" + building + '\'' +
                 ", floor='" + floor + '\'' +
                 ", reviews='" + reviews + '\'' +
@@ -42,8 +44,9 @@ public class WaterFountain implements Parcelable {
 
     }
 
-    public WaterFountain(Location location, String building, String floor, Integer reviews, String temperature, boolean isBottleRefillStation, String taste, Integer overallRating, ArrayList<Rating> rating, ArrayList<String> image) {
-        this.location = location;
+    public WaterFountain(double longitude, double latitude, String building, String floor, Integer reviews, String temperature, boolean isBottleRefillStation, String taste, Integer overallRating, ArrayList<Rating> rating, ArrayList<String> image) {
+        this.longitude = longitude;
+        this.latitude = latitude;
         this.building = building;
         this.floor = floor;
         this.reviews = reviews;
@@ -61,15 +64,6 @@ public class WaterFountain implements Parcelable {
 
     public void setOverallRating(Integer overallRating) {
         this.overallRating = overallRating;
-    }
-
-    public Location getLocation() {
-
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
     }
 
     public String getBuilding() {
@@ -112,6 +106,22 @@ public class WaterFountain implements Parcelable {
         isBottleRefillStation = bottleRefillStation;
     }
 
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
     public String getTaste() {
         return taste;
     }
@@ -136,27 +146,25 @@ public class WaterFountain implements Parcelable {
         this.image = image;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
     protected WaterFountain(Parcel in) {
-        location = (Location) in.readValue(Location.class.getClassLoader());
+        longitude = in.readDouble();
+        latitude = in.readDouble();
         building = in.readString();
         floor = in.readString();
+        reviews = in.readByte() == 0x00 ? null : in.readInt();
         temperature = in.readString();
         isBottleRefillStation = in.readByte() != 0x00;
         taste = in.readString();
         overallRating = in.readByte() == 0x00 ? null : in.readInt();
         if (in.readByte() == 0x01) {
-            rating = new ArrayList<>();
+            rating = new ArrayList<Rating>();
             in.readList(rating, Rating.class.getClassLoader());
         } else {
             rating = null;
         }
         if (in.readByte() == 0x01) {
-            image = new ArrayList<>();
+            image = new ArrayList<String>();
             in.readList(image, String.class.getClassLoader());
         } else {
             image = null;
@@ -164,10 +172,22 @@ public class WaterFountain implements Parcelable {
     }
 
     @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeValue(location);
+        dest.writeDouble(longitude);
+        dest.writeDouble(latitude);
         dest.writeString(building);
         dest.writeString(floor);
+        if (reviews == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeInt(reviews);
+        }
         dest.writeString(temperature);
         dest.writeByte((byte) (isBottleRefillStation ? 0x01 : 0x00));
         dest.writeString(taste);

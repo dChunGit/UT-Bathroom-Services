@@ -8,4 +8,5 @@ import java.util.LinkedList;
 public interface DatabaseCallback {
     void updateFinishedB(LinkedList<Bathroom> r);
     void updateFinishedF(LinkedList<WaterFountain> r);
+    void updateBuildings(LinkedList<Building> b);
 }
