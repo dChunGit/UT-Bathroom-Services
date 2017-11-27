@@ -42,6 +42,10 @@ public class BathroomDB {
 
     }
 
+    public void updateReviewForBathroom(Bathroom b) {
+        mFireStore.collection("bathroom").document(b.getBuilding() + " " + b.getFloor()).set(b);
+    }
+
     public void addReviewForBathroom(Bathroom b, String review){
         final ArrayList<String> id= new ArrayList<>();
         mFireStore.collection("bathroom")

@@ -42,6 +42,10 @@ public class WaterFountainDB {
 
     }
 
+    public void updateReviewForFountain(WaterFountain w) {
+        mFireStore.collection("waterfountain").document(w.getBuilding() + " " + w.getFloor()).set(w);
+    }
+
     public void addReviewForWaterFountain(WaterFountain wf, String review){
         final ArrayList<String> id= new ArrayList<String>();
         mFireStore.collection("waterfountain")

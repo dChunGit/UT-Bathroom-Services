@@ -90,6 +90,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
         try{
             editLocation = getIntent().getStringExtra("Selected");
+            System.out.println(editLocation);
         } catch (Exception e) {
             System.out.println("Something");
         }
@@ -136,16 +137,16 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
         if(editLocation != null) {
             String[] title = editLocation.split("@");
-            if(title[1].equals("Bathroom")) {
+            if(title[1].trim().equals("Bathroom")) {
                 //if this doesn't work, post in new runnable
                 typespinner.setSelection(0);
-                Bathroom bathroom = firebaseBRatings.get(title[0]);
+                Bathroom bathroom = firebaseBRatings.get(title[0].trim());
                 autoCompleteTextView.setText(bathroom.getBuilding());
                 editText.setText(bathroom.getFloor());
 
-            } else if(title[1].equals("Fountain")){
+            } else if(title[1].trim().equals("Fountain")){
                 typespinner.setSelection(1);
-                WaterFountain waterFountain = firebaseWRatings.get(title[0]);
+                WaterFountain waterFountain = firebaseWRatings.get(title[0].trim());
                 autoCompleteTextView.setText(waterFountain.getBuilding());
                 editText.setText(waterFountain.getFloor());
             }
@@ -341,9 +342,15 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
                 //if is a location already
                 if(firebaseBRatings.containsKey(building + " " + floorNumber)) {
-                    //bathroomDB.addReviewForBathroom();
+                    Bathroom temp = setUpBathroom(firebaseBRatings.get(building + " " + floorNumber));
+                    BathroomDB bathroomDB = new BathroomDB();
+                    bathroomDB.updateReviewForBathroom(temp);
+
                 } else if(firebaseWRatings.containsKey(building + " " + floorNumber)) {
-                    //
+                    WaterFountain temp = setUpFountain(firebaseWRatings.get(building + " " + floorNumber));
+                    WaterFountainDB waterFountainDB = new WaterFountainDB();
+                    waterFountainDB.updateReviewForFountain(temp);
+
                 } else {
                     ArrayList<Rating> newRating = new ArrayList<>();
                     Rating rating = new Rating(commentsEditText.getText().toString());
@@ -383,6 +390,121 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    private WaterFountain setUpFountain(WaterFountain waterFountain) {
+        int reviews = waterFountain.getReviews();
+        int tempP = getTempString(waterFountain.getTemperature());
+        int tasteP = getTasteString(waterFountain.getTaste());
+        int overallP = waterFountain.getOverallRating();
+
+        waterFountain.setTemperature(getTempVal(((tempP * reviews) + getTempString(temp))/(reviews + 1)));
+        //need to make bottle refill an arraylist
+        waterFountain.setTaste(getTasteVal(((tasteP * reviews) + getTasteString(taste))/(reviews + 1)));
+        waterFountain.setOverallRating(((overallP * reviews) + overallV)/(reviews + 1));
+
+        ArrayList<Rating> newRating = waterFountain.getRating();
+        Rating rating = new Rating(commentsEditText.getText().toString());
+        newRating.add(rating);
+        waterFountain.setRating(newRating);
+
+        waterFountain.setReviews(reviews + 1);
+        return waterFountain;
+    }
+    private String getTasteVal(int i) {
+        String taste = "";
+        switch(i) {
+            case 0: taste = "Wow"; break;
+            case 1: taste = "Pretty Good"; break;
+            case 2: taste = "Meh"; break;
+            case 3: taste = "Not Great"; break;
+            case 4: taste = "Disgusting";
+        }
+        return taste;
+    }
+
+    private int getTasteString(String type) {
+        switch(type) {
+            case "Wow": return 5;
+            case "Pretty Good": return 4;
+            case "Meh": return 3;
+            case "Not Great": return 2;
+            case "Disgusting": return 1;
+            default: return 0;
+        }
+    }
+
+    private String getTempVal(int i) {
+        String temp = "";
+
+        switch(i) {
+            case 0: temp = "cold"; break;
+            case 1: temp = "cool"; break;
+            case 2: temp = "lukewarm"; break;
+            case 3: temp = "warm"; break;
+            case 4: temp = "hot";
+        }
+        return temp;
+    }
+    
+    private int getTempString(String type) {
+        switch(type) {
+            case "cold": return 5; 
+            case "cool": return 4; 
+            case "lukewarm": return 3; 
+            case "warm": return 2; 
+            case "hot": return 1;
+            default: return 0;
+        }
+    }
+    
+    private Bathroom setUpBathroom(Bathroom bathroom) {
+        int spaceP = getSpaceVal(bathroom.getSpace());
+        int stallNumP = bathroom.getNumberStalls();
+        int wifiP = bathroom.getWifiQuality(), activityP = bathroom.getBusyness(),
+                overallP = bathroom.getOverallRating(), cleanP = bathroom.getCleanliness();
+        int reviews = bathroom.getReviews();
+
+        bathroom.setSpace(getSpaceString(((spaceP * reviews) + getSpaceVal(space))/(reviews + 1)));
+        bathroom.setNumberStalls(((stallNumP * reviews) + stallnum)/(reviews + 1));
+        bathroom.setWifiQuality(((wifiP * reviews) + wifiV)/(reviews + 1));
+        bathroom.setBusyness(((activityP * reviews) + activityV)/(reviews + 1));
+        bathroom.setOverallRating(((overallP * reviews) + overallV)/(reviews + 1));
+        bathroom.setCleanliness(((cleanP * reviews) + cleanlinessV)/(reviews + 1));
+
+        ArrayList<Rating> newRating = bathroom.getRating();
+        Rating rating = new Rating(commentsEditText.getText().toString());
+        newRating.add(rating);
+        bathroom.setRating(newRating);
+
+        bathroom.setReviews(reviews + 1);
+
+        return bathroom;
+    }
+    
+    private int getSpaceVal(String space) {
+        switch(space) {
+            case "XSmall": return 1; 
+            case "Small": return 2; 
+            case "Medium": return 3; 
+            case "Large": return 4; 
+            case "XLarge": return 5; 
+            default: return 0;
+        }
+    }
+
+    private String getSpaceString(int select) {
+        String space = "";
+
+        switch(select) {
+            case 0: space = "XSmall"; break;
+            case 1: space = "Small"; break;
+            case 2: space = "Medium"; break;
+            case 3: space = "Large"; break;
+            case 4: space = "XLarge";
+        }
+
+        return space;
     }
 
     @Override
