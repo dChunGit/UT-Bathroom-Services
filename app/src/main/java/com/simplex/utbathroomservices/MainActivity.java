@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<Marker> mapMarkers = new ArrayList<>();
     private boolean syncing = false, locUpdate = false;
     private String currentSelected;
+    private Object selectedMarker;
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
@@ -247,6 +248,8 @@ public class MainActivity extends AppCompatActivity
         addfab.setOnClickListener((view) -> {
             Intent settings = new Intent(MainActivity.this, Add.class);
             //send bathroom/fountain
+            settings.putExtra("BRatings", bathroomLinkedList);
+            settings.putExtra("WRatings", fountainLinkedList);
             settings.putExtra("Selected", currentSelected);
             settings.putExtra("Buildings", buildings);
             startActivityForResult(settings, ADD_LOCATION);
@@ -301,6 +304,16 @@ public class MainActivity extends AppCompatActivity
         });
 
         toolbar2.setOnClickListener((view) -> {
+            String text = toolbar2.getText().toString();
+            System.out.println(text);
+            if(!text.equals("No Location")) {
+                String type = text.split("@")[1].trim();
+                String key = text.split("@")[0].trim();
+                switch(type) {
+                    case "Bathroom": setReview(firebaseBRatings.get(key)); break;
+                    case "Fountain": setReview(firebaseWRatings.get(key));
+                }
+            }
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         });
 
@@ -399,7 +412,10 @@ public class MainActivity extends AppCompatActivity
             imageUrls = waterFountain.getImage();
 
             overallRating.setRating(orate);
-            bottlerefill.setText(String.valueOf(refill));
+            if(refill) {
+                bottlerefill.setText("Yes");
+            } else bottlerefill.setText("No");
+
             ScaleRatingBar tasteBar = findViewById(R.id.tasteBar);
             ScaleRatingBar tempBar = findViewById(R.id.tempBar);
 
@@ -797,13 +813,13 @@ public class MainActivity extends AppCompatActivity
             temp.add(mMap.addMarker(markerOptions));
         }
 
-        for(Marker m : mapMarkers) {
+        /*for(Marker m : mapMarkers) {
             if(!temp.contains(m)) {
                 m.remove();
             }
         }
         mapMarkers.clear();
-        mapMarkers = temp;
+        mapMarkers = temp;*/
 
     }
 
