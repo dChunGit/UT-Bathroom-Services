@@ -9,24 +9,31 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
+import com.simplex.utbathroomservices.cloudfirestore.Building;
+import com.simplex.utbathroomservices.cloudfirestore.BuildingDB;
 import com.simplex.utbathroomservices.cloudfirestore.DatabaseCallback;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountainDB;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 public class UpdateFragment extends Fragment implements DatabaseCallback {
 
     public interface onUpdateListener {
-        void onUpdateBFinish(HashMap<String, Bathroom> firebaseResults, LinkedList<Bathroom> resultsList, LinkedList<MarkerOptions> markers, boolean doFountain);
-        void onUpdateWFinish(HashMap<String, WaterFountain> firebaseResults, LinkedList<WaterFountain> resultsList, LinkedList<MarkerOptions> markers);
+        void onUpdateBFinish(HashMap<String, Bathroom> firebaseResults, LinkedList<Bathroom> resultsList,
+                             LinkedList<MarkerOptions> markers, boolean doAll);
+        void onUpdateWFinish(HashMap<String, WaterFountain> firebaseResults, LinkedList<WaterFountain> resultsList,
+                             LinkedList<MarkerOptions> markers, boolean doAll);
+        void onUpdateBuildingFinish(LinkedList<String> buildings);
     }
 
     private onUpdateListener mListener;
     private LinkedList<MarkerOptions> markerOptions = new LinkedList<>();
     private String type;
-    private boolean doFountain = false;
+    private boolean doAll = false;
 
     public UpdateFragment() {
         // Required empty public constructor
@@ -63,16 +70,20 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
     }
 
     private void startUpdate() {
-        if(type.equalsIgnoreCase("Update")) {
-            doFountain = true;
+        if(type.contains("Update")) {
+            doAll = true;
         }
 
-        if(type.equalsIgnoreCase("Bathroom") || type.equalsIgnoreCase("Update")) {
+        if(type.contains("Bathroom") || type.equalsIgnoreCase("Update")) {
             BathroomDB bathroomDB = new BathroomDB(this);
             bathroomDB.getAllBathrooms();
-        } else if(type.equalsIgnoreCase("Fountain")) {
+        } else if(type.contains("Fountain")) {
             WaterFountainDB waterFountainDB = new WaterFountainDB(this);
             waterFountainDB.getAllWaterFountains();
+        } else if(type.contains("Buildings")) {
+            BuildingDB buildingDB = new BuildingDB(this);
+            buildingDB.getAllBuildings();
+            //buildingDB.addAllBuildings(new ArrayList<>(Arrays.asList(buildings)));
         }
     }
 
@@ -84,7 +95,7 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
                 results.put(bathroom.getBuilding() + " " + bathroom.getFloor(), bathroom);
             }
             setUpMarkers(r);
-            mListener.onUpdateBFinish(results, r, markerOptions, doFountain);
+            mListener.onUpdateBFinish(results, r, markerOptions, doAll);
         }).start();
     }
 
@@ -96,7 +107,15 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
                 results.put(waterFountain.getBuilding() + " " + waterFountain.getFloor(), waterFountain);
             }
             setUpMarkers(r);
-            mListener.onUpdateWFinish(results, r, markerOptions);
+            mListener.onUpdateWFinish(results, r, markerOptions, doAll);
+        }).start();
+    }
+
+    @Override
+    public void updateBuildings(LinkedList<Building> b) {
+        new Thread(() -> {
+            LinkedList<String> temp = new LinkedList<>(b.get(0).getBuildings());
+            mListener.onUpdateBuildingFinish(temp);
         }).start();
     }
 
@@ -121,7 +140,7 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
 
             if(location != null) {
                 LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
-                MarkerOptions options = new MarkerOptions().position(sydney).title(title + " " + type);
+                MarkerOptions options = new MarkerOptions().position(sydney).title(title + " @ " + type);
                 synchronized (this) {
                     markerOptions.add(options);
                 }
