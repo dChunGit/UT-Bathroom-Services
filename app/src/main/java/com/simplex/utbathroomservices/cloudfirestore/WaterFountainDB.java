@@ -23,7 +23,7 @@ import java.util.LinkedList;
 
 public class WaterFountainDB {
     private FirebaseFirestore mFireStore = FirebaseFirestore.getInstance();
-    private LinkedList<WaterFountain> results = new LinkedList<>();
+    private ArrayList<WaterFountain> results = new ArrayList<>();
 
     private DatabaseCallback databaseCallback;
 
@@ -38,12 +38,20 @@ public class WaterFountainDB {
                                      Integer overallRating,ArrayList<Rating> rating, ArrayList<String> image) {
         WaterFountain wf = new WaterFountain(location.getLongitude(), location.getLatitude(), building, floor, reviews, temperature,
                 isBottleRefillStation, taste, overallRating,rating, image);
-        mFireStore.collection("waterfountain").document(building + " " + floor).set(wf);
+        mFireStore.collection("waterfountain").document(building + " " + floor).set(wf).addOnCompleteListener((task) -> {
+            if(task.isSuccessful()) {
+                databaseCallback.addFinished(true);
+            } else databaseCallback.addFinished(false);
+        });;
 
     }
 
     public void updateReviewForFountain(WaterFountain w) {
-        mFireStore.collection("waterfountain").document(w.getBuilding() + " " + w.getFloor()).set(w);
+        mFireStore.collection("waterfountain").document(w.getBuilding() + " " + w.getFloor()).set(w).addOnCompleteListener((task) -> {
+            if(task.isSuccessful()) {
+                databaseCallback.addFinished(true);
+            } else databaseCallback.addFinished(false);
+        });;
     }
 
     public void addReviewForWaterFountain(WaterFountain wf, String review){

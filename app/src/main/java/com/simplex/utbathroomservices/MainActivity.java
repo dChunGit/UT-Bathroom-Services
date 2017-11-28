@@ -1,5 +1,6 @@
 package com.simplex.utbathroomservices;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -47,6 +50,7 @@ import com.iarcuschin.simpleratingbar.SimpleRatingBar;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+import com.simplex.utbathroomservices.fragments.DatabaseFragment;
 import com.simplex.utbathroomservices.fragments.ServiceFragment;
 import com.simplex.utbathroomservices.fragments.UpdateFragment;
 import com.wang.avi.AVLoadingIndicatorView;
@@ -54,7 +58,6 @@ import com.willy.ratingbar.ScaleRatingBar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity
     final String BOTTOMSHEET = "BOTTOMSHEET";
     final String LOADING = "LOADING";
     final String TOOLBAR = "TOOLBAR";
+    final String SELECTED = "SELECTED";
     private boolean whichtoolbar = false;
     private static final int ADD_LOCATION = 0;
 
@@ -90,6 +94,8 @@ public class MainActivity extends AppCompatActivity
     private int maptype = GoogleMap.MAP_TYPE_NORMAL;
     private float zoomLevel;
 
+    private boolean addedNUpdate = false;
+
     private BottomSheetBehavior bottomSheetBehavior;
     private Toolbar toolbar, locationToolbar;
     private CardView cardToolbar;
@@ -101,19 +107,22 @@ public class MainActivity extends AppCompatActivity
 
     private UpdateFragment updateFragment;
     private ServiceFragment serviceFragment;
+    private DatabaseFragment databaseFragment;
     private FragmentManager fragmentManager;
     private static final String TAG_TASK_FRAGMENT = "updateFragment";
     private static final String TAG_LOC_FRAGMENT = "locationFragment";
+    private static final String TAG_DATA_FRAGMENT = "databaseFragment";
 
     private HashMap<String, Bathroom> firebaseBRatings = new HashMap<>();
     private HashMap<String, WaterFountain> firebaseWRatings = new HashMap<>();
-    private LinkedList<Bathroom> bathroomLinkedList = new LinkedList<>();
-    private LinkedList<WaterFountain> fountainLinkedList = new LinkedList<>();
-    private LinkedList<String> buildings = new LinkedList<>();
+    private ArrayList<Bathroom> saveBathroom = new ArrayList<>();
+    private ArrayList<WaterFountain> saveFountain= new ArrayList<>();
+    private ArrayList<String> saveBuildings= new ArrayList<>();
     private ArrayList<Marker> mapMarkers = new ArrayList<>();
+    private HashMap<String, MarkerOptions> newMapmarkers = new HashMap<>();
+    private ArrayList<String> oldMapmarkers = new ArrayList<>();
     private boolean syncing = false, locUpdate = false;
     private String currentSelected;
-    private Object selectedMarker;
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
@@ -139,10 +148,16 @@ public class MainActivity extends AppCompatActivity
         fragmentManager = getSupportFragmentManager();
         updateFragment = (UpdateFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
         serviceFragment = (ServiceFragment) fragmentManager.findFragmentByTag(TAG_LOC_FRAGMENT);
+        databaseFragment = (DatabaseFragment) fragmentManager.findFragmentByTag(TAG_DATA_FRAGMENT);
 
         if(serviceFragment == null) {
             serviceFragment = ServiceFragment.newInstance();
             fragmentManager.beginTransaction().add(serviceFragment, TAG_LOC_FRAGMENT).commit();
+        }
+        
+        if(databaseFragment == null) {
+            databaseFragment = DatabaseFragment.newInstance();
+            fragmentManager.beginTransaction().add(databaseFragment, TAG_DATA_FRAGMENT).commit();
         }
 
         setFont();
@@ -162,6 +177,22 @@ public class MainActivity extends AppCompatActivity
             syncing = savedInstanceState.getBoolean(LOADING);
             if(!syncing) {
                 sync.hide();
+            }
+            if(databaseFragment != null) {
+                Log.d("MainActivity", "restoring data");
+                firebaseBRatings = databaseFragment.getFirebaseBRatings();
+                firebaseWRatings = databaseFragment.getFirebaseWRatings();
+                saveBathroom = databaseFragment.getSaveBathroom();
+                saveFountain = databaseFragment.getSaveFountain();
+                saveBuildings = databaseFragment.getSaveBuildings();
+                mapMarkers = databaseFragment.getMapMarkers();
+                newMapmarkers = databaseFragment.getNewMapmarkers();
+                oldMapmarkers = databaseFragment.getOldMapmarkers();
+            }
+            String temp = savedInstanceState.getString(SELECTED);
+            if(temp != null) {
+                currentSelected = temp;
+                processReview(currentSelected);
             }
         } else {
             updateEntries("Update");
@@ -211,13 +242,13 @@ public class MainActivity extends AppCompatActivity
                 Intent settings = new Intent(MainActivity.this, Add.class);
                 //not ideal, should make location parcelable or something
                 if (mLastKnownLocation != null) {
-                    System.out.println("Putting in extra " + mLastKnownLocation.toString());
+                    Log.d("MainActivity", "Putting in extra " + mLastKnownLocation.toString());
                     settings.putExtra("Location", mLastKnownLocation);
                 }
-                //System.out.println(bathroomLinkedList);
-                settings.putExtra("BRatings", bathroomLinkedList);
-                settings.putExtra("WRatings", fountainLinkedList);
-                settings.putExtra("Buildings", buildings);
+
+                settings.putParcelableArrayListExtra("BRatings", saveBathroom);
+                settings.putParcelableArrayListExtra("WRatings", saveFountain);
+                settings.putStringArrayListExtra("Buildings", saveBuildings);
                 startActivityForResult(settings, ADD_LOCATION);
                 overridePendingTransition(R.anim.fadein, R.anim.fadeout);
             } else {
@@ -248,10 +279,10 @@ public class MainActivity extends AppCompatActivity
         addfab.setOnClickListener((view) -> {
             Intent settings = new Intent(MainActivity.this, Add.class);
             //send bathroom/fountain
-            settings.putExtra("BRatings", bathroomLinkedList);
-            settings.putExtra("WRatings", fountainLinkedList);
+            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
+            settings.putParcelableArrayListExtra("WRatings", saveFountain);
             settings.putExtra("Selected", currentSelected);
-            settings.putExtra("Buildings", buildings);
+            settings.putStringArrayListExtra("Buildings", saveBuildings);
             startActivityForResult(settings, ADD_LOCATION);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
         });
@@ -305,7 +336,7 @@ public class MainActivity extends AppCompatActivity
 
         toolbar2.setOnClickListener((view) -> {
             String text = toolbar2.getText().toString();
-            System.out.println(text);
+            Log.d("MainActivity", text);
             if(!text.equals("No Location")) {
                 String type = text.split("@")[1].trim();
                 String key = text.split("@")[0].trim();
@@ -346,102 +377,147 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setReview(Object location) {
-        System.out.println("Setting review " + location.toString());
-        float orate = 0f;
-        ArrayList<Rating> ratings = new ArrayList<>();
-        ArrayList<String> imageUrls = new ArrayList<>();
-        SimpleRatingBar overallRating = findViewById(R.id.stars);
+        if(location != null) {
+            Log.d("MainActivity", "Setting review " + location.toString());
+            RecyclerView recyclerView = findViewById(R.id.reviewRecycler);
 
-        if(location instanceof Bathroom) {
+            float orate = 0f;
+            ArrayList<Rating> ratings;
+            ArrayList<String> imageUrls = new ArrayList<>();
+            SimpleRatingBar overallRating = findViewById(R.id.stars);
 
-            bathroomreview.setVisibility(View.VISIBLE);
-            fountainreview.setVisibility(View.GONE);
-            
-            int activity = 0, wifi = 0, clean = 0, stalls = 0, spaceT = 0;
-            String space;
-            
-            Bathroom bathroom = (Bathroom) location;
-            orate = bathroom.getOverallRating();
-            space = bathroom.getSpace();
-            stalls = bathroom.getNumberStalls();
-            activity = bathroom.getBusyness();
-            wifi = bathroom.getWifiQuality();
-            clean = bathroom.getCleanliness();
-            ratings = bathroom.getRating();
-            imageUrls = bathroom.getImage();
+            if (location instanceof Bathroom) {
 
-            overallRating.setRating(orate);
-            ScaleRatingBar spaceBar = findViewById(R.id.spaceBar);
-            ScaleRatingBar activityBar = findViewById(R.id.activityBar);
-            ScaleRatingBar wifiBar = findViewById(R.id.wifiBar);
-            ScaleRatingBar cleanBar = findViewById(R.id.cleanBar);
+                bathroomreview.setVisibility(View.VISIBLE);
+                fountainreview.setVisibility(View.GONE);
 
-            switch(space) {
-                case "XSmall": spaceT = 1; break;
-                case "Small": spaceT = 2; break;
-                case "Medium": spaceT = 3; break;
-                case "Large": spaceT = 4; break;
-                case "XLarge": spaceT = 5; break;
-                default: spaceT = 0;
+                int activity = 0, wifi = 0, clean = 0, stalls = 0, spaceT = 0;
+                String space;
+
+                Bathroom bathroom = (Bathroom) location;
+                orate = bathroom.getOverallRating();
+                space = bathroom.getSpace();
+                stalls = bathroom.getNumberStalls();
+                activity = bathroom.getBusyness();
+                wifi = bathroom.getWifiQuality();
+                clean = bathroom.getCleanliness();
+                ratings = bathroom.getRating();
+                imageUrls = bathroom.getImage();
+
+                ReviewAdapter reviewAdapter = new ReviewAdapter(this, ratings);
+                recyclerView.setAdapter(reviewAdapter);
+                recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, 0));
+
+                overallRating.setRating(orate);
+                ScaleRatingBar spaceBar = findViewById(R.id.spaceBar);
+                ScaleRatingBar activityBar = findViewById(R.id.activityBar);
+                ScaleRatingBar wifiBar = findViewById(R.id.wifiBar);
+                ScaleRatingBar cleanBar = findViewById(R.id.cleanBar);
+
+                switch (space) {
+                    case "XSmall":
+                        spaceT = 1;
+                        break;
+                    case "Small":
+                        spaceT = 2;
+                        break;
+                    case "Medium":
+                        spaceT = 3;
+                        break;
+                    case "Large":
+                        spaceT = 4;
+                        break;
+                    case "XLarge":
+                        spaceT = 5;
+                        break;
+                    default:
+                        spaceT = 0;
+                }
+
+                spaceBar.setRating(spaceT);
+                activityBar.setRating(activity);
+                wifiBar.setRating(wifi);
+                cleanBar.setRating(clean);
+                stallamount.setText(String.valueOf(stalls));
+
+                building.setText(bathroom.getBuilding());
+                room.setText(bathroom.getFloor());
+
+            } else if (location instanceof WaterFountain) {
+
+                bathroomreview.setVisibility(View.GONE);
+                fountainreview.setVisibility(View.VISIBLE);
+
+                boolean refill;
+                String taste, temperature;
+                int tasteT = 0, tempT = 0;
+
+                WaterFountain waterFountain = (WaterFountain) location;
+                refill = waterFountain.isBottleRefillStation();
+                taste = waterFountain.getTaste();
+                temperature = waterFountain.getTemperature();
+                orate = waterFountain.getOverallRating();
+                ratings = waterFountain.getRating();
+                imageUrls = waterFountain.getImage();
+
+                ReviewAdapter reviewAdapter = new ReviewAdapter(this, ratings);
+                recyclerView.setAdapter(reviewAdapter);
+                recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, 0));
+
+                overallRating.setRating(orate);
+                if (refill) {
+                    bottlerefill.setText("Yes");
+                } else bottlerefill.setText("No");
+
+                ScaleRatingBar tasteBar = findViewById(R.id.tasteBar);
+                ScaleRatingBar tempBar = findViewById(R.id.tempBar);
+
+                switch (temperature) {
+                    case "cold":
+                        tempT = 5;
+                        break;
+                    case "cool":
+                        tempT = 4;
+                        break;
+                    case "lukewarm":
+                        tempT = 3;
+                        break;
+                    case "warm":
+                        tempT = 2;
+                        break;
+                    case "hot":
+                        tempT = 1;
+                        break;
+                    default:
+                        tempT = 0;
+                }
+
+                switch (taste) {
+                    case "Wow":
+                        tasteT = 5;
+                        break;
+                    case "Pretty Good":
+                        tasteT = 4;
+                        break;
+                    case "Meh":
+                        tasteT = 3;
+                        break;
+                    case "Not Great":
+                        tasteT = 2;
+                        break;
+                    case "Disgusting":
+                        tasteT = 1;
+                        break;
+                    default:
+                        tasteT = 0;
+                }
+
+                tasteBar.setRating(tasteT);
+                tempBar.setRating(tempT);
+
+                building.setText(waterFountain.getBuilding());
+                room.setText(waterFountain.getFloor());
             }
-
-            spaceBar.setRating(spaceT);
-            activityBar.setRating(activity);
-            wifiBar.setRating(wifi);
-            cleanBar.setRating(clean);
-            stallamount.setText(String.valueOf(stalls));
-
-            building.setText(bathroom.getBuilding());
-            room.setText(bathroom.getFloor());
-
-        } else if(location instanceof WaterFountain) {
-
-            bathroomreview.setVisibility(View.GONE);
-            fountainreview.setVisibility(View.VISIBLE);
-            
-            boolean refill;
-            String taste, temperature;
-            int tasteT = 0, tempT = 0;
-            
-            WaterFountain waterFountain = (WaterFountain) location;
-            refill = waterFountain.isBottleRefillStation();
-            taste = waterFountain.getTaste();
-            temperature = waterFountain.getTemperature();
-            orate = waterFountain.getOverallRating();
-            ratings = waterFountain.getRating();
-            imageUrls = waterFountain.getImage();
-
-            overallRating.setRating(orate);
-            if(refill) {
-                bottlerefill.setText("Yes");
-            } else bottlerefill.setText("No");
-
-            ScaleRatingBar tasteBar = findViewById(R.id.tasteBar);
-            ScaleRatingBar tempBar = findViewById(R.id.tempBar);
-
-            switch(temperature) {
-                case "cold": tempT = 5; break;
-                case "cool": tempT = 4; break;
-                case "lukewarm": tempT = 3; break;
-                case "warm": tempT = 2; break;
-                case "hot": tempT = 1; break;
-                default: tempT = 0;
-            }
-
-            switch(taste) {
-                case "Wow": tasteT = 5; break;
-                case "Pretty Good": tasteT = 4; break;
-                case "Meh": tasteT = 3; break;
-                case "Not Great": tasteT = 2; break;
-                case "Disgusting": tasteT = 1; break;
-                default: tasteT = 0;
-            }
-
-            tasteBar.setRating(tasteT);
-            tempBar.setRating(tempT);
-
-            building.setText(waterFountain.getBuilding());
-            room.setText(waterFountain.getFloor());
         }
     }
 
@@ -450,26 +526,16 @@ public class MainActivity extends AppCompatActivity
         getMapType();
 
         // Get map asynchronously and add callback
-        /*SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);*/
-        new Thread(() -> {
-            try {
-                final SupportMapFragment supportMapFragment = SupportMapFragment.newInstance();
-                getSupportFragmentManager().beginTransaction().add(R.id.map, supportMapFragment).commit();
-                runOnUiThread(() -> supportMapFragment.getMapAsync(MainActivity.this));
-
-            } catch (Exception e) {
-                //log map load exception
-            }
-        }).start();
+        final SupportMapFragment supportMapFragment = SupportMapFragment.newInstance();
+        getSupportFragmentManager().beginTransaction().add(R.id.map, supportMapFragment).commit();
+        runOnUiThread(() -> supportMapFragment.getMapAsync(MainActivity.this));
 
         // Current location setup
         mFusedLocationProviderApi = LocationServices.FusedLocationApi;
     }
 
     private void updateEntries(String type) {
-        System.out.println("Call to update");
+        Log.d("MainActivity", "Call to update");
         if(updateFragment == null) {
             syncing = true;
             updateFragment = UpdateFragment.newInstance(type);
@@ -483,7 +549,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        System.out.println("TAG, onSavedInstanceState");
+        Log.d("MainActivity", "TAG, onSavedInstanceState");
         outState.putParcelable(SAVELOCATION, mLastKnownLocation);
         outState.putBoolean(LOCATIONGRANTED, mLocationPermissionGranted);
         outState.putBoolean(FOLLOW, followPerson);
@@ -491,6 +557,8 @@ public class MainActivity extends AppCompatActivity
         outState.putInt(BOTTOMSHEET, bottomSheetBehavior.getState());
         outState.putBoolean(TOOLBAR, whichtoolbar);
         outState.putBoolean(LOADING, syncing);
+        outState.putString(SELECTED, currentSelected);
+
     }
 
     @Override
@@ -519,7 +587,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        System.out.println("inflating");
+        Log.d("MainActivity", "inflating");
         if(bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
             getMenuInflater().inflate(R.menu.map, menu);
 
@@ -564,7 +632,7 @@ public class MainActivity extends AppCompatActivity
                         ScaleRatingBar wifiDialog= filterDialogView.findViewById(R.id.wifiBar_dialog);
                         ScaleRatingBar cleanDialog = filterDialogView.findViewById(R.id.cleanBar_dialog);
 
-                        System.out.println(overallDialog.getRating() + " " + spaceDialog.getRating() + " " + activityDialog.getRating() +
+                        Log.d("MainActivity", overallDialog.getRating() + " " + spaceDialog.getRating() + " " + activityDialog.getRating() +
                             " " + wifiDialog.getRating() + " " + cleanDialog.getRating());
                     })
                     .show();
@@ -661,6 +729,10 @@ public class MainActivity extends AppCompatActivity
         setMapType();
         moveCamera();
 
+        if(!newMapmarkers.isEmpty()) {
+            addMarkers(new ArrayList<>(), true);
+        }
+
     }
 
     private void checkPermissions() {
@@ -692,24 +764,28 @@ public class MainActivity extends AppCompatActivity
         updateLocationUI();
     }
 
-    @Override
-    public boolean onMarkerClick(final Marker marker) {
+    private void processReview(String title) {
         if(toolbar2 != null) {
-            String title = marker.getTitle();
-            currentSelected = title;
             toolbar2.setText(title);
             String[] splitter = title.split("@");
             String type = splitter[1];
             String key = splitter[0].trim();
-            System.out.println(type);
+            Log.d("MainActivity", type);
 
-            if(type.contains("Bathroom")) {
+            if (type.contains("Bathroom")) {
                 setReview(firebaseBRatings.get(key));
-            } else if(type.contains("Fountain")) {
+            } else if (type.contains("Fountain")) {
                 setReview(firebaseWRatings.get(key));
             }
-
         }
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        String title = marker.getTitle();
+        currentSelected = title;
+        processReview(title);
+
         return false;
     }
 
@@ -806,42 +882,80 @@ public class MainActivity extends AppCompatActivity
             mMap.setMapType(maptype);
         }
     }
-    private void addMarkers(LinkedList<MarkerOptions> markers) {
-        ArrayList<Marker> temp = new ArrayList<>();
 
-        for(MarkerOptions markerOptions : markers) {
-            temp.add(mMap.addMarker(markerOptions));
+    private void addMarkers(ArrayList<MarkerOptions> markers, boolean last) {
+        for(MarkerOptions m : markers) {
+            newMapmarkers.put(m.getTitle(), m);
         }
 
-        /*for(Marker m : mapMarkers) {
-            if(!temp.contains(m)) {
+        if(last) {
+            Log.d("MainActivity", "New: " + newMapmarkers);
+            Log.d("MainActivity", "Old: " + oldMapmarkers);
+            Log.d("MainActivity", "Markers: " + mapMarkers);
+
+            /*for (int a = 0; a < oldMapmarkers.size(); a++) {
+                String name = oldMapmarkers.get(a);
+
+                if(!newMapmarkers.containsKey(name)) {
+                    Log.d("MainActivity", "Removing");
+                    Marker marker = mapMarkers.get(a);
+                    Log.d("MainActivity", marker.getTitle() + " " + marker);
+                    marker.remove();
+                }
+            }*/
+            for(Marker m : mapMarkers) {
+                Log.d("MainActivity", "Removing");
                 m.remove();
             }
+
+            mapMarkers.clear();
+            oldMapmarkers.clear();
+
+            for(String title : newMapmarkers.keySet()) {
+                Log.d("MainActivity", title);
+                MarkerOptions markerOptions = newMapmarkers.get(title);
+                Marker marker = mMap.addMarker(markerOptions);
+
+                oldMapmarkers.add(marker.getId());
+                mapMarkers.add(marker);
+            }
+            
+            if(databaseFragment != null) {
+                databaseFragment.setNewMapmarkers(newMapmarkers);
+                databaseFragment.setMapMarkers(mapMarkers);
+                databaseFragment.setOldMapmarkers(oldMapmarkers);
+            }
+
+            newMapmarkers.clear();
         }
-        mapMarkers.clear();
-        mapMarkers = temp;*/
 
     }
 
     @Override
-    public void onUpdateBFinish(HashMap<String, Bathroom> firebaseUpdate, LinkedList<Bathroom> resultsList,
-                                LinkedList<MarkerOptions> markers, boolean doAll) {
+    public void onUpdateBFinish(HashMap<String, Bathroom> firebaseUpdate, ArrayList<Bathroom> resultsList,
+                                ArrayList<MarkerOptions> markers, boolean doAll) {
         runOnUiThread(() -> {
             firebaseBRatings = firebaseUpdate;
-            bathroomLinkedList = resultsList;
+            saveBathroom = resultsList;
+            
+            if(databaseFragment != null) {
+                databaseFragment.setFirebaseBRatings(firebaseBRatings);
+                databaseFragment.setSaveBathroom(saveBathroom);
+            }
 
-            System.out.println(firebaseBRatings);
-            addMarkers(markers);
+            Log.d("MainActivity", firebaseBRatings.toString());
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 
             if(!doAll) {
                 syncing = false;
+                addMarkers(markers, true);
                 if(sync != null) {
                     Handler handler = new Handler();
                     handler.postDelayed(() -> sync.smoothToHide(), 1000);
                 }
             } else {
+                addMarkers(markers, false);
                 updateEntries("Fountain|Update");
             }
 
@@ -849,14 +963,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onUpdateWFinish(HashMap<String, WaterFountain> firebaseUpdate, LinkedList<WaterFountain> resultsList,
-                                LinkedList<MarkerOptions> markers, boolean doAll) {
+    public void onUpdateWFinish(HashMap<String, WaterFountain> firebaseUpdate, ArrayList<WaterFountain> resultsList,
+                                ArrayList<MarkerOptions> markers, boolean doAll) {
         runOnUiThread(() -> {
             firebaseWRatings = firebaseUpdate;
-            fountainLinkedList = resultsList;
-
-            System.out.println(firebaseWRatings);
-            addMarkers(markers);
+            saveFountain = resultsList;
+            
+            if(databaseFragment != null) {
+                databaseFragment.setFirebaseWRatings(firebaseWRatings);
+                databaseFragment.setSaveFountain(saveFountain);
+            }
+            
+            Log.d("MainActivity", firebaseWRatings.toString());
+            addMarkers(markers, true);
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 
@@ -873,11 +992,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onUpdateBuildingFinish(LinkedList<String> b) {
+    public void onUpdateBuildingFinish(ArrayList<String> b) {
         runOnUiThread(() -> {
-
-            buildings = b;
-            System.out.println(buildings);
+            saveBuildings = b;
+            
+            if(databaseFragment != null) {
+                databaseFragment.setSaveBuildings(saveBuildings);
+            }
+            
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 
@@ -903,6 +1025,11 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
 
         }
+        try {
+            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_DATA_FRAGMENT)).commitAllowingStateLoss();
+        } catch (Exception e) {
+            
+        }
         serviceFragment = null;
         updateFragment = null;
     }
@@ -921,6 +1048,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+        if(addedNUpdate) {
+            updateEntries("Update");
+        }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ADD_LOCATION) {
+            if(resultCode == Activity.RESULT_OK){
+                addedNUpdate = true;
+            }
+        }
+    }
 }

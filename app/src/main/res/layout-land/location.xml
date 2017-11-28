@@ -1,387 +1,434 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:rb="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.simplex.utbathroomservices.MainActivity"
     android:orientation="vertical"
+    android:paddingTop="24dp"
+    android:paddingBottom="24dp"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/location_sheet"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:padding="15dp"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
-        <LinearLayout
-            android:id="@+id/locationLayout"
-            android:layout_width="wrap_content"
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="vertical">
-
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:id="@+id/locationText"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    android:text="@string/building"/>
-
-                <TextView
-                    android:id="@+id/buildingname"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="N/A"/>
-
-            </LinearLayout>
+            android:elevation="4dp"
+            android:layout_margin="7dp">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:padding="15dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    android:text="@string/room"/>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
 
-                <TextView
-                    android:id="@+id/roomname"
+                <LinearLayout
+                    android:id="@+id/locationLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="N/A"/>
+                    android:layout_margin="10dp"
+                    android:orientation="vertical">
+
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:id="@+id/locationText"
+                            android:layout_width="150dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:text="@string/building"/>
+
+                        <TextView
+                            android:id="@+id/buildingname"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="N/A"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="150dp"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:text="@string/room"/>
+
+                        <TextView
+                            android:id="@+id/roomname"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="N/A"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+
+                    <TextView
+                        android:id="@+id/rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:lineSpacingExtra="8dp"
+                        android:text="@string/rating"/>
+
+
+                    <com.iarcuschin.simpleratingbar.SimpleRatingBar
+                        android:id="@+id/stars"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srb_starSize="20dp"
+                        app:srb_numberOfStars="5"
+                        app:srb_stepSize="0.1"
+                        app:srb_borderColor="@color/colorAccent"
+                        app:srb_fillColor="@color/colorAccent" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+
             </LinearLayout>
+        </android.support.v7.widget.CardView>
 
-        </LinearLayout>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="vertical"
-            android:gravity="center">
-
-
-            <TextView
-                android:id="@+id/rating"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:lineSpacingExtra="8dp"
-                android:text="@string/rating"/>
-
-
-            <com.iarcuschin.simpleratingbar.SimpleRatingBar
-                android:id="@+id/stars"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:srb_starSize="20dp"
-                app:srb_numberOfStars="5"
-                app:srb_stepSize="0.1"
-                app:srb_borderColor="@color/colorAccent"
-                app:srb_fillColor="@color/colorAccent" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/bathroomreview"
-        android:padding="15dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Number of Stalls:"
-                android:layout_margin="7dp"/>
-
-            <TextView
-                android:id="@+id/numstalls"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="N/A"
-                android:layout_margin="7dp"/>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
+            android:elevation="4dp"
+            android:layout_margin="7dp">
 
             <LinearLayout
-                android:id="@+id/leftRatings"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/bathroomreview"
+                    android:padding="15dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:text="Space"
-                        android:layout_margin="7dp"/>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
 
-                    <com.willy.ratingbar.ScaleRatingBar
-                        android:id="@+id/spaceBar"
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Number of Stalls:"
+                            android:layout_margin="7dp"/>
+
+                        <TextView
+                            android:id="@+id/numstalls"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="N/A"
+                            android:layout_margin="7dp"/>
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        rb:numStars="5"
-                        rb:starWidth="30dp"
-                        rb:starHeight="30dp"
-                        rb:starPadding="7dp"
-                        rb:touchable="false"
-                        android:layout_margin="2dp"/>
+                        android:orientation="horizontal">
 
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                        <LinearLayout
+                            android:id="@+id/leftRatings"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="100dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Space"
+                                    android:layout_margin="7dp"/>
+
+                                <com.willy.ratingbar.ScaleRatingBar
+                                    android:id="@+id/spaceBar"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    rb:numStars="5"
+                                    rb:starWidth="30dp"
+                                    rb:starHeight="30dp"
+                                    rb:starPadding="7dp"
+                                    rb:touchable="false"
+                                    android:layout_margin="2dp"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="100dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Activity"
+                                    android:layout_margin="7dp"/>
+
+                                <com.willy.ratingbar.ScaleRatingBar
+                                    android:id="@+id/activityBar"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    rb:numStars="5"
+                                    rb:starWidth="30dp"
+                                    rb:starHeight="30dp"
+                                    rb:starPadding="7dp"
+                                    rb:touchable="false"
+                                    android:layout_margin="2dp"/>
+
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                        <LinearLayout
+                            android:layout_toEndOf="@id/leftRatings"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+
+                                <TextView
+                                    android:layout_width="100dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="WiFi"
+                                    android:layout_margin="7dp"/>
+
+
+                                <com.willy.ratingbar.ScaleRatingBar
+                                    android:id="@+id/wifiBar"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    rb:numStars="5"
+                                    rb:starWidth="30dp"
+                                    rb:starHeight="30dp"
+                                    rb:starPadding="7dp"
+                                    rb:touchable="false"
+                                    android:layout_margin="2dp"/>
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+
+                                <TextView
+                                    android:layout_width="100dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="Cleanliness"
+                                    android:layout_margin="7dp"/>
+
+                                <com.willy.ratingbar.ScaleRatingBar
+                                    android:id="@+id/cleanBar"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    rb:numStars="5"
+                                    rb:starWidth="30dp"
+                                    rb:starHeight="30dp"
+                                    rb:starPadding="7dp"
+                                    rb:touchable="false"
+                                    android:layout_margin="2dp"/>
+
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                    </LinearLayout>
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:id="@+id/fountainreview"
+                    android:padding="15dp"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:text="Activity"
-                        android:layout_margin="7dp"/>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
 
-                    <com.willy.ratingbar.ScaleRatingBar
-                        android:id="@+id/activityBar"
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Refill Station:"
+                            android:layout_margin="7dp"/>
+
+                        <TextView
+                            android:id="@+id/isbottlerefill"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Yes"
+                            android:layout_margin="7dp"/>
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ratingsF"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        rb:numStars="5"
-                        rb:starWidth="30dp"
-                        rb:starHeight="30dp"
-                        rb:starPadding="7dp"
-                        rb:touchable="false"
-                        android:layout_margin="2dp"/>
+                        android:orientation="horizontal">
 
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"/>
 
+                            <TextView
+                                android:layout_width="100dp"
+                                android:layout_height="wrap_content"
+                                android:text="Space"
+                                android:layout_margin="7dp"/>
+
+                            <com.willy.ratingbar.ScaleRatingBar
+                                android:id="@+id/tempBar"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                rb:numStars="5"
+                                rb:starWidth="30dp"
+                                rb:starHeight="30dp"
+                                rb:starPadding="7dp"
+                                rb:touchable="false"
+                                android:layout_margin="2dp"/>
+
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"/>
+
+                            <TextView
+                                android:layout_width="100dp"
+                                android:layout_height="wrap_content"
+                                android:text="Space"
+                                android:layout_margin="7dp"/>
+
+                            <com.willy.ratingbar.ScaleRatingBar
+                                android:id="@+id/tasteBar"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                rb:numStars="5"
+                                rb:starWidth="30dp"
+                                rb:starHeight="30dp"
+                                rb:starPadding="7dp"
+                                rb:touchable="false"
+                                android:layout_margin="2dp"/>
+
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"/>
+
+                    </LinearLayout>
                 </LinearLayout>
-
             </LinearLayout>
+        </android.support.v7.widget.CardView>
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="4dp"
+            android:layout_margin="7dp">
 
             <LinearLayout
-                android:layout_toEndOf="@id/leftRatings"
-                android:layout_width="wrap_content"
+                android:padding="15dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
+                android:gravity="center">
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:text="WiFi"
-                        android:layout_margin="7dp"/>
-
-
-                    <com.willy.ratingbar.ScaleRatingBar
-                        android:id="@+id/wifiBar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        rb:numStars="5"
-                        rb:starWidth="30dp"
-                        rb:starHeight="30dp"
-                        rb:starPadding="7dp"
-                        rb:touchable="false"
-                        android:layout_margin="2dp"/>
-
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:text="Cleanliness"
-                        android:layout_margin="7dp"/>
-
-                    <com.willy.ratingbar.ScaleRatingBar
-                        android:id="@+id/cleanBar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        rb:numStars="5"
-                        rb:starWidth="30dp"
-                        rb:starHeight="30dp"
-                        rb:starPadding="7dp"
-                        rb:touchable="false"
-                        android:layout_margin="2dp"/>
-
-                </LinearLayout>
+                    android:textSize="20sp"
+                    android:text="@string/reviews"/>
             </LinearLayout>
+        </android.support.v7.widget.CardView>
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/fountainreview"
-        android:padding="15dp"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Refill Station:"
-                android:layout_margin="7dp"/>
-
-            <TextView
-                android:id="@+id/isbottlerefill"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Yes"
-                android:layout_margin="7dp"/>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ratingsF"
-            android:layout_width="wrap_content"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/reviewRecycler"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:text="Space"
-                    android:layout_margin="7dp"/>
-
-                <com.willy.ratingbar.ScaleRatingBar
-                    android:id="@+id/tempBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    rb:numStars="5"
-                    rb:starWidth="30dp"
-                    rb:starHeight="30dp"
-                    rb:starPadding="7dp"
-                    rb:touchable="false"
-                    android:layout_margin="2dp"/>
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:text="Space"
-                    android:layout_margin="7dp"/>
-
-                <com.willy.ratingbar.ScaleRatingBar
-                    android:id="@+id/tasteBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    rb:numStars="5"
-                    rb:starWidth="30dp"
-                    rb:starHeight="30dp"
-                    rb:starPadding="7dp"
-                    rb:touchable="false"
-                    android:layout_margin="2dp"/>
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
-
-        </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
-        android:padding="15dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="@string/reviews"/>
+            android:layout_marginStart="7dp"
+            android:layout_marginEnd="7dp"
+            android:scrollbars="horizontal" />
     </LinearLayout>
 
-</LinearLayout>
+</android.support.v4.widget.NestedScrollView>

@@ -26,15 +26,18 @@ import android.widget.Toast;
 import com.github.clans.fab.FloatingActionButton;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
+import com.simplex.utbathroomservices.cloudfirestore.Building;
+import com.simplex.utbathroomservices.cloudfirestore.DatabaseCallback;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountainDB;
 import com.willy.ratingbar.ScaleRatingBar;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Add extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class Add extends AppCompatActivity implements AdapterView.OnItemSelectedListener, DatabaseCallback {
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
@@ -343,12 +346,12 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 //if is a location already
                 if(firebaseBRatings.containsKey(building + " " + floorNumber)) {
                     Bathroom temp = setUpBathroom(firebaseBRatings.get(building + " " + floorNumber));
-                    BathroomDB bathroomDB = new BathroomDB();
+                    BathroomDB bathroomDB = new BathroomDB(this);
                     bathroomDB.updateReviewForBathroom(temp);
 
                 } else if(firebaseWRatings.containsKey(building + " " + floorNumber)) {
                     WaterFountain temp = setUpFountain(firebaseWRatings.get(building + " " + floorNumber));
-                    WaterFountainDB waterFountainDB = new WaterFountainDB();
+                    WaterFountainDB waterFountainDB = new WaterFountainDB(this);
                     waterFountainDB.updateReviewForFountain(temp);
 
                 } else {
@@ -371,22 +374,19 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
                     if(type.equals("Bathroom")) {
 
-                        BathroomDB bathroomDB = new BathroomDB();
+                        BathroomDB bathroomDB = new BathroomDB(this);
                         bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
                                 wifiV, activityV, overallV,
                                 cleanlinessV, newRating, new ArrayList<>());
 
                     } else if(type.equals("Fountain")) {
 
-                        WaterFountainDB waterFountainDB = new WaterFountainDB();
+                        WaterFountainDB waterFountainDB = new WaterFountainDB(this);
                         waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
                                 isFillable, taste, overallV, newRating, new ArrayList<>());
 
                     }
                 }
-
-                finish();
-                overridePendingTransition(R.anim.fadein, R.anim.fadeout);
             }
         }
         return super.onOptionsItemSelected(item);
@@ -411,6 +411,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         waterFountain.setReviews(reviews + 1);
         return waterFountain;
     }
+
     private String getTasteVal(int i) {
         String taste = "";
         switch(i) {
@@ -518,5 +519,32 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             Toast.makeText(getBaseContext(), "Press CLOSE again to discard review", Toast.LENGTH_SHORT).show();
         }
         mBackPressed = System.currentTimeMillis();
+    }
+
+    @Override
+    public void updateFinishedB(ArrayList<Bathroom> r) {
+        //ignore
+    }
+
+    @Override
+    public void updateFinishedF(ArrayList<WaterFountain> r) {
+        //ignore
+    }
+
+    @Override
+    public void updateBuildings(ArrayList<Building> b) {
+        //ignore
+    }
+
+    @Override
+    public void addFinished(boolean success) {
+        if(success) {
+            Intent i = new Intent();
+            setResult(Activity.RESULT_OK, i);
+            finish();
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+        } else {
+            Toast.makeText(this, "Error Saving to Database. Please try again", Toast.LENGTH_LONG).show();
+        }
     }
 }

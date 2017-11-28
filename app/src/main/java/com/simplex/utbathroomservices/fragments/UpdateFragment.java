@@ -23,15 +23,15 @@ import java.util.LinkedList;
 public class UpdateFragment extends Fragment implements DatabaseCallback {
 
     public interface onUpdateListener {
-        void onUpdateBFinish(HashMap<String, Bathroom> firebaseResults, LinkedList<Bathroom> resultsList,
-                             LinkedList<MarkerOptions> markers, boolean doAll);
-        void onUpdateWFinish(HashMap<String, WaterFountain> firebaseResults, LinkedList<WaterFountain> resultsList,
-                             LinkedList<MarkerOptions> markers, boolean doAll);
-        void onUpdateBuildingFinish(LinkedList<String> buildings);
+        void onUpdateBFinish(HashMap<String, Bathroom> firebaseResults, ArrayList<Bathroom> resultsList,
+                             ArrayList<MarkerOptions> markers, boolean doAll);
+        void onUpdateWFinish(HashMap<String, WaterFountain> firebaseResults, ArrayList<WaterFountain> resultsList,
+                             ArrayList<MarkerOptions> markers, boolean doAll);
+        void onUpdateBuildingFinish(ArrayList<String> buildings);
     }
 
     private onUpdateListener mListener;
-    private LinkedList<MarkerOptions> markerOptions = new LinkedList<>();
+    private ArrayList<MarkerOptions> markerOptions = new ArrayList<>();
     private String type;
     private boolean doAll = false;
 
@@ -88,7 +88,7 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
     }
 
     @Override
-    public void updateFinishedB(LinkedList<Bathroom> r) {
+    public void updateFinishedB(ArrayList<Bathroom> r) {
         new Thread(() -> {
             HashMap<String, Bathroom> results = new HashMap<>();
             for(Bathroom bathroom : r) {
@@ -100,7 +100,7 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
     }
 
     @Override
-    public void updateFinishedF(LinkedList<WaterFountain> r) {
+    public void updateFinishedF(ArrayList<WaterFountain> r) {
         new Thread(() -> {
             HashMap<String, WaterFountain> results = new HashMap<>();
             for(WaterFountain waterFountain : r) {
@@ -112,14 +112,19 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
     }
 
     @Override
-    public void updateBuildings(LinkedList<Building> b) {
+    public void updateBuildings(ArrayList<Building> b) {
         new Thread(() -> {
-            LinkedList<String> temp = new LinkedList<>(b.get(0).getBuildings());
+            ArrayList<String> temp = new ArrayList<>(b.get(0).getBuildings());
             mListener.onUpdateBuildingFinish(temp);
         }).start();
     }
 
-    private <T> void setUpMarkers(LinkedList<T> results) {
+    @Override
+    public void addFinished(boolean success) {
+        //ignore
+    }
+
+    private <T> void setUpMarkers(ArrayList<T> results) {
         for(T item: results) {
             //Location location = new Location("mocked");
             double longitude, latitude;
