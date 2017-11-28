@@ -47,6 +47,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
+import com.simplex.utbathroomservices.adapters.ReviewAdapter;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
@@ -70,7 +71,6 @@ public class MainActivity extends AppCompatActivity
     //TODO: Reviews activity
     //TODO: Search Activity
     //TODO: Settings/About/Help Activity
-    //TODO: Bar graph, key features, reviews recyclerview
     //TODO: Camera API
     //TODO: Create service to update entries periodically
     final String SAVELOCATION = "SAVE LOCATION";
@@ -404,7 +404,7 @@ public class MainActivity extends AppCompatActivity
                 ratings = bathroom.getRating();
                 imageUrls = bathroom.getImage();
 
-                ReviewAdapter reviewAdapter = new ReviewAdapter(this, ratings);
+                ReviewAdapter reviewAdapter = new ReviewAdapter(this, ratings, "Bathroom");
                 recyclerView.setAdapter(reviewAdapter);
                 recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, 0));
 
@@ -460,7 +460,7 @@ public class MainActivity extends AppCompatActivity
                 ratings = waterFountain.getRating();
                 imageUrls = waterFountain.getImage();
 
-                ReviewAdapter reviewAdapter = new ReviewAdapter(this, ratings);
+                ReviewAdapter reviewAdapter = new ReviewAdapter(this, ratings, "Fountain");
                 recyclerView.setAdapter(reviewAdapter);
                 recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, 0));
 

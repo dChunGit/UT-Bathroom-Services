@@ -54,7 +54,7 @@ public class WaterFountainDB {
         });;
     }
 
-    public void addReviewForWaterFountain(WaterFountain wf, String review){
+    /*public void addReviewForWaterFountain(WaterFountain wf, String review){
         final ArrayList<String> id= new ArrayList<String>();
         mFireStore.collection("waterfountain")
                 .whereEqualTo("building", wf.getBuilding())
@@ -89,7 +89,7 @@ public class WaterFountainDB {
                         }
                     }
                 });
-    }
+    }*/
 
     public void getAllWaterFountains() {
         mFireStore.collection("waterfountain")
