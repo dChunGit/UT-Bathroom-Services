@@ -345,19 +345,17 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
                 //if is a location already
                 if(firebaseBRatings.containsKey(building + " " + floorNumber)) {
-                    Bathroom temp = setUpBathroom(firebaseBRatings.get(building + " " + floorNumber));
+                    Bathroom bathroom = setUpBathroom(firebaseBRatings.get(building + " " + floorNumber));
                     BathroomDB bathroomDB = new BathroomDB(this);
-                    bathroomDB.updateReviewForBathroom(temp);
+                    bathroomDB.updateReviewForBathroom(bathroom);
 
                 } else if(firebaseWRatings.containsKey(building + " " + floorNumber)) {
-                    WaterFountain temp = setUpFountain(firebaseWRatings.get(building + " " + floorNumber));
+                    WaterFountain waterFountain = setUpFountain(firebaseWRatings.get(building + " " + floorNumber));
                     WaterFountainDB waterFountainDB = new WaterFountainDB(this);
-                    waterFountainDB.updateReviewForFountain(temp);
+                    waterFountainDB.updateReviewForFountain(waterFountain);
 
                 } else {
                     ArrayList<Rating> newRating = new ArrayList<>();
-                    Rating rating = new Rating(commentsEditText.getText().toString());
-                    newRating.add(rating);
                     if(customStallSelect) {
                         try {
                             int temp = Integer.valueOf(displayStall.getText().toString());
@@ -374,12 +372,19 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
                     if(type.equals("Bathroom")) {
 
+                        Rating rating = new Rating(commentsEditText.getText().toString(), space, stallnum,
+                                wifiV, activityV, overallV, cleanlinessV, null, false, null);
+                        newRating.add(rating);
                         BathroomDB bathroomDB = new BathroomDB(this);
                         bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
                                 wifiV, activityV, overallV,
                                 cleanlinessV, newRating, new ArrayList<>());
 
                     } else if(type.equals("Fountain")) {
+
+                        Rating rating = new Rating(commentsEditText.getText().toString(), null, 0,
+                                0, 0, 0, overallV, temp, isFillable, taste);
+                        newRating.add(rating);
 
                         WaterFountainDB waterFountainDB = new WaterFountainDB(this);
                         waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
@@ -404,7 +409,10 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         waterFountain.setOverallRating(((overallP * reviews) + overallV)/(reviews + 1));
 
         ArrayList<Rating> newRating = waterFountain.getRating();
-        Rating rating = new Rating(commentsEditText.getText().toString());
+
+        Rating rating = new Rating(commentsEditText.getText().toString(), null, 0,
+                0, 0, 0, overallV, temp, isFillable, taste);
+
         newRating.add(rating);
         waterFountain.setRating(newRating);
 
@@ -415,11 +423,11 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     private String getTasteVal(int i) {
         String taste = "";
         switch(i) {
-            case 0: taste = "Wow"; break;
-            case 1: taste = "Pretty Good"; break;
-            case 2: taste = "Meh"; break;
-            case 3: taste = "Not Great"; break;
-            case 4: taste = "Disgusting";
+            case 1: taste = "Wow"; break;
+            case 2: taste = "Pretty Good"; break;
+            case 3: taste = "Meh"; break;
+            case 4: taste = "Not Great"; break;
+            case 5: taste = "Disgusting";
         }
         return taste;
     }
@@ -439,11 +447,11 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         String temp = "";
 
         switch(i) {
-            case 0: temp = "cold"; break;
-            case 1: temp = "cool"; break;
-            case 2: temp = "lukewarm"; break;
-            case 3: temp = "warm"; break;
-            case 4: temp = "hot";
+            case 1: temp = "cold"; break;
+            case 2: temp = "cool"; break;
+            case 3: temp = "lukewarm"; break;
+            case 4: temp = "warm"; break;
+            case 5: temp = "hot";
         }
         return temp;
     }
@@ -474,7 +482,9 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         bathroom.setCleanliness(((cleanP * reviews) + cleanlinessV)/(reviews + 1));
 
         ArrayList<Rating> newRating = bathroom.getRating();
-        Rating rating = new Rating(commentsEditText.getText().toString());
+        Rating rating = new Rating(commentsEditText.getText().toString(), space, stallnum,
+                wifiV, activityV, overallV, cleanlinessV, null, false, null);
+
         newRating.add(rating);
         bathroom.setRating(newRating);
 
@@ -498,11 +508,11 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         String space = "";
 
         switch(select) {
-            case 0: space = "XSmall"; break;
-            case 1: space = "Small"; break;
-            case 2: space = "Medium"; break;
-            case 3: space = "Large"; break;
-            case 4: space = "XLarge";
+            case 1: space = "XSmall"; break;
+            case 2: space = "Small"; break;
+            case 3: space = "Medium"; break;
+            case 4: space = "Large"; break;
+            case 5: space = "XLarge";
         }
 
         return space;

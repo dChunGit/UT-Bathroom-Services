@@ -55,7 +55,7 @@ public class BathroomDB {
         });
     }
 
-    public void addReviewForBathroom(Bathroom b, String review){
+    /*public void addReviewForBathroom(Bathroom b, String review){
         final ArrayList<String> id= new ArrayList<>();
         mFireStore.collection("bathroom")
                 .whereEqualTo("building", b.getBuilding())
@@ -87,7 +87,7 @@ public class BathroomDB {
                         Log.d("Error", "Error getting documents: ", task.getException());
                     }
                 });
-    }
+    }*/
 
     public void getAllBathrooms(){
         mFireStore.collection("bathroom")
