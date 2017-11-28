@@ -23,7 +23,7 @@ import java.util.LinkedList;
 
 public class WaterFountainDB {
     private FirebaseFirestore mFireStore = FirebaseFirestore.getInstance();
-    private LinkedList<WaterFountain> results = new LinkedList<>();
+    private ArrayList<WaterFountain> results = new ArrayList<>();
 
     private DatabaseCallback databaseCallback;
 

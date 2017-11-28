@@ -17,7 +17,7 @@ import java.util.LinkedList;
  */
 
 public class BuildingDB {
-    private LinkedList<Building> results= new LinkedList<>();
+    private ArrayList<Building> results= new ArrayList<>();
     private FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
 
     private DatabaseCallback databaseCallback;

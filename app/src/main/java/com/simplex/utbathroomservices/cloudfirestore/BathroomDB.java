@@ -21,7 +21,7 @@ import java.util.LinkedList;
  */
 
 public class BathroomDB {
-    private LinkedList<Bathroom> results= new LinkedList<>();
+    private ArrayList<Bathroom> results= new ArrayList<>();
     private FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
     //possible connection bug, only seen once so not sure atm
 

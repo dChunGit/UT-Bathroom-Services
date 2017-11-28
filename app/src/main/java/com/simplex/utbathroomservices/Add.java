@@ -346,12 +346,12 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 //if is a location already
                 if(firebaseBRatings.containsKey(building + " " + floorNumber)) {
                     Bathroom temp = setUpBathroom(firebaseBRatings.get(building + " " + floorNumber));
-                    BathroomDB bathroomDB = new BathroomDB();
+                    BathroomDB bathroomDB = new BathroomDB(this);
                     bathroomDB.updateReviewForBathroom(temp);
 
                 } else if(firebaseWRatings.containsKey(building + " " + floorNumber)) {
                     WaterFountain temp = setUpFountain(firebaseWRatings.get(building + " " + floorNumber));
-                    WaterFountainDB waterFountainDB = new WaterFountainDB();
+                    WaterFountainDB waterFountainDB = new WaterFountainDB(this);
                     waterFountainDB.updateReviewForFountain(temp);
 
                 } else {
@@ -522,17 +522,17 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     }
 
     @Override
-    public void updateFinishedB(LinkedList<Bathroom> r) {
+    public void updateFinishedB(ArrayList<Bathroom> r) {
         //ignore
     }
 
     @Override
-    public void updateFinishedF(LinkedList<WaterFountain> r) {
+    public void updateFinishedF(ArrayList<WaterFountain> r) {
         //ignore
     }
 
     @Override
-    public void updateBuildings(LinkedList<Building> b) {
+    public void updateBuildings(ArrayList<Building> b) {
         //ignore
     }
 
