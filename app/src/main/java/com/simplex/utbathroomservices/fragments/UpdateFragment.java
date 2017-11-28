@@ -119,6 +119,11 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
         }).start();
     }
 
+    @Override
+    public void addFinished(boolean success) {
+        //ignore
+    }
+
     private <T> void setUpMarkers(LinkedList<T> results) {
         for(T item: results) {
             //Location location = new Location("mocked");

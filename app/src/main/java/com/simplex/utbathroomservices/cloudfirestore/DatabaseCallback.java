@@ -9,4 +9,5 @@ public interface DatabaseCallback {
     void updateFinishedB(LinkedList<Bathroom> r);
     void updateFinishedF(LinkedList<WaterFountain> r);
     void updateBuildings(LinkedList<Building> b);
+    void addFinished(boolean success);
 }

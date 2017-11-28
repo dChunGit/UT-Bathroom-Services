@@ -1,5 +1,6 @@
 package com.simplex.utbathroomservices;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -90,6 +91,8 @@ public class MainActivity extends AppCompatActivity
     private int maptype = GoogleMap.MAP_TYPE_NORMAL;
     private float zoomLevel;
 
+    private boolean addedNUpdate = false;
+
     private BottomSheetBehavior bottomSheetBehavior;
     private Toolbar toolbar, locationToolbar;
     private CardView cardToolbar;
@@ -111,9 +114,10 @@ public class MainActivity extends AppCompatActivity
     private LinkedList<WaterFountain> fountainLinkedList = new LinkedList<>();
     private LinkedList<String> buildings = new LinkedList<>();
     private ArrayList<Marker> mapMarkers = new ArrayList<>();
+    private HashMap<String, MarkerOptions> newMapmarkers = new HashMap<>();
+    private ArrayList<String> oldMapmarkers = new ArrayList<>();
     private boolean syncing = false, locUpdate = false;
     private String currentSelected;
-    private Object selectedMarker;
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
@@ -806,20 +810,46 @@ public class MainActivity extends AppCompatActivity
             mMap.setMapType(maptype);
         }
     }
-    private void addMarkers(LinkedList<MarkerOptions> markers) {
-        ArrayList<Marker> temp = new ArrayList<>();
 
-        for(MarkerOptions markerOptions : markers) {
-            temp.add(mMap.addMarker(markerOptions));
+    private void addMarkers(LinkedList<MarkerOptions> markers, boolean last) {
+        for(MarkerOptions m : markers) {
+            newMapmarkers.put(m.getTitle(), m);
         }
+        System.out.println(last);
 
-        /*for(Marker m : mapMarkers) {
-            if(!temp.contains(m)) {
+        if(last) {
+            System.out.println("New: " + newMapmarkers);
+            System.out.println("Old: " + oldMapmarkers);
+            System.out.println("Markers: " + mapMarkers);
+
+            /*for (int a = 0; a < oldMapmarkers.size(); a++) {
+                String name = oldMapmarkers.get(a);
+
+                if(!newMapmarkers.containsKey(name)) {
+                    System.out.println("Removing");
+                    Marker marker = mapMarkers.get(a);
+                    System.out.println(marker.getTitle() + " " + marker);
+                    marker.remove();
+                }
+            }*/
+            for(Marker m : mapMarkers) {
+                System.out.println("Removing");
                 m.remove();
             }
+
+            mapMarkers.clear();
+            oldMapmarkers.clear();
+
+            for(String title : newMapmarkers.keySet()) {
+                System.out.println(title);
+                MarkerOptions markerOptions = newMapmarkers.get(title);
+
+                oldMapmarkers.add(markerOptions.getTitle());
+                mapMarkers.add(mMap.addMarker(markerOptions));
+            }
+
+            newMapmarkers.clear();
         }
-        mapMarkers.clear();
-        mapMarkers = temp;*/
 
     }
 
@@ -831,17 +861,18 @@ public class MainActivity extends AppCompatActivity
             bathroomLinkedList = resultsList;
 
             System.out.println(firebaseBRatings);
-            addMarkers(markers);
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 
             if(!doAll) {
                 syncing = false;
+                addMarkers(markers, true);
                 if(sync != null) {
                     Handler handler = new Handler();
                     handler.postDelayed(() -> sync.smoothToHide(), 1000);
                 }
             } else {
+                addMarkers(markers, false);
                 updateEntries("Fountain|Update");
             }
 
@@ -856,7 +887,7 @@ public class MainActivity extends AppCompatActivity
             fountainLinkedList = resultsList;
 
             System.out.println(firebaseWRatings);
-            addMarkers(markers);
+            addMarkers(markers, true);
             updateFragment = null;
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
 
@@ -921,6 +952,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+        if(addedNUpdate) {
+            updateEntries("Update");
+        }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ADD_LOCATION) {
+            if(resultCode == Activity.RESULT_OK){
+                addedNUpdate = true;
+            }
+        }
+    }
 }
