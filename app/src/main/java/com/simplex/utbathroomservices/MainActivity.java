@@ -531,7 +531,6 @@ public class MainActivity extends AppCompatActivity
     private void setReview(Object location) {
         if(location != null) {
             Log.d("MainActivity", "Setting review " + location.toString());
-            doBounceAnimation(bottomSheetLayout);
             RecyclerView recyclerView = findViewById(R.id.reviewRecycler);
 
             float orate;
@@ -997,6 +996,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onMarkerClick(final Marker marker) {
         String title = marker.getTitle();
         currentSelected = title;
+        doBounceAnimation(bottomSheetLayout);
         processReview(title);
 
         return false;
