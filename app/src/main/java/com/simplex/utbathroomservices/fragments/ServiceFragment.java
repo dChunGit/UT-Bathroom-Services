@@ -63,14 +63,6 @@ public class ServiceFragment extends Fragment implements LocationCallback {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        setRetainInstance(true);
-        return inflater.inflate(R.layout.fragment_, container, false);
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
         getActivity().getApplicationContext().unbindService(mConnection);
