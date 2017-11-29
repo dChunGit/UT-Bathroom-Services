@@ -59,7 +59,8 @@ public class GoogleLocationService {
 
     }
 
-    private class GoogleServicesCallbacks implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+    private class GoogleServicesCallbacks implements GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
         @Override
         public void onConnected(Bundle bundle) {
@@ -119,21 +120,18 @@ public class GoogleLocationService {
 
 
     public void startUpdates() {
-    /*
-     * Connect the client. Don't re-start any requests here; instead, wait
-     * for onResume()
-     */
+        //connect client
         if (servicesConnected(activity)) {
             if (locationEnabled(activity)) {
                 locationUpdateListener.canReceiveLocationUpdates();
                 startLocationUpdates();
             } else {
                 locationUpdateListener.cannotReceiveLocationUpdates();
-                Toast.makeText(activity, "Unable to get your location.Please turn on your device Gps", Toast.LENGTH_LONG).show();
+                Toast.makeText(activity, "Unable to get your location. Please turn on your GPS", Toast.LENGTH_LONG).show();
             }
         } else {
             locationUpdateListener.cannotReceiveLocationUpdates();
-            Toast.makeText(activity, "Google play service not available", Toast.LENGTH_LONG).show();
+            Toast.makeText(activity, "Google Play Services Unavailable", Toast.LENGTH_LONG).show();
         }
     }
 

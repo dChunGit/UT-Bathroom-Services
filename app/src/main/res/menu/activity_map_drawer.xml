@@ -19,10 +19,6 @@
     <item android:title="Options">
         <menu>
             <item
-                android:id="@+id/settings"
-                android:icon="@drawable/ic_settings"
-                android:title="Settings" />
-            <item
                 android:id="@+id/about"
                 android:icon="@drawable/ic_info"
                 android:title="About" />

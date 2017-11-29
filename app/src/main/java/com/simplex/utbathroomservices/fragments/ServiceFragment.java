@@ -20,6 +20,7 @@ import com.simplex.utbathroomservices.location.LocationService;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
+//Starts location updates and retains as long as app is running
 public class ServiceFragment extends Fragment implements LocationCallback {
 
     private UpdateLocationListener mListener;

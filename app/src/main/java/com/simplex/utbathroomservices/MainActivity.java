@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity
     //TODO: Favorites activity
     //TODO: Reviews activity
     //TODO: Search Activity
-    //TODO: Settings/About/Help Activity
+    //TODO: Settings Activity
     //TODO: Camera API
     //TODO: Create service to update entries periodically
     final String SAVELOCATION = "SAVE LOCATION";
@@ -153,11 +153,13 @@ public class MainActivity extends AppCompatActivity
         serviceFragment = (ServiceFragment) fragmentManager.findFragmentByTag(TAG_LOC_FRAGMENT);
         databaseFragment = (DatabaseFragment) fragmentManager.findFragmentByTag(TAG_DATA_FRAGMENT);
 
+        //for location updates
         if(serviceFragment == null) {
             serviceFragment = ServiceFragment.newInstance();
             fragmentManager.beginTransaction().add(serviceFragment, TAG_LOC_FRAGMENT).commit();
         }
-        
+
+        //to store data
         if(databaseFragment == null) {
             databaseFragment = DatabaseFragment.newInstance();
             fragmentManager.beginTransaction().add(databaseFragment, TAG_DATA_FRAGMENT).commit();
@@ -276,7 +278,10 @@ public class MainActivity extends AppCompatActivity
         });
 
         FloatingActionButton refresh = findViewById(R.id.refresh);
-        refresh.setOnClickListener((view) -> updateEntries("Update"));
+        refresh.setOnClickListener((view) -> {
+            floatingActionMenu.close(true);
+            updateEntries("Update");
+        });
 
         android.support.design.widget.FloatingActionButton addfab = findViewById(R.id.addreview);
         addfab.setOnClickListener((view) -> {
@@ -324,9 +329,11 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                //nice fade and switch views
                 floatingActionMenu.setAlpha(1 - slideOffset);
                 cardToolbar.setAlpha(1 - slideOffset);
                 toolbar2.setAlpha(1-slideOffset);
+                //sets threshold so view doesn't have a hitch on slide
                 if((1 - slideOffset) < .05) {
                     cardToolbar.setVisibility(View.GONE);
                     toolbar2.setVisibility(View.GONE);
@@ -338,6 +345,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         toolbar2.setOnClickListener((view) -> {
+            //the bottom toolbar displays selected location
             String text = toolbar2.getText().toString();
             Log.d("MainActivity", text);
             if(!text.equals("No Location")) {
@@ -384,7 +392,7 @@ public class MainActivity extends AppCompatActivity
             Log.d("MainActivity", "Setting review " + location.toString());
             RecyclerView recyclerView = findViewById(R.id.reviewRecycler);
 
-            float orate = 0f;
+            float orate;
             ArrayList<Rating> ratings;
             ArrayList<String> imageUrls = new ArrayList<>();
             SimpleRatingBar overallRating = findViewById(R.id.stars);
@@ -453,7 +461,7 @@ public class MainActivity extends AppCompatActivity
 
                 boolean refill;
                 String taste, temperature;
-                int tasteT = 0, tempT = 0;
+                int tasteT, tempT;
 
                 WaterFountain waterFountain = (WaterFountain) location;
                 refill = waterFountain.isBottleRefillStation();
@@ -611,8 +619,8 @@ public class MainActivity extends AppCompatActivity
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
             return true;
-        } else if (id == R.id.action_settings) {
-            Intent settings = new Intent(this, Settings.class);
+        } else if (id == R.id.action_about) {
+            Intent settings = new Intent(this, About.class);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
@@ -701,14 +709,9 @@ public class MainActivity extends AppCompatActivity
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
         } else if (id == R.id.advanced_search) {
+            //advanced search algorithm
 
-        } else if (id == R.id.settings) {
-
-            Intent settings = new Intent(this, Settings.class);
-            startActivity(settings);
-            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-
-        }  else if(id == R.id.about) {
+        } else if(id == R.id.about) {
 
             Intent i = new Intent(this, About.class);
             i.putExtra(position, 0);
@@ -942,16 +945,7 @@ public class MainActivity extends AppCompatActivity
             Log.d("MainActivity", "Old: " + oldMapmarkers);
             Log.d("MainActivity", "Markers: " + mapMarkers);
 
-            /*for (int a = 0; a < oldMapmarkers.size(); a++) {
-                String name = oldMapmarkers.get(a);
-
-                if(!newMapmarkers.containsKey(name)) {
-                    Log.d("MainActivity", "Removing");
-                    Marker marker = mapMarkers.get(a);
-                    Log.d("MainActivity", marker.getTitle() + " " + marker);
-                    marker.remove();
-                }
-            }*/
+            //inefficient, should prob only remove ones no longer in the map
             for(Marker m : mapMarkers) {
                 Log.d("MainActivity", "Removing");
                 m.remove();
@@ -1057,6 +1051,17 @@ public class MainActivity extends AppCompatActivity
                 Handler handler = new Handler();
                 handler.postDelayed(() -> sync.smoothToHide(), 1000);
             }
+
+            //update review selected if it is currently opened
+            if(bottomSheetBehavior != null) {
+                Log.d("MainActivity", "bottomsheetbehavior not null");
+                if(bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    if(currentSelected != null) {
+                        Log.d("MainActivity", currentSelected + " not null");
+                        processReview(currentSelected);
+                    }
+                }
+            }
         });
     }
 
@@ -1105,6 +1110,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ADD_LOCATION) {
+            //can't invoke directly bc of savedInstanceState
             if(resultCode == Activity.RESULT_OK){
                 addedNUpdate = true;
             }
