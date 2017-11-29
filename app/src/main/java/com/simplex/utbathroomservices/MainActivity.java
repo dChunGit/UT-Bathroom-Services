@@ -1,5 +1,6 @@
 package com.simplex.utbathroomservices;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +38,10 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.daasuu.ei.Ease;
+import com.daasuu.ei.EasingInterpolator;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.location.FusedLocationProviderApi;
@@ -107,6 +112,7 @@ public class MainActivity extends AppCompatActivity
     private FloatingActionMenu floatingActionMenu;
     private AVLoadingIndicatorView sync;
     private LinearLayout bathroomreview, fountainreview;
+    private FloatingActionButton addLocation, location, refresh;
 
     private UpdateFragment updateFragment;
     private ServiceFragment serviceFragment;
@@ -154,10 +160,7 @@ public class MainActivity extends AppCompatActivity
         databaseFragment = (DatabaseFragment) fragmentManager.findFragmentByTag(TAG_DATA_FRAGMENT);
 
         //for location updates
-        if(serviceFragment == null) {
-            serviceFragment = ServiceFragment.newInstance();
-            fragmentManager.beginTransaction().add(serviceFragment, TAG_LOC_FRAGMENT).commit();
-        }
+        checkPermissions();
 
         //to store data
         if(databaseFragment == null) {
@@ -203,6 +206,144 @@ public class MainActivity extends AppCompatActivity
             updateEntries("Update");
         }
 
+        if(!getTutorial()) {
+            //show tutorial
+            if(floatingActionMenu != null) {
+                floatingActionMenu.open(true);
+            }
+            if(location != null) {
+                location.setClickable(false);
+            }
+            if(addLocation != null) {
+                location.setClickable(false);
+            }
+            if(refresh != null) {
+                refresh.setClickable(false);
+            }
+
+            Toolbar temp = findViewById(R.id.toolbar);
+            toolbar.inflateMenu(R.menu.map);
+            toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.ic_menu));
+
+
+            TapTargetSequence tapTargetSequence = new TapTargetSequence(this)
+                    .targets(
+                            TapTarget.forToolbarNavigationIcon(temp, "Open Drawer", "View more options")
+                                    .id(0)
+                                    .outerCircleColor(R.color.colorAccent3)
+                                    .targetCircleColor(R.color.white)
+                                    .titleTextSize(20)
+                                    .textColor(R.color.white)
+                                    .cancelable(false)
+                                    .transparentTarget(true),
+                            TapTarget.forToolbarMenuItem(temp, R.id.action_search, "Quick Search",
+                                    "Use this to quickly filter")
+                                    .id(1)
+                                    .outerCircleColor(R.color.colorAccent)
+                                    .targetCircleColor(R.color.white)
+                                    .titleTextSize(20)
+                                    .textColor(R.color.white)
+                                    .cancelable(false)
+                                    .transparentTarget(true),
+                            TapTarget.forToolbarOverflow(toolbar, "More Options", "Map type and quick access links")
+                                    .id(2)
+                                    .outerCircleColor(R.color.colorAccent2)
+                                    .targetCircleColor(R.color.white)
+                                    .titleTextSize(20)
+                                    .textColor(R.color.white)
+                                    .cancelable(false)
+                                    .transparentTarget(true),
+                            TapTarget.forView(findViewById(R.id.location),
+                                    "Set Map Camera to Your Location",
+                                    "Once clicked, the map will follow your location until moved manually")
+                                    .id(3)
+                                    .outerCircleColor(R.color.colorAccent4)
+                                    .targetCircleColor(R.color.white)
+                                    .titleTextSize(20)
+                                    .textColor(R.color.white)
+                                    .cancelable(false)
+                                    .transparentTarget(true),
+                            TapTarget.forView(findViewById(R.id.newLocation),
+                                    "Add a NEW bathroom/water fountain location",
+                                    "Uses your location to add a new facility to the map")
+                                    .id(4)
+                                    .outerCircleColor(R.color.colorAccent4)
+                                    .targetCircleColor(R.color.white)
+                                    .titleTextSize(20)
+                                    .textColor(R.color.white)
+                                    .cancelable(false)
+                                    .transparentTarget(true),
+                            TapTarget.forView(findViewById(R.id.refresh),
+                                    "Sync the Database",
+                                    "Refreshes the local database and populates the map")
+                                    .id(5)
+                                    .outerCircleColor(R.color.colorAccent5)
+                                    .targetCircleColor(R.color.white)
+                                    .titleTextSize(20)
+                                    .textColor(R.color.white)
+                                    .cancelable(false)
+                                    .transparentTarget(true),
+                            TapTarget.forView(findViewById(R.id.toolbar2),
+                                    "Open to view reviews",
+                                    "Shows overall ratings, individual reviews, and location information")
+                                    .id(6)
+                                    .outerCircleColor(R.color.colorAccent)
+                                    .targetCircleColor(R.color.white)
+                                    .titleTextSize(20)
+                                    .textColor(R.color.white)
+                                    .cancelable(false)
+                                    .transparentTarget(true))
+                    .listener(new TapTargetSequence.Listener() {
+                        @Override
+                        public void onSequenceFinish() {
+                            // Yay
+                            if(floatingActionMenu != null) {
+                                floatingActionMenu.close(true);
+                            }
+                            if(location != null) {
+                                location.setClickable(true);
+                            }
+                            if(addLocation != null) {
+                                location.setClickable(true);
+                            }
+                            if(refresh != null) {
+                                refresh.setClickable(true);
+                            }
+                            setTutorialComplete();
+                            checkPermissions();
+                            if(mLocationPermissionGranted) {
+                                /*followPerson = true;
+                                updateLocationUI();
+                                setDeviceLocation(null);*/
+                            }
+                            floatingActionMenu.close(true);
+                        }
+
+                        @Override
+                        public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
+                            if(lastTarget.id() == 5 || lastTarget.id() == 6) {
+                                doBounceAnimation(toolbar2);
+                            }
+                        }
+
+                        @Override
+                        public void onSequenceCanceled(TapTarget lastTarget) {
+                            setTutorialComplete();
+                        }
+                    });
+            tapTargetSequence.start();
+        }
+
+    }
+
+    private void doBounceAnimation(View targetView) {
+        if(targetView != null) {
+            ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationY", 0, 40, 0);
+            animator.setInterpolator(new EasingInterpolator(Ease.QUAD_IN_OUT));
+            animator.setStartDelay(500);
+            animator.setDuration(2000);
+            animator.start();
+        }
     }
 
     private void setFont() {
@@ -228,9 +369,8 @@ public class MainActivity extends AppCompatActivity
         fountainreview = findViewById(R.id.fountainreview);
         bottlerefill = findViewById(R.id.isbottlerefill);
 
-        final FloatingActionButton location = findViewById(R.id.location);
+        location = findViewById(R.id.location);
         location.setOnClickListener((view) ->{
-            checkPermissions();
             if(mLocationPermissionGranted) {
                 followPerson = true;
                 updateLocationUI();
@@ -239,7 +379,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        FloatingActionButton addLocation = findViewById(R.id.newLocation);
+        addLocation = findViewById(R.id.newLocation);
         addLocation.setOnClickListener((view) -> {
             if(!syncing && locUpdate) {
 
@@ -277,7 +417,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        FloatingActionButton refresh = findViewById(R.id.refresh);
+        refresh = findViewById(R.id.refresh);
         refresh.setOnClickListener((view) -> {
             floatingActionMenu.close(true);
             updateEntries("Update");
@@ -778,13 +918,17 @@ public class MainActivity extends AppCompatActivity
         mMap.setOnCameraMoveStartedListener(this);
         mMap.setOnMarkerClickListener(this);
 
+        initializeMap();
+
+    }
+
+    private void initializeMap() {
         setMapType();
         moveCamera();
 
         if(!newMapmarkers.isEmpty()) {
             addMarkers(new ArrayList<>(), true);
         }
-
     }
 
     private void checkPermissions() {
@@ -793,6 +937,13 @@ public class MainActivity extends AppCompatActivity
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
+            //for location updates
+            if(serviceFragment == null) {
+                Log.d("MainActivity", "Starting Location Updates");
+                serviceFragment = ServiceFragment.newInstance();
+                fragmentManager.beginTransaction().add(serviceFragment, TAG_LOC_FRAGMENT).commit();
+            }
+
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
@@ -809,11 +960,19 @@ public class MainActivity extends AppCompatActivity
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 if (grantResults.length > 0 &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
                     mLocationPermissionGranted = true;
+                    //for location updates
+                    if(serviceFragment == null) {
+                        Log.d("MainActivity", "Starting Location Updates");
+                        serviceFragment = ServiceFragment.newInstance();
+                        fragmentManager.beginTransaction().add(serviceFragment, TAG_LOC_FRAGMENT).commit();
+                    }
                 }
             }
         }
-        updateLocationUI();
+
+
     }
 
     private void processReview(String title) {
@@ -891,6 +1050,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLocationUpdate(Location location) {
+        Log.d("MainActivity", "Updating Location: " + location);
         updateLocationUI();
         setDeviceLocation(location);
     }
@@ -913,6 +1073,18 @@ public class MainActivity extends AppCompatActivity
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, zoomLevel));
             }
         }
+    }
+
+    private void setTutorialComplete() {
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("TUTORIAL", true);
+        editor.apply();
+    }
+
+    private boolean getTutorial() {
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        return sharedPref.getBoolean("TUTORIAL", false);
     }
 
     private void saveMapType() {

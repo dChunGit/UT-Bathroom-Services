@@ -143,6 +143,7 @@
     </string-array>
 
     <!--Libraries-->
+    <!--Make sure to change in AboutFragment-->
     <string-array name="about">
         <item>FloatingActionButton</item>
         <item>Calligraphy</item>
@@ -150,6 +151,8 @@
         <item>Simple Rating Bar</item>
         <item>Scale Rating Bar</item>
         <item>AVLoadingIndicatorView</item>
+        <item>TapTargetView</item>
+        <item>EasingInterpolator</item>
         <item>AppCompat-v7 27.0.1</item>
         <item>Constraint-Layout 1.0.2</item>
         <item>Design 27.0.1</item>
@@ -168,6 +171,8 @@
         <item>Copyright - Iván Arcuschin - Apache 2.0</item>
         <item>Copyright - Willy Yu - MIT License</item>
         <item>Copyright - Jack Wang - Apache 2.0</item>
+        <item>Copyright - Keepsafe Software Inc. - Apache 2.0</item>
+        <item>Copyright - Masayuki Suda - MIT</item>
         <item>Copyright - Android - Apache 2.0</item>
         <item>Copyright - Android - Apache 2.0</item>
         <item>Copyright - Android - Apache 2.0</item>
