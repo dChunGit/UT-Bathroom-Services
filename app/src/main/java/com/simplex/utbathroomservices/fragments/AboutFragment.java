@@ -133,15 +133,17 @@ public class AboutFragment extends Fragment {
                     case 3: url = "https://github.com/FlyingPumba/SimpleRatingBar"; break;
                     case 4: url = "https://github.com/ome450901/SimpleRatingBar"; break;
                     case 5: url = "https://github.com/81813780/AVLoadingIndicatorView"; break;
-                    case 6: url = "https://github.com/aosp-mirror/platform_frameworks_support"; break;
-                    case 7: url = "https://github.com/aosp-mirror/platform_frameworks_support"; break;
+                    case 6: url = "https://github.com/KeepSafe/TapTargetView"; break;
+                    case 7: url = "https://github.com/MasayukiSuda/EasingInterpolator"; break;
                     case 8: url = "https://github.com/aosp-mirror/platform_frameworks_support"; break;
                     case 9: url = "https://github.com/aosp-mirror/platform_frameworks_support"; break;
                     case 10: url = "https://github.com/aosp-mirror/platform_frameworks_support"; break;
                     case 11: url = "https://github.com/aosp-mirror/platform_frameworks_support"; break;
-                    case 12: url = "https://developers.google.com/maps/android"; break;
-                    case 13: url = "https://firebase.google.com"; break;
-                    case 14: url = "https://developers.google.com/android/guides/setup"; break;
+                    case 12: url = "https://github.com/aosp-mirror/platform_frameworks_support"; break;
+                    case 13: url = "https://github.com/aosp-mirror/platform_frameworks_support"; break;
+                    case 14: url = "https://developers.google.com/maps/android"; break;
+                    case 15: url = "https://firebase.google.com"; break;
+                    case 16: url = "https://developers.google.com/android/guides/setup"; break;
                     default: url = "https://google.com";
                 }
 
