@@ -1,24 +1,22 @@
 package com.simplex.utbathroomservices;
 
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class SplashScreen extends AppCompatActivity implements OnMapReadyCallback{
 
@@ -26,9 +24,21 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
     private TextView done;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_onboarding);
+        setContentView(R.layout.splashscreen);
+
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/ColabReg.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build()
+        );
+
         avLoadingIndicatorView = findViewById(R.id.loadingIndicator);
         avLoadingIndicatorView.smoothToShow();
         done = findViewById(R.id.done);

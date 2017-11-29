@@ -45,13 +45,19 @@
             android:name=".location.LocationService"
             android:enabled="true" />
 
-        <activity android:name=".Favorites"
+        <activity
+            android:name=".Favorites"
             android:theme="@style/AppTheme" />
-        <activity android:name=".Search"
+        <activity
+            android:name=".Search"
             android:theme="@style/AppTheme" />
-        <activity android:name=".Add"
-            android:theme="@style/AppTheme"
-            android:parentActivityName=".MainActivity"/>
+        <activity
+            android:name=".Add"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".About"
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>

@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import android.support.v4.app.ActivityCompat;
@@ -81,6 +83,7 @@ public class MainActivity extends AppCompatActivity
     final String LOADING = "LOADING";
     final String TOOLBAR = "TOOLBAR";
     final String SELECTED = "SELECTED";
+    final String position = "POSITION";
     private boolean whichtoolbar = false;
     private static final int ADD_LOCATION = 0;
 
@@ -705,10 +708,56 @@ public class MainActivity extends AppCompatActivity
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
-        } else if (id == R.id.about) {
+        }  else if(id == R.id.about) {
 
-        } else if (id == R.id.help) {
+            Intent i = new Intent(this, About.class);
+            i.putExtra(position, 0);
+            startActivity(i);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
+            return true;
+        } else if(id == R.id.library) {
+            Intent i = new Intent(this, About.class);
+            i.putExtra(position, 1);
+            startActivity(i);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
+            return true;
+        } else if(id == R.id.contact) {
+            //contact us dialog information
+            MaterialDialog m = new MaterialDialog.Builder(this)
+                    .customView(R.layout.contact_item, false)
+                    .cancelable(true)
+                    .title("Contact Us")
+                    .titleColorRes(R.color.colorAccent)
+                    .positiveText("Go")
+                    .onPositive((dialog, which) -> {
+                        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                        Toast.makeText(getApplicationContext(), getString(R.string.openLink) + " Github", Toast.LENGTH_SHORT).show();
+
+                        //build and launch tab
+                        CustomTabsIntent customTabsIntent = builder.build();
+                        String url = getApplicationContext().getResources().getString(R.string.contactURL);
+                        customTabsIntent.launchUrl(getApplicationContext(), Uri.parse(url));
+                        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
+                    })
+                    .negativeText("Cancel")
+                    .show();
+
+            View view = m.getCustomView();
+            TextView githubIssue = view.findViewById(R.id.contactURL);
+            githubIssue.setOnClickListener((view1) -> {
+                CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                Toast.makeText(getApplicationContext(), getString(R.string.openLink) + " Github", Toast.LENGTH_SHORT).show();
+
+                //build and launch tab
+                CustomTabsIntent customTabsIntent = builder.build();
+                String url = getApplicationContext().getResources().getString(R.string.contactURL);
+                customTabsIntent.launchUrl(getApplicationContext(), Uri.parse(url));
+                overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
+            });
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

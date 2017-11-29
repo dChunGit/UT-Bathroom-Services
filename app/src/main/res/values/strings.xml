@@ -28,6 +28,27 @@
     <string name="back">Press BACK again to exit</string>
     <string name="appbar_scrolling_view_behavior" translatable="false">android.support.design.widget.AppBarLayout$ScrollingViewBehavior</string>
 
+    <!--PagerAdapterHeadings-->
+    <string name="about_adapter">About App</string>
+    <string name="library_adapter">Libraries</string>
+    <string name="changes_adapter">Changelog</string>
+    <string name="about_app">About</string>
+
+    <!--Licenses-->
+    <string name="apachename">Apache 2.0</string>
+    <string name="apache">Licensed under the Apache License, Version 2.0 (the \"License\");
+        \nYou may not use this file except in compliance with the License.
+        \nYou may obtain a copy of the License at\n
+        \nhttp://www.apache.org/licenses/LICENSE-2.0\n
+        \nUnless required by applicable law or agreed to in writing, software distributed under
+        the License is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+        \nSee the License for the specific language governing permissions and
+        limitations under the License.</string>
+    <string name="mitname">The MIT License</string>
+    <string name="mit">Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n
+        \nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n
+        \nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
+
     <string name="spinnerprompt">Select Type</string>
     <string name="stallprompt">Select Number</string>
     <string name="spaceprompt">Select Space</string>
@@ -73,8 +94,80 @@
         <item>Custom</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="change112817">Initial Release</string>
+
+    <string-array name="release">
+        <item>November 28, 2017</item>
+    </string-array>
+
+    <string-array name="features">
+        <item>@string/change112817</item>
+    </string-array>
+
+    <!--About App-->
+    <string-array name="headers">
+        <item>Developed By</item>
+        <item>About UTBS</item>
+        <item>Permissions</item>
+        <item>Source Code</item>
+    </string-array>
+
+    <!--About App-->
+    <string name="developed">David Chun, Zoe Ng, Joel Wang, Hans Xu\n
+    \nCopyright &#169; 2017-2018 Simplex</string>
+    <string name="aboutApp">UT Bathroom Services is an app designed to help people find their way around the UT Campus facilities.
+    \nUsers can find and rate bathrooms or water fountains, creating a database.</string>
+    <string name="explainPermissions">Location: The location permission is used to provide up to date location tracking while in app and to assign new facility locations\n
+    \nWe do not and will not collect any personally identifiable information.\n</string>
+    <string name="sourceCode">View Source Code</string>
+    <string name="openLink">Open</string>
+    <string name="dGithub">Opening Source Code</string>
+    <string name="contact">For Bug Reports or QOL Suggestions, add a new issue here:</string>
+    <string name="contactURL">https://github.com/dChunGit/UT-Bathroom-Services/issues</string>
+
+    <string-array name="explanation">
+        <item>@string/developed</item>
+        <item>@string/aboutApp</item>
+        <item>@string/explainPermissions</item>
+        <item>@string/sourceCode</item>
+    </string-array>
+
+    <!--AboutFragmentries-->
+    <string-array name="about">
+        <item>FloatingActionButton</item>
+        <item>Calligraphy</item>
+        <item>Material Dialogs</item>
+        <item>Simple Rating Bar</item>
+        <item>Scale Rating Bar</item>
+        <item>AVLoadingIndicatorView</item>
+        <item>AppCompat-v7 27.0.1</item>
+        <item>Constraint-Layout 1.0.2</item>
+        <item>Design 27.0.1</item>
+        <item>RecyclerView 27.0.1</item>
+        <item>CardView 27.0.1</item>
+        <item>CustomTabs 27.0.1</item>
+        <item>Play Services Maps 11.6.0</item>
+        <item>Firebase Firestore 11.6.0</item>
+        <item>Play Services Location 11.6.0</item>
+    </string-array>
+
+    <string-array name="license">
+        <item>Copyright - Dmytro Tarianyk - Apache 2.0</item>
+        <item>Copyright - Christopher Jenkins - Apache 2.0</item>
+        <item>Copyright - Aidan Michael Follestad - MIT</item>
+        <item>Copyright - Iván Arcuschin - Apache 2.0</item>
+        <item>Copyright - Willy Yu - MIT License</item>
+        <item>Copyright - Jack Wang - Apache 2.0</item>
+        <item>Copyright - Android - Apache 2.0</item>
+        <item>Copyright - Android - Apache 2.0</item>
+        <item>Copyright - Android - Apache 2.0</item>
+        <item>Copyright - Android - Apache 2.0</item>
+        <item>Copyright - Android - Apache 2.0</item>
+        <item>Copyright - Android - Apache 2.0</item>
+        <item>Copyright - Google - Apache 2.0</item>
+        <item>Copyright - Google - Apache 2.0</item>
+        <item>Copyright - Google - Apache 2.0</item>
+    </string-array>
 
 
 </resources>
