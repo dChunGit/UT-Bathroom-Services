@@ -611,8 +611,8 @@ public class MainActivity extends AppCompatActivity
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
             return true;
-        } else if (id == R.id.action_settings) {
-            Intent settings = new Intent(this, Settings.class);
+        } else if (id == R.id.action_about) {
+            Intent settings = new Intent(this, About.class);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
@@ -701,14 +701,9 @@ public class MainActivity extends AppCompatActivity
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
         } else if (id == R.id.advanced_search) {
+            //advanced search algorithm
 
-        } else if (id == R.id.settings) {
-
-            Intent settings = new Intent(this, Settings.class);
-            startActivity(settings);
-            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-
-        }  else if(id == R.id.about) {
+        } else if(id == R.id.about) {
 
             Intent i = new Intent(this, About.class);
             i.putExtra(position, 0);

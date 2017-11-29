@@ -85,6 +85,17 @@ public class AboutFragment extends Fragment {
                         CustomTabsIntent customTabsIntent = builder.build();
                         customTabsIntent.launchUrl(getActivity(), Uri.parse(url));
                         getActivity().overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+                    } break;
+                    case 4: {
+                        String url = getResources().getString(R.string.contactURL);
+                        //Chrome custom tabs - open using chrome (if not installed use default)
+                        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                        //System.out.println(Color.BLUE + " " + color);
+                        Toast.makeText(getContext(), getString(R.string.dGithub) , Toast.LENGTH_SHORT).show();
+                        //build and launch tab
+                        CustomTabsIntent customTabsIntent = builder.build();
+                        customTabsIntent.launchUrl(getActivity(), Uri.parse(url));
+                        getActivity().overridePendingTransition(R.anim.fadein, R.anim.fadeout);
                     }
                 }
             });

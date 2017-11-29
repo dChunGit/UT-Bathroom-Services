@@ -3,11 +3,16 @@ package com.simplex.utbathroomservices;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.transition.ChangeBounds;
+import android.support.transition.Transition;
+import android.support.transition.TransitionManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -22,6 +27,7 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
 
     private AVLoadingIndicatorView avLoadingIndicatorView;
     private TextView done;
+    private View disappearView;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -42,6 +48,7 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
         avLoadingIndicatorView = findViewById(R.id.loadingIndicator);
         avLoadingIndicatorView.smoothToShow();
         done = findViewById(R.id.done);
+        disappearView = findViewById(R.id.tempView);
 
         setFont();
 
@@ -72,7 +79,7 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         final Handler handler = new Handler();
         final Intent main = new Intent(this, MainActivity.class);
-        final Animation animationFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
+        final Animation animationFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadeinlong);
         animationFadeIn.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -86,24 +93,31 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
             public void onAnimationRepeat(Animation animation) {}
         });
 
+        final ViewGroup transitionsContainer = findViewById(R.id.logoview);
+
         handler.postDelayed(() -> {
 
             if(avLoadingIndicatorView != null) {
                 avLoadingIndicatorView.smoothToHide();
+                Transition transition = new ChangeBounds();
+                transition.setDuration(500);
+                TransitionManager.beginDelayedTransition(transitionsContainer, transition);
+                disappearView.setVisibility(View.GONE);
+
             }
 
             if(done != null) {
                 done.startAnimation(animationFadeIn);
             }
 
-        }, 1500);
+        }, 1000);
 
         handler.postDelayed(() -> {
 
             startActivity(main);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
-        }, 2000);
+        }, 2500);
 
         //Toast.makeText(this, "Loaded", Toast.LENGTH_LONG).show();
 
