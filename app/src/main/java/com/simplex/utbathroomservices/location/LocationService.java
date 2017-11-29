@@ -13,6 +13,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
  * Created by dwsch on 10/24/2017.
  */
 
+//service to call location updates
 public class LocationService extends Service implements LocationUpdateListener{
     private GoogleLocationService googleLocationService;
     private LocationCallback locationCallback;
