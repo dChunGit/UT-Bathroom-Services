@@ -9,10 +9,30 @@
         <item name="android:textColor">@color/textColor</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar"/>
+    <style name="AppTheme.AppBarOverlayAlt" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="AppTheme.PopupOverlayAlt" parent="ThemeOverlay.AppCompat.Dark" />
+
+    <style name="TabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">#FFFFFF</item>
+        <item name="tabTextAppearance">@style/TabText</item>
+        <item name="tabSelectedTextColor">@color/white</item>
+        <item name="tabGravity">fill</item>
+        <item name="tabMaxWidth">0dp</item>
+    </style>
+
+    <style name="TabText" parent="TextAppearance.Design.Tab">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="ToolbarTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
 </resources>

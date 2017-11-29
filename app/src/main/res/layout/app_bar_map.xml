@@ -7,22 +7,35 @@
     android:layout_height="match_parent"
     tools:context="com.simplex.utbathroomservices.MainActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <include layout="@layout/content_map" />
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="match_parent"
+            android:padding="16dp">
 
-    </android.support.design.widget.AppBarLayout>
+            <android.support.v7.widget.CardView
+                android:id="@+id/cardToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-    <include layout="@layout/content_map" />
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="@color/white"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" />
 
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/menu"
@@ -36,7 +49,7 @@
         fab:menu_colorPressed="@color/colorPrimaryDark"
         fab:menu_colorRipple="#99FFFFFF"
         fab:menu_fab_size="normal"
-        fab:menu_icon="@drawable/menu"
+        fab:menu_icon="@drawable/ic_bubble_chart"
         fab:menu_labels_colorNormal="#FFFFFF"
         fab:menu_labels_colorPressed="#444444"
         fab:menu_labels_colorRipple="#66FFFFFF"
@@ -64,27 +77,55 @@
         fab:menu_showShadow="true">
 
         <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/zoomIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@color/colorAccent2"
+            fab:fab_colorPressed="@color/colorPrimaryDark"
+            fab:fab_colorRipple="@color/colorPrimary"
+            android:src="@drawable/ic_zoom_in"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/zoomOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_zoom_out"
+            fab:fab_colorNormal="@color/colorAccent2"
+            fab:fab_colorPressed="@color/colorPrimaryDark"
+            fab:fab_colorRipple="@color/colorPrimary"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@color/colorAccent5"
+            fab:fab_colorPressed="@color/colorPrimaryDark"
+            fab:fab_colorRipple="@color/colorPrimary"
+            android:src="@drawable/ic_refresh"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/newLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_add_location"
-            fab:fab_label="Add Location"
-            fab:fab_colorNormal="@color/colorAccent"
+            fab:fab_colorNormal="@color/colorAccent3"
             fab:fab_colorPressed="@color/colorPrimaryDark"
             fab:fab_colorRipple="@color/colorPrimary"
             fab:fab_size="mini" />
 
 
-    <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        fab:fab_label="My Location"
-        fab:fab_colorNormal="@color/colorAccent"
-        fab:fab_colorPressed="@color/colorPrimaryDark"
-        fab:fab_colorRipple="@color/colorPrimary"
-        android:src="@drawable/ic_location"
-        fab:fab_size="mini" />
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@color/colorAccent4"
+            fab:fab_colorPressed="@color/colorPrimaryDark"
+            fab:fab_colorRipple="@color/colorPrimary"
+            android:src="@drawable/ic_my_location"
+            fab:fab_size="mini" />
 
     </com.github.clans.fab.FloatingActionMenu>
 </android.support.design.widget.CoordinatorLayout>

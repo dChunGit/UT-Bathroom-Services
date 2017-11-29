@@ -1,8 +1,54 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.simplex.utbathroomservices.MainActivity" />
+    tools:context="com.simplex.utbathroomservices.MainActivity" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/locationSheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:behavior_peekHeight="?attr/actionBarSize"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+        android:background="@color/white">
+
+        <include layout="@layout/location_sheet"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/toolbar2"
+                android:layout_width="match_parent"
+                android:text="No Location"
+                android:gravity="center"
+                android:textSize="30sp"
+                android:textColor="@color/textColorAlt"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary"/>
+
+            <com.wang.avi.AVLoadingIndicatorView
+                android:id="@+id/sync"
+                android:layout_marginStart="14dp"
+                android:layout_centerVertical="true"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                app:indicatorName="PacmanIndicator" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>
