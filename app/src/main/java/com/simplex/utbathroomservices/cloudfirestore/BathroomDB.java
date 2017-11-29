@@ -21,8 +21,9 @@ import java.util.LinkedList;
  */
 
 public class BathroomDB {
-    LinkedList<Bathroom> results= new LinkedList<>();
-    FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
+    private ArrayList<Bathroom> results= new ArrayList<>();
+    private FirebaseFirestore mFireStore=FirebaseFirestore.getInstance();
+    //possible connection bug, only seen once so not sure atm
 
     private DatabaseCallback databaseCallback;
 
@@ -35,25 +36,30 @@ public class BathroomDB {
     public void addBathroomToDB(Location location, String building, String floor, Integer reviews, String space,
                                 Integer numberStalls, Integer wifiQuality, Integer busyness,
                                 Integer cleanliness, Integer overallRating, ArrayList<Rating> rating,
-                                ArrayList<String> image){
-        Bathroom b= new Bathroom( location,  building,  floor,  reviews, space,  numberStalls,  wifiQuality,
+                                ArrayList<String> image) {
+        Bathroom b= new Bathroom(location.getLongitude(), location.getLatitude(),  building,  floor,  reviews, space,  numberStalls,  wifiQuality,
                 busyness, cleanliness, overallRating , rating, image);
-        mFireStore.collection("bathroom").document(building + " " + floor).set(b);
+        mFireStore.collection("bathroom").document(building + " " + floor).set(b).addOnCompleteListener((task) -> {
+            if(task.isSuccessful()) {
+                databaseCallback.addFinished(true);
+            } else databaseCallback.addFinished(false);
+        });
 
     }
 
-    public void addReviewForBathroom(Bathroom b, String review){
-        final ArrayList<String> id= new ArrayList<String>();
+    public void updateReviewForBathroom(Bathroom b) {
+        mFireStore.collection("bathroom").document(b.getBuilding() + " " + b.getFloor()).set(b).addOnCompleteListener((task) -> {
+            if(task.isSuccessful()) {
+                databaseCallback.addFinished(true);
+            } else databaseCallback.addFinished(false);
+        });
+    }
+
+    /*public void addReviewForBathroom(Bathroom b, String review){
+        final ArrayList<String> id= new ArrayList<>();
         mFireStore.collection("bathroom")
                 .whereEqualTo("building", b.getBuilding())
                 .whereEqualTo("floor", b.getFloor())
-                .whereEqualTo("location", b.getLocation())
-                .whereEqualTo("space", b.getSpace())
-                .whereEqualTo("numberStalls", b.getNumberStalls())
-                .whereEqualTo("wifiQuality", b.getWifiQuality())
-                .whereEqualTo("busyness", b.getBusyness())
-                .whereEqualTo("cleanliness", b.getCleanliness())
-                .whereEqualTo("overallRating", b.getOverallRating())
                 .get()
                 .addOnCompleteListener((task) -> {
                     if (task.isSuccessful()) {
@@ -61,10 +67,10 @@ public class BathroomDB {
                             id.add(document.getId());
                         }
                         Rating rating= new Rating(review);
-                        b.rating.add(rating);
+                        b.getRating().add(rating);
                         DocumentReference bathroomRef = mFireStore.collection("bathroom").document(id.get(0));
                         bathroomRef
-                                .update("rating", b.rating)
+                                .update("rating", b.getRating())
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -81,7 +87,7 @@ public class BathroomDB {
                         Log.d("Error", "Error getting documents: ", task.getException());
                     }
                 });
-    }
+    }*/
 
     public void getAllBathrooms(){
         mFireStore.collection("bathroom")
@@ -152,7 +158,7 @@ public class BathroomDB {
                 Log.d("Error", "Error getting documents: ", task.getException());
             }
             if(databaseCallback != null) {
-                databaseCallback.updateFinished(results);
+                databaseCallback.updateFinishedB(results);
             }
         }
     }

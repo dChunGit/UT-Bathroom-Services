@@ -5,15 +5,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by zoeng on 11/10/17.
  */
 
-public class Bathroom implements Parcelable{
+public class Bathroom implements Parcelable {
 
-    Location location;
+    double longitude;
+    double latitude;
     String building;
     String floor;
     Integer reviews; //Number of reviews
@@ -30,10 +30,11 @@ public class Bathroom implements Parcelable{
 
     }
 
-    public Bathroom(Location location, String building, String floor, Integer reviews, String space, Integer numberStalls,
+    public Bathroom(double longitude, double latitude, String building, String floor, Integer reviews, String space, Integer numberStalls,
                     Integer wifiQuality, Integer busyness, Integer cleanliness, Integer overallRating,
                     ArrayList<Rating> rating, ArrayList<String> image) {
-        this.location = location;
+        this.longitude = longitude;
+        this.latitude = latitude;
         this.building = building;
         this.floor = floor;
         this.reviews = reviews;
@@ -50,7 +51,8 @@ public class Bathroom implements Parcelable{
     @Override
     public String toString() {
         return "Bathroom{" +
-                "location=" + location +
+                "longitude=" + longitude +
+                ", latitude=" + latitude+
                 ", building='" + building + '\'' +
                 ", floor='" + floor + '\'' +
                 ", reviews='" + reviews + "\'" +
@@ -84,6 +86,22 @@ public class Bathroom implements Parcelable{
 
     public void setReviews(Integer reviews) {
         this.reviews = reviews;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
     public String getSpace() { return space; }
@@ -124,12 +142,6 @@ public class Bathroom implements Parcelable{
         this.rating = rating;
     }
 
-    public Location getLocation() { return location; }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
     public ArrayList<String> getImage() {
         return image;
     }
@@ -154,70 +166,105 @@ public class Bathroom implements Parcelable{
         this.overallRating = overallRating;
     }
 
+
+    protected Bathroom(Parcel in) {
+        longitude = in.readDouble();
+        latitude = in.readDouble();
+        building = in.readString();
+        floor = in.readString();
+        reviews = in.readByte() == 0x00 ? null : in.readInt();
+        space = in.readString();
+        numberStalls = in.readByte() == 0x00 ? null : in.readInt();
+        wifiQuality = in.readByte() == 0x00 ? null : in.readInt();
+        busyness = in.readByte() == 0x00 ? null : in.readInt();
+        cleanliness = in.readByte() == 0x00 ? null : in.readInt();
+        overallRating = in.readByte() == 0x00 ? null : in.readInt();
+        if (in.readByte() == 0x01) {
+            rating = new ArrayList<Rating>();
+            in.readList(rating, Rating.class.getClassLoader());
+        } else {
+            rating = null;
+        }
+        if (in.readByte() == 0x01) {
+            image = new ArrayList<String>();
+            in.readList(image, String.class.getClassLoader());
+        } else {
+            image = null;
+        }
+    }
+
     @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeParcelable(location, i);
-        parcel.writeString(building);
-        parcel.writeString(floor);
-        parcel.writeValue(reviews);
-        parcel.writeString(space);
-        parcel.writeValue(numberStalls);
-        parcel.writeValue(wifiQuality);
-        parcel.writeValue(busyness);
-        parcel.writeValue(cleanliness);
-        parcel.writeValue(overallRating);
-        if(rating != null) {
-            parcel.writeTypedArray(rating.toArray(new Rating[rating.size()]), i);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDouble(longitude);
+        dest.writeDouble(latitude);
+        dest.writeString(building);
+        dest.writeString(floor);
+        if (reviews == null) {
+            dest.writeByte((byte) (0x00));
         } else {
-            parcel.writeTypedArray(new Rating[0], i);
+            dest.writeByte((byte) (0x01));
+            dest.writeInt(reviews);
         }
-        if(image != null) {
-            parcel.writeStringArray(image.toArray(new String[image.size()]));
+        dest.writeString(space);
+        if (numberStalls == null) {
+            dest.writeByte((byte) (0x00));
         } else {
-            parcel.writeStringArray(new String[0]);
+            dest.writeByte((byte) (0x01));
+            dest.writeInt(numberStalls);
+        }
+        if (wifiQuality == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeInt(wifiQuality);
+        }
+        if (busyness == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeInt(busyness);
+        }
+        if (cleanliness == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeInt(cleanliness);
+        }
+        if (overallRating == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeInt(overallRating);
+        }
+        if (rating == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(rating);
+        }
+        if (image == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(image);
         }
     }
 
-    private Bathroom(Parcel in) {
-        location = in.readParcelable(Location.class.getClassLoader());
-        building = in.readString();
-        floor = in.readString();
-        reviews = (Integer) in.readValue(Integer.class.getClassLoader());
-        space = in.readString();
-        numberStalls = (Integer) in.readValue(Integer.class.getClassLoader());
-        wifiQuality = (Integer) in.readValue(Integer.class.getClassLoader());
-        busyness = (Integer) in.readValue(Integer.class.getClassLoader());
-        cleanliness = (Integer) in.readValue(Integer.class.getClassLoader());
-        overallRating = (Integer) in.readValue(Integer.class.getClassLoader());
-        Rating[] tempRating = in.createTypedArray(Rating.CREATOR);
-        if(tempRating.length == 0) {
-            rating = null;
-        } else {
-            rating = new ArrayList<>(Arrays.asList(tempRating));
-        }
-        String[] tempImage = in.createStringArray();
-        if(tempImage.length == 0) {
-            image = null;
-        } else {
-            image = new ArrayList<>(Arrays.asList(tempImage));
-        }
-    }
-
+    @SuppressWarnings("unused")
     public static final Parcelable.Creator<Bathroom> CREATOR = new Parcelable.Creator<Bathroom>() {
-
         @Override
-        public Bathroom createFromParcel(Parcel parcel) {
-            return new Bathroom(parcel);
+        public Bathroom createFromParcel(Parcel in) {
+            return new Bathroom(in);
         }
 
         @Override
-        public Bathroom[] newArray(int i) {
-            return new Bathroom[i];
+        public Bathroom[] newArray(int size) {
+            return new Bathroom[size];
         }
     };
 }

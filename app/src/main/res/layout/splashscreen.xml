@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.simplex.utbathroomservices.SplashScreen">
+
+    <FrameLayout
+        android:id="@+id/loadingMap"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"/>
+
+    <RelativeLayout
+        android:id="@+id/loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorAccent" >
+
+        <LinearLayout
+            android:id="@+id/logoview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:adjustViewBounds="true"
+                android:layout_width="wrap_content"
+                android:layout_height="130dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/logo_utbstop"/>
+
+            <View
+                android:id="@+id/tempView"
+                android:layout_width="wrap_content"
+                android:layout_height="64dp"/>
+
+            <ImageView
+                android:adjustViewBounds="true"
+                android:layout_width="wrap_content"
+                android:layout_height="130dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/logo_utbsbot"/>
+        </LinearLayout>
+
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/loadingIndicator"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:indicatorName="PacmanIndicator"
+            app:indicatorColor="@color/white" />
+
+        <TextView
+            android:id="@+id/done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Map Loaded"
+            android:textSize="26sp"
+            android:visibility="invisible"
+            android:textColor="@color/white"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/name"/>
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="64dp"
+            android:text="UT Bathroom Services"/>
+
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>
