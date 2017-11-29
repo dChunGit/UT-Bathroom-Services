@@ -118,6 +118,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             sentWRatings = new ArrayList<>();
         }
 
+        //put into hashmaps for faster access later on
         new Thread(() -> {
             for(Bathroom b : sentBRatings) {
                 firebaseBRatings.put(b.getBuilding() + " " + b.getFloor(), b);
@@ -137,7 +138,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     }
 
     private void setUpInfo() {
-
+        //if adding for pre-existing location, restore views to match
         if(editLocation != null) {
             String[] title = editLocation.split("@");
             if(title[1].trim().equals("Bathroom")) {
@@ -161,7 +162,12 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
         Toolbar toolbar = findViewById(R.id.addbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.title_addActivity));
+        //set title based on if editing existing location or not
+        if(editLocation != null) {
+            getSupportActionBar().setTitle(R.string.title_addActivityAlt);
+        } else {
+            getSupportActionBar().setTitle(getString(R.string.title_addActivity));
+        }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
 
@@ -208,6 +214,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     }
 
     private void setUpSpinners() {
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, buildings);
         autoCompleteTextView = findViewById(R.id.completeBuilding);
@@ -250,10 +257,9 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        System.out.println(adapterView.getId());
+
         switch(adapterView.getId()) {
             case R.id.typespinner: {
-                System.out.println("TypeSpinner");
                 switch(i) {
                     case 0: {
                         type = "Bathroom";
@@ -268,7 +274,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 }
             } break;
             case R.id.stallpicker: {
-                System.out.println("StallSpinner");
+                //displaystall is for custom input
                 displayStall.setVisibility(View.INVISIBLE);
                 customStallSelect = false;
 
@@ -286,7 +292,6 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 }
             } break;
             case R.id.spacePicker: {
-                System.out.println("SpaceSpinner");
                 switch(i) {
                     case 0: space = "XSmall"; break;
                     case 1: space = "Small"; break;
@@ -296,7 +301,6 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 }
             } break;
             case R.id.tempPicker: {
-                System.out.println("TempSpinner");
                 switch(i) {
                     case 0: temp = "cold"; break;
                     case 1: temp = "cool"; break;
@@ -306,7 +310,6 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 }
             } break;
             case R.id.tastePicker: {
-                System.out.println("TasteSpinner");
                 switch(i) {
                     case 0: taste = "Wow"; break;
                     case 1: taste = "Pretty Good"; break;
@@ -329,7 +332,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-
+        //don't care I think
     }
 
     @Override
@@ -343,54 +346,62 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                 building = autoCompleteTextView.getText().toString();
                 floorNumber = editText.getText().toString();
 
-                //if is a location already
-                if(firebaseBRatings.containsKey(building + " " + floorNumber)) {
-                    Bathroom bathroom = setUpBathroom(firebaseBRatings.get(building + " " + floorNumber));
-                    BathroomDB bathroomDB = new BathroomDB(this);
-                    bathroomDB.updateReviewForBathroom(bathroom);
+                if(!building.isEmpty() && !floorNumber.isEmpty()) {
 
-                } else if(firebaseWRatings.containsKey(building + " " + floorNumber)) {
-                    WaterFountain waterFountain = setUpFountain(firebaseWRatings.get(building + " " + floorNumber));
-                    WaterFountainDB waterFountainDB = new WaterFountainDB(this);
-                    waterFountainDB.updateReviewForFountain(waterFountain);
+                    //if is a location already
+                    if (firebaseBRatings.containsKey(building + " " + floorNumber)) {
+                        Bathroom bathroom = setUpBathroom(firebaseBRatings.get(building + " " + floorNumber));
+                        BathroomDB bathroomDB = new BathroomDB(this);
+                        bathroomDB.updateReviewForBathroom(bathroom);
 
-                } else {
-                    ArrayList<Rating> newRating = new ArrayList<>();
-                    if(customStallSelect) {
-                        try {
-                            int temp = Integer.valueOf(displayStall.getText().toString());
-                            if (temp >= 0) {
-                                stallnum = temp;
-                            } else {
+                    } else if (firebaseWRatings.containsKey(building + " " + floorNumber)) {
+                        WaterFountain waterFountain = setUpFountain(firebaseWRatings.get(building + " " + floorNumber));
+                        WaterFountainDB waterFountainDB = new WaterFountainDB(this);
+                        waterFountainDB.updateReviewForFountain(waterFountain);
+
+                    } else {
+                        //add new location
+
+                        ArrayList<Rating> newRating = new ArrayList<>();
+                        //if entered a custom stall number, check to make sure is valid
+                        if (customStallSelect) {
+                            try {
+                                int temp = Integer.valueOf(displayStall.getText().toString());
+                                if (temp >= 0) {
+                                    stallnum = temp;
+                                } else {
+                                    Toast.makeText(this, "Please Enter a Valid Number", Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (Exception e) {
+                                //not a number
                                 Toast.makeText(this, "Please Enter a Valid Number", Toast.LENGTH_SHORT).show();
                             }
-                        } catch (Exception e) {
-                            //not a number
-                            Toast.makeText(this, "Please Enter a Valid Number", Toast.LENGTH_SHORT).show();
+                        }
+
+                        if (type.equals("Bathroom")) {
+
+                            Rating rating = new Rating(commentsEditText.getText().toString(), space, stallnum,
+                                    wifiV, activityV, overallV, cleanlinessV, null, false, null);
+                            newRating.add(rating);
+                            BathroomDB bathroomDB = new BathroomDB(this);
+                            bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
+                                    wifiV, activityV, overallV,
+                                    cleanlinessV, newRating, new ArrayList<>());
+
+                        } else if (type.equals("Fountain")) {
+
+                            Rating rating = new Rating(commentsEditText.getText().toString(), null, 0,
+                                    0, 0, 0, overallV, temp, isFillable, taste);
+                            newRating.add(rating);
+
+                            WaterFountainDB waterFountainDB = new WaterFountainDB(this);
+                            waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
+                                    isFillable, taste, overallV, newRating, new ArrayList<>());
+
                         }
                     }
-
-                    if(type.equals("Bathroom")) {
-
-                        Rating rating = new Rating(commentsEditText.getText().toString(), space, stallnum,
-                                wifiV, activityV, overallV, cleanlinessV, null, false, null);
-                        newRating.add(rating);
-                        BathroomDB bathroomDB = new BathroomDB(this);
-                        bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
-                                wifiV, activityV, overallV,
-                                cleanlinessV, newRating, new ArrayList<>());
-
-                    } else if(type.equals("Fountain")) {
-
-                        Rating rating = new Rating(commentsEditText.getText().toString(), null, 0,
-                                0, 0, 0, overallV, temp, isFillable, taste);
-                        newRating.add(rating);
-
-                        WaterFountainDB waterFountainDB = new WaterFountainDB(this);
-                        waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
-                                isFillable, taste, overallV, newRating, new ArrayList<>());
-
-                    }
+                } else {
+                    Toast.makeText(this, "Please Enter a Valid Building and Floor/Room Number", Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -404,7 +415,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         int overallP = waterFountain.getOverallRating();
 
         waterFountain.setTemperature(getTempVal(((tempP * reviews) + getTempString(temp))/(reviews + 1)));
-        //need to make bottle refill an arraylist
+        //need to make bottle refill an arraylist at some point to get majority instead of latest
         waterFountain.setTaste(getTasteVal(((tasteP * reviews) + getTasteString(taste))/(reviews + 1)));
         waterFountain.setOverallRating(((overallP * reviews) + overallV)/(reviews + 1));
 

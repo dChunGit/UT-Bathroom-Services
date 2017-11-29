@@ -30,6 +30,7 @@ public class About extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //set font
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath("fonts/ColabReg.ttf")
                 .setFontAttrId(R.attr.fontPath)
@@ -99,12 +100,8 @@ public class About extends AppCompatActivity {
     //menu dots method - includes color picker
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //if item is action_settings
         if (id == R.id.action_apache) {
 
             //show apache license

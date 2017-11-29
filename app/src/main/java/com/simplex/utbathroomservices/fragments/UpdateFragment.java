@@ -5,6 +5,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+//gets data from firebase database, later should make it periodic
 public class UpdateFragment extends Fragment implements DatabaseCallback {
 
     public interface onUpdateListener {
@@ -38,7 +40,6 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
     public UpdateFragment() {
         // Required empty public constructor
     }
-
 
     public static UpdateFragment newInstance(String type) {
         UpdateFragment updateFragment = new UpdateFragment();
@@ -126,7 +127,7 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
 
     private <T> void setUpMarkers(ArrayList<T> results) {
         for(T item: results) {
-            //Location location = new Location("mocked");
+            float hue;
             double longitude, latitude;
             String title, type;
             if(item instanceof Bathroom) {
@@ -135,8 +136,8 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
                 System.out.println(title);
                 longitude = bathroom.getLongitude();
                 latitude = bathroom.getLatitude();
-                //location = bathroom.getLocation();
                 type = "Bathroom";
+                hue = BitmapDescriptorFactory.HUE_ROSE;
 
             } else {
                 WaterFountain fountain = (WaterFountain) item;
@@ -144,12 +145,13 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
                 System.out.println(title);
                 longitude = fountain.getLongitude();
                 latitude = fountain.getLatitude();
-                //location = fountain.getLocation();
                 type = "Fountain";
+                hue = BitmapDescriptorFactory.HUE_CYAN;
             }
 
-            LatLng sydney = new LatLng(latitude, longitude);
-            MarkerOptions options = new MarkerOptions().position(sydney).title(title + " @ " + type);
+            LatLng location = new LatLng(latitude, longitude);
+            MarkerOptions options = new MarkerOptions().position(location).title(title + " @ " + type).
+                    icon(BitmapDescriptorFactory.defaultMarker(hue));
             synchronized (this) {
                 markerOptions.add(options);
             }
@@ -157,7 +159,6 @@ public class UpdateFragment extends Fragment implements DatabaseCallback {
         }
 
     }
-
 
     @Override
     public void onDetach() {

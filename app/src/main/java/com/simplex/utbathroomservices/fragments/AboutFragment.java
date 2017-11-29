@@ -101,6 +101,7 @@ public class AboutFragment extends Fragment {
             });
 
         }else if(mPage == 2){
+            //library layout
             view = inflater.inflate(R.layout.libraries_tab, container, false);
             listView = view.findViewById(R.id.openSource);
 
@@ -124,6 +125,7 @@ public class AboutFragment extends Fragment {
 
             listView.setOnItemClickListener((arg0, art1, position, arg3) -> {
                 String url;
+                //hard coded urls, prob better to put into @string as list but...
                 switch(position) {
                     case 0: url = "https://github.com/Clans/FloatingActionButton"; break;
                     case 1: url = "https://github.com/chrisjenx/Calligraphy"; break;
@@ -155,6 +157,7 @@ public class AboutFragment extends Fragment {
             });
 
         }else {
+            //Changelog layout
             view = inflater.inflate(R.layout.changelog_tab, container, false);
             listView = view.findViewById(R.id.changelog);
 

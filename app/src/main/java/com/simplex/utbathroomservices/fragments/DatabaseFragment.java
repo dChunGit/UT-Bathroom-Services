@@ -1,22 +1,17 @@
 package com.simplex.utbathroomservices.fragments;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+//saves database state, right now only for orientation change but could use to back up data as well
 public class DatabaseFragment extends Fragment {
 
     private HashMap<String, Bathroom> firebaseBRatings = new HashMap<>();

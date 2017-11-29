@@ -73,7 +73,8 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_alignParentBottom="true"
-            android:layout_margin="48dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="64dp"
             android:text="UT Bathroom Services"/>
 
     </RelativeLayout>
