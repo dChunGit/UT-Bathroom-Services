@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity
 
     private BottomSheetBehavior bottomSheetBehavior;
     private Toolbar toolbar, locationToolbar;
+    private RelativeLayout bottomSheetLayout;
     private CardView cardToolbar;
     private TextView toolbar2, building, room, stallamount, bottlerefill;
     private DrawerLayout drawerLayout;
@@ -151,7 +152,7 @@ public class MainActivity extends AppCompatActivity
         followPerson = true;
         zoomLevel = 17f;
 
-        RelativeLayout bottomSheetLayout = findViewById(R.id.locationSheet);
+        bottomSheetLayout = findViewById(R.id.locationSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
 
         fragmentManager = getSupportFragmentManager();
@@ -267,7 +268,7 @@ public class MainActivity extends AppCompatActivity
                                     "Add a NEW bathroom/water fountain location",
                                     "Uses your location to add a new facility to the map")
                                     .id(4)
-                                    .outerCircleColor(R.color.colorAccent4)
+                                    .outerCircleColor(R.color.colorAccent3)
                                     .targetCircleColor(R.color.white)
                                     .titleTextSize(20)
                                     .textColor(R.color.white)
@@ -321,8 +322,8 @@ public class MainActivity extends AppCompatActivity
 
                         @Override
                         public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
-                            if(lastTarget.id() == 5 || lastTarget.id() == 6) {
-                                doBounceAnimation(toolbar2);
+                            if(lastTarget.id() == 5) {
+                                doBounceAnimation(bottomSheetLayout);
                             }
                         }
 
@@ -338,8 +339,8 @@ public class MainActivity extends AppCompatActivity
 
     private void doBounceAnimation(View targetView) {
         if(targetView != null) {
-            ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationY", 0, 40, 0);
-            animator.setInterpolator(new EasingInterpolator(Ease.QUAD_IN_OUT));
+            ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationY", 0, -40, 0);
+            animator.setInterpolator(new EasingInterpolator(Ease.CUBIC_IN_OUT));
             animator.setStartDelay(500);
             animator.setDuration(2000);
             animator.start();
@@ -530,6 +531,7 @@ public class MainActivity extends AppCompatActivity
     private void setReview(Object location) {
         if(location != null) {
             Log.d("MainActivity", "Setting review " + location.toString());
+            doBounceAnimation(bottomSheetLayout);
             RecyclerView recyclerView = findViewById(R.id.reviewRecycler);
 
             float orate;
