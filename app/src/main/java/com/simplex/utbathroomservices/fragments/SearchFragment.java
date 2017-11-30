@@ -184,7 +184,7 @@ public class SearchFragment extends Fragment {
             else
             {
                 Iterator<WaterFountain> it = fountains.iterator();
-                while (it.hasNext()) {
+               /* while (it.hasNext()) {
                     WaterFountain temp = it.next();
                     int translatedTaste = 0;
                     int translatedTemperature = 0;
@@ -211,7 +211,7 @@ public class SearchFragment extends Fragment {
                             translatedTaste < taste ||
                             translatedTemperature < temperature)
                         it.remove();
-                }
+                }*/
             }
             //whatever is left, return it
 

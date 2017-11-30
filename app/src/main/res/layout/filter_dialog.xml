@@ -6,12 +6,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:padding="15dp"
+    <RelativeLayout
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginBottom="14dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="Type"
+            android:textSize="20sp"
+            android:layout_margin="7dp"/>
+
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/typespinnerDialog"
+            android:layout_alignParentEnd="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:prompt="@string/spinnerprompt"
+            android:paddingEnd="30dp"/>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/overall_dialog"
@@ -19,10 +43,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <LinearLayout
+            <RelativeLayout
+                android:layout_margin="7dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -31,11 +55,12 @@
                     android:layout_margin="7dp"/>
 
                 <LinearLayout
+                    android:layout_marginTop="24dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center"
-                    android:layout_marginStart="30dp">
+                    android:layout_alignParentEnd="true">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/overallBar_dialog"
@@ -55,12 +80,12 @@
                         android:layout_margin="7dp"
                         />
                 </LinearLayout>
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
+            <RelativeLayout
+                android:layout_margin="7dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -69,11 +94,12 @@
                     android:layout_margin="7dp"/>
 
                 <LinearLayout
+                    android:layout_marginTop="24dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:orientation="horizontal"
-                    android:layout_marginStart="30dp">
+                    android:layout_alignParentEnd="true"
+                    android:orientation="horizontal">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/spaceBar_dialog"
@@ -94,12 +120,12 @@
                         />
                 </LinearLayout>
 
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
+            <RelativeLayout
+                android:layout_margin="7dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -108,11 +134,12 @@
                     android:layout_margin="7dp"/>
 
                 <LinearLayout
+                    android:layout_marginTop="24dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
                     android:gravity="center"
-                    android:orientation="horizontal"
-                    android:layout_marginStart="30dp">
+                    android:orientation="horizontal">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/activityBar_dialog"
@@ -133,12 +160,12 @@
                         />
                 </LinearLayout>
 
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
+            <RelativeLayout
+                android:layout_margin="7dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -147,11 +174,12 @@
                     android:layout_margin="7dp"/>
 
                 <LinearLayout
+                    android:layout_marginTop="24dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginStart="30dp">
+                    android:layout_alignParentEnd="true">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/wifiBar_dialog"
@@ -172,25 +200,27 @@
                         />
                 </LinearLayout>
 
-            </LinearLayout>
+            </RelativeLayout>
 
-            <LinearLayout
+            <RelativeLayout
+                android:layout_margin="7dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
                 <TextView
+                    android:id="@+id/textClean"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cleanliness"
                     android:layout_margin="7dp"/>
 
                 <LinearLayout
+                    android:layout_marginTop="24dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="horizontal"
-                    android:layout_marginStart="30dp">
+                    android:layout_alignParentEnd="true">
 
                     <com.willy.ratingbar.ScaleRatingBar
                         android:id="@+id/cleanBar_dialog"
@@ -211,8 +241,87 @@
                         />
                 </LinearLayout>
 
+            </RelativeLayout>
 
-            </LinearLayout>
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/fountainAdd_dialog"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="7dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="Temperature"
+                    android:textSize="14sp"
+                    android:layout_margin="7dp"/>
+
+                <android.support.v7.widget.AppCompatSpinner
+                    android:id="@+id/tempPicker_dialog"
+                    android:layout_alignParentEnd="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:prompt="@string/tempPrompt"
+                    android:paddingEnd="30dp"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="7dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="Bottle Refill Station"
+                    android:textSize="14sp"
+                    android:layout_margin="7dp"/>
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/refillStation_dialog"
+                    android:layout_alignParentEnd="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:prompt="@string/stallprompt"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="7dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="Taste"
+                    android:textSize="14sp"
+                    android:layout_margin="7dp"/>
+
+                <android.support.v7.widget.AppCompatSpinner
+                    android:id="@+id/tastePicker_dialog"
+                    android:layout_alignParentEnd="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:prompt="@string/tastePrompt"
+                    android:paddingEnd="30dp"/>
+
+            </RelativeLayout>
 
         </LinearLayout>
 

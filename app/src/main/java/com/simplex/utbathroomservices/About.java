@@ -42,12 +42,7 @@ public class About extends AppCompatActivity {
         Toolbar mActionBarToolbar = findViewById(R.id.toolbar_about);
         setSupportActionBar(mActionBarToolbar);
         getSupportActionBar().setTitle(getString(R.string.about_app));
-        mActionBarToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        mActionBarToolbar.setNavigationOnClickListener((view) -> onBackPressed());
 
         //add back button to actionbar
         ActionBar actionbar = getSupportActionBar();

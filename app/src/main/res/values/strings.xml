@@ -6,6 +6,8 @@
     <string name="title_activity_settings">Settings</string>
     <string name="title_addActivity">Add New Location</string>
     <string name="title_addActivityAlt">Add New Review</string>
+    <string name="title_activity_favorites">Favorites</string>
+    <string name="title_activity_reviews">My Reviews</string>
 
     <!--Drawer Items-->
     <string name="navigation_drawer_open">Open navigation drawer</string>

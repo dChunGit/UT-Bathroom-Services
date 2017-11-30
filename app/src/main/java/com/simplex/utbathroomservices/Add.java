@@ -170,6 +170,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
+        toolbar.setNavigationOnClickListener((view) -> onBackPressed());
 
         displayStall = findViewById(R.id.customDisplay);
         bathroomLL = findViewById(R.id.bathcard);
@@ -568,4 +569,5 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             Toast.makeText(this, "Error Saving to Database. Please try again", Toast.LENGTH_LONG).show();
         }
     }
+
 }

@@ -20,6 +20,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -30,9 +31,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -760,23 +764,17 @@ public class MainActivity extends AppCompatActivity
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
             return true;
-        }else if(R.id.reviews == id){
-            Intent settings = new Intent(MainActivity.this, Reviews.class);
-            //send bathroom/fountain
-            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
-            settings.putParcelableArrayListExtra("WRatings", saveFountain);
-            startActivity(settings);
-            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-
-
         } else if (id == R.id.action_about) {
+
             Intent settings = new Intent(this, About.class);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
             return true;
         } else if(id == R.id.action_search) {
-            new MaterialDialog.Builder(this)
+            String type;
+
+            MaterialDialog m = new MaterialDialog.Builder(this)
                     .customView(R.layout.filter_dialog, true)
                     .cancelable(true)
                     .title("QUICK SEARCH")
@@ -787,16 +785,63 @@ public class MainActivity extends AppCompatActivity
                             Toast.makeText(getApplicationContext(), "Searching", Toast.LENGTH_SHORT).show();
                         }
                         View filterDialogView = dialog.getCustomView();
+                        Spinner typespinner = filterDialogView.findViewById(R.id.typespinnerDialog);
+                        Spinner tempspinner = filterDialogView.findViewById(R.id.tempPicker_dialog);
+                        Spinner tastespinner = filterDialogView.findViewById(R.id.tastePicker_dialog);
+                        SwitchCompat switchRefill = filterDialogView.findViewById(R.id.refillStation_dialog);
                         ScaleRatingBar overallDialog = filterDialogView.findViewById(R.id.overallBar_dialog);
                         ScaleRatingBar spaceDialog = filterDialogView.findViewById(R.id.spaceBar_dialog);
                         ScaleRatingBar activityDialog = filterDialogView.findViewById(R.id.activityBar_dialog);
                         ScaleRatingBar wifiDialog= filterDialogView.findViewById(R.id.wifiBar_dialog);
                         ScaleRatingBar cleanDialog = filterDialogView.findViewById(R.id.cleanBar_dialog);
 
-                        Log.d("MainActivity", overallDialog.getRating() + " " + spaceDialog.getRating() + " " + activityDialog.getRating() +
-                            " " + wifiDialog.getRating() + " " + cleanDialog.getRating());
+                        Log.d("MainActivity", typespinner.getSelectedItem() + " " + tempspinner.getSelectedItem() + " " +
+                                switchRefill.isChecked() + " " + tastespinner.getSelectedItem() + " " + overallDialog.getRating() +
+                                " " + spaceDialog.getRating() + " " + activityDialog.getRating() + " " +
+                                wifiDialog.getRating() + " " + cleanDialog.getRating());
                     })
                     .show();
+
+            View customDialog = m.getCustomView();
+            LinearLayout bathroomLL = customDialog.findViewById(R.id.overall_dialog);
+            LinearLayout fountainLL = customDialog.findViewById(R.id.fountainAdd_dialog);
+
+            Spinner typespinner = customDialog.findViewById(R.id.typespinnerDialog);
+            Spinner tempspinner = customDialog.findViewById(R.id.tempPicker_dialog);
+            Spinner tastespinner = customDialog.findViewById(R.id.tastePicker_dialog);
+            ArrayAdapter<CharSequence> spinneradapter = ArrayAdapter.createFromResource(this,
+                    R.array.type_array, R.layout.spinner_item);
+            ArrayAdapter<CharSequence> tempadapter = ArrayAdapter.createFromResource(this,
+                    R.array.temp_array, R.layout.spinner_item);
+            ArrayAdapter<CharSequence> tasteadapter = ArrayAdapter.createFromResource(this,
+                    R.array.taste_array, R.layout.spinner_item);
+            spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            tempadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            tasteadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            typespinner.setAdapter(spinneradapter);
+            tempspinner.setAdapter(tempadapter);
+            tastespinner.setAdapter(tasteadapter);
+            typespinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    switch(i) {
+                        case 0: {
+                            bathroomLL.setVisibility(View.VISIBLE);
+                            fountainLL.setVisibility(View.GONE);
+                        } break;
+                        case 1: {
+                            fountainLL.setVisibility(View.VISIBLE);
+                            bathroomLL.setVisibility(View.GONE);
+                        }
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+
 
             return true;
         } else if(id == R.id.action_maptype) {
@@ -855,6 +900,18 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.favorites) {
 
             Intent settings = new Intent(this, Favorites.class);
+            //send bathroom/fountain
+            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
+            settings.putParcelableArrayListExtra("WRatings", saveFountain);
+            startActivity(settings);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
+        } else if(id == R.id.reviews) {
+
+            Intent settings = new Intent(MainActivity.this, Reviews.class);
+            //send bathroom/fountain
+            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
+            settings.putParcelableArrayListExtra("WRatings", saveFountain);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
