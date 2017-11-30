@@ -55,4 +55,11 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
         }
         searchFragment = null;
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+    }
+
 }

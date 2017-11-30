@@ -38,19 +38,13 @@ public class FavoriteAdapter  <T> extends RecyclerView.Adapter<FavoriteAdapter.R
         return context;
     }
 
-
-
     @Override
     public ReviewHolder1 onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
         // Inflate the custom layout
-        View reviewView = inflater.inflate(R.layout.review_item, parent, false);
-
-
-
-
+        View reviewView = inflater.inflate(R.layout.bathroom_favorites, parent, false);
         // Return a new holder instance
         ReviewHolder1 reviewHolder = new ReviewHolder1(reviewView);
         return reviewHolder;
@@ -66,48 +60,12 @@ public class FavoriteAdapter  <T> extends RecyclerView.Adapter<FavoriteAdapter.R
             holder.room.setText(String.valueOf(b.getFloor()));
             holder.stars.setRating(b.getOverallRating());
 
-
         } else if(type.equals("Fountain")) {
             WaterFountain wf= (WaterFountain) ratings.get(position);
             holder.building.setText(String.valueOf(wf.getBuilding()));
             holder.room.setText(String.valueOf(wf.getFloor()));
             holder.stars.setRating(wf.getOverallRating());
 
-        }
-    }
-
-    private int getSpaceVal(String space) {
-        switch(space) {
-            case "XSmall": return 1;
-            case "Small": return 2;
-            case "Medium": return 3;
-            case "Large": return 4;
-            case "XLarge": return 5;
-            default: return 0;
-        }
-    }
-
-    private int getTasteVal(String type) {
-        System.out.println("taste: " + type);
-        switch(type) {
-            case "Wow": return 5;
-            case "Pretty Good": return 4;
-            case "Meh": return 3;
-            case "Not Great": return 2;
-            case "Disgusting": return 1;
-            default: return 0;
-        }
-    }
-
-    private int getTempVal(String type) {
-        System.out.println("temp: " + type);
-        switch(type) {
-            case "cold": return 5;
-            case "cool": return 4;
-            case "lukewarm": return 3;
-            case "warm": return 2;
-            case "hot": return 1;
-            default: return 0;
         }
     }
 

@@ -165,7 +165,7 @@ public class SearchFragment extends Fragment {
             else
             {
                 Iterator<WaterFountain> it = fountains.iterator();
-                while (it.hasNext()) {
+               /* while (it.hasNext()) {
                     WaterFountain temp = it.next();
                     if (!temp.getBuilding().equals(building.toUpperCase()) ||
                             !(Integer.valueOf(temp.getFloor()) == floor) ||
@@ -173,7 +173,7 @@ public class SearchFragment extends Fragment {
                             temp.getTaste() < taste ||
                             temp.get)
                         it.remove();
-                }
+                }*/
             }
 
 
