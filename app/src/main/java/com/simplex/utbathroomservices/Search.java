@@ -4,7 +4,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
+import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.fragments.SearchFragment;
+
+import java.util.ArrayList;
 
 public class Search extends AppCompatActivity implements SearchFragment.SearchCallback{
     private SearchFragment searchFragment;
@@ -47,7 +51,7 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
     }
 
     @Override
-    public void onPostExecuteSearch() {
+    public void onPostExecuteSearch(ArrayList<Bathroom> filteredBathrooms, ArrayList<WaterFountain> filteredFountains) {
         try {
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
         } catch (Exception e) {

@@ -10,6 +10,7 @@ import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class SearchFragment extends Fragment {
         void onPreExecuteSearch();
         void onProgressUpdateSearch();
         void onCancelledSearch();
-        void onPostExecuteSearch();
+        void onPostExecuteSearch(ArrayList<Bathroom> filteredBathrooms, ArrayList<WaterFountain> filteredFountains);
     }
 
     public SearchFragment() {
@@ -122,35 +123,53 @@ public class SearchFragment extends Fragment {
         }
 
         protected void onPostExecute(Integer success) {
-            searchCallback.onPostExecuteSearch();
+            searchCallback.onPostExecuteSearch((ArrayList<Bathroom>)searchParams.get("BRatings") , (ArrayList<WaterFountain>) searchParams.get("WRatings"));
             asyncRunning = false;
         }
 
         @Override
         protected Integer doInBackground(String... strings) {
             //initalize with params once we figure it out
+            ArrayList<Integer> userParams = (ArrayList<Integer>) searchParams.get("USpec");
             String building = null;
-            int floor = -1;
-            String space = null;
-            int stalls = -1;
-            int wifi = -1;
-            int busyness = -1;
-            int cleanliness = -1;
-            int rating = -1;
-            List<Bathroom> baths = null;
+            int floor = userParams.get(0);
+            int space = userParams.get(1);
+            int stalls = userParams.get(2);
+            int wifi = userParams.get(3);
+            int busyness = userParams.get(4);
+            int cleanliness = userParams.get(5);
+            int rating = userParams.get(6);
+            List<Bathroom> baths = (List<Bathroom>) searchParams.get("BRatings");
             //water fountain stuff
-            List<WaterFountain> fountains = null;
-            boolean fountain = false;
-            int taste = -1;
-            int temperature = -1;
+            List<WaterFountain> fountains = (List<WaterFountain>) searchParams.get("WRatings");
+            int fountain = userParams.get(7);
+            int taste = userParams.get(8);
+            int temperature = userParams.get(9);
             BathroomDB bDB = new BathroomDB(); //maybe need callback?
             //do search
             /*assume default priority: building->floor, rating
              */
-            if(!fountain) {
+            if(fountain != 1) {
                 Iterator<Bathroom> it = baths.iterator();
                 while (it.hasNext()) {
+                    int translatedSpace = 0;
                     Bathroom temp = it.next();
+                    switch(temp.getSpace()) {
+                        case "XSmall":
+                            translatedSpace = 1;
+                            break;
+                        case "Small":
+                            translatedSpace = 2;
+                            break;
+                        case "Medium":
+                            translatedSpace = 3;
+                            break;
+                        case "Large":
+                            translatedSpace = 4;
+                            break;
+                        case "XLarge":
+                            translatedSpace = 5;
+                    }
                     if (!temp.getBuilding().equals(building.toUpperCase()) ||
                             temp.getBusyness() < busyness ||
                             !(Integer.valueOf(temp.getFloor()) == floor) ||
@@ -158,7 +177,7 @@ public class SearchFragment extends Fragment {
                             temp.getCleanliness() < cleanliness ||
                             temp.getOverallRating() < rating ||
                             temp.getWifiQuality() < wifi ||
-                            !temp.getSpace().equals(space.toUpperCase()))
+                            translatedSpace < space)
                         it.remove();
                 }
             }
@@ -167,18 +186,39 @@ public class SearchFragment extends Fragment {
                 Iterator<WaterFountain> it = fountains.iterator();
                 while (it.hasNext()) {
                     WaterFountain temp = it.next();
+                    int translatedTaste = 0;
+                    int translatedTemperature = 0;
+                    switch (temp.getTemperature())
+                    {
+                        case "cold": translatedTemperature = 5; break;
+                        case "cool": translatedTemperature = 4; break;
+                        case "lukewarm": translatedTemperature = 3; break;
+                        case "warm": translatedTemperature = 2; break;
+                        case "hot": translatedTemperature = 1; break;
+                        default : translatedTemperature = 0;
+                    }
+                    switch(temp.getTaste())
+                    {
+                        case "Wow": translatedTaste = 5; break;
+                        case "Pretty Good": translatedTaste = 4; break;
+                        case "Meh": translatedTaste = 3; break;
+                        case "Not Great": translatedTaste = 2; break;
+                        case "Disgusting": translatedTaste = 1;
+                    }
                     if (!temp.getBuilding().equals(building.toUpperCase()) ||
                             !(Integer.valueOf(temp.getFloor()) == floor) ||
                             temp.getOverallRating() < rating ||
-                            temp.getTaste() < taste ||
-                            temp.get)
+                            translatedTaste < taste ||
+                            translatedTemperature < temperature)
                         it.remove();
                 }
             }
+            //whatever is left, return it
 
 
 
-            return null;
+
+            return 1;
         }
     }
 }
