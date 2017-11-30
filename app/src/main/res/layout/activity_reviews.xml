@@ -8,17 +8,15 @@
     tools:context="com.simplex.utbathroomservices.Favorites">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar5"
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/addbar6"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/AppTheme.PopupOverlayAlt"
-            android:background="?attr/colorPrimary" />
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"><android.support.v7.widget.Toolbar
+        android:id="@+id/addbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:popupTheme="@style/AppTheme.PopupOverlayAlt"
+        android:background="?attr/colorPrimary" />
 
     </android.support.design.widget.AppBarLayout>
     <TextView
@@ -29,7 +27,7 @@
         android:textSize="20dp"/>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/reviewRecycler1"
+        android:id="@+id/reviewRecycler3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="7dp"
@@ -44,7 +42,7 @@
         android:textSize="20dp"/>
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/reviewRecycler2"
+        android:id="@+id/reviewRecycler4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="7dp"
