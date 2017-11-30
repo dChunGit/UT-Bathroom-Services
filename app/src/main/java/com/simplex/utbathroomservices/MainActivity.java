@@ -760,6 +760,15 @@ public class MainActivity extends AppCompatActivity
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
             return true;
+        }else if(R.id.reviews == id){
+            Intent settings = new Intent(MainActivity.this, Reviews.class);
+            //send bathroom/fountain
+            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
+            settings.putParcelableArrayListExtra("WRatings", saveFountain);
+            startActivity(settings);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
+
         } else if (id == R.id.action_about) {
             Intent settings = new Intent(this, About.class);
             startActivity(settings);
