@@ -1,11 +1,15 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.activities;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+<<<<<<< HEAD:app/src/main/java/com/simplex/utbathroomservices/Search.java
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+=======
+import com.simplex.utbathroomservices.R;
+>>>>>>> David:app/src/main/java/com/simplex/utbathroomservices/activities/Search.java
 import com.simplex.utbathroomservices.fragments.SearchFragment;
 
 import java.util.ArrayList;

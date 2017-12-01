@@ -1,4 +1,4 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.activities;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.adapters.AboutAdapter;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;

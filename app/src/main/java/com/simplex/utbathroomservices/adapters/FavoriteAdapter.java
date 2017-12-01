@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * Created by dchun on 11/27/17.
  */
 
-public class FavoriteAdapter  <T> extends RecyclerView.Adapter<FavoriteAdapter.ReviewHolder1> {
+public class FavoriteAdapter <T> extends RecyclerView.Adapter<FavoriteAdapter.ReviewHolder1> {
     private Context context;
     private ArrayList<T> ratings = new ArrayList<>();
     private String type;

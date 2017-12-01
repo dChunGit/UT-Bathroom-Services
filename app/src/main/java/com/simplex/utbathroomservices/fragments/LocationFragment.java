@@ -9,19 +9,15 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.location.LocationCallback;
 import com.simplex.utbathroomservices.location.LocationService;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
 //Starts location updates and retains as long as app is running
-public class ServiceFragment extends Fragment implements LocationCallback {
+public class LocationFragment extends Fragment implements LocationCallback {
 
     private UpdateLocationListener mListener;
     boolean mBounded;
@@ -42,12 +38,12 @@ public class ServiceFragment extends Fragment implements LocationCallback {
         void onLocationUpdate(Location location);
     }
 
-    public ServiceFragment() {
+    public LocationFragment() {
         // Required empty public constructor
     }
 
-    public static ServiceFragment newInstance() {
-        return new ServiceFragment();
+    public static LocationFragment newInstance() {
+        return new LocationFragment();
     }
 
     @Override
@@ -103,7 +99,7 @@ public class ServiceFragment extends Fragment implements LocationCallback {
             mBounded = true;
             LocationService.LocalBinder mLocalBinder = (LocationService.LocalBinder)service;
             mServer = mLocalBinder.getServerInstance();
-            mServer.setCallbacks(ServiceFragment.this);
+            mServer.setCallbacks(LocationFragment.this);
         }
     };
 }
