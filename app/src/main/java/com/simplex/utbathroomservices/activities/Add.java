@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
+import com.simplex.utbathroomservices.Database;
 import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
@@ -35,8 +36,7 @@ import com.simplex.utbathroomservices.cloudfirestore.WaterFountainDB;
 import com.willy.ratingbar.ScaleRatingBar;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 public class Add extends AppCompatActivity implements AdapterView.OnItemSelectedListener, DatabaseCallback {
 
@@ -49,12 +49,10 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     private int stallnum;
     private boolean customStallSelect = false, isFillable;
 
-    private String[] buildings;
-    private ConcurrentHashMap<String, Bathroom> firebaseBRatings = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, WaterFountain> firebaseWRatings = new ConcurrentHashMap<>();
-    private ArrayList<Bathroom> sentBRatings = new ArrayList<>();
-    private ArrayList<WaterFountain> sentWRatings = new ArrayList<>();
+    private HashMap<String, Bathroom> firebaseBRatings = new HashMap<>();
+    private HashMap<String, WaterFountain> firebaseWRatings = new HashMap<>();
     private ArrayList<String> buildingsList = new ArrayList<>();
+    private String[] buildings = new String[0];
 
     private AutoCompleteTextView autoCompleteTextView;
     private EditText editText, commentsEditText;
@@ -71,25 +69,12 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
         System.out.println(getIntent().getExtras());
+        Database database = (Database) getApplication();
 
         try {
             location = getIntent().getParcelableExtra("Location");
         } catch (Exception e) {
             System.out.println("Location Not Sent or Something Else");
-        }
-
-        try{
-            sentBRatings = getIntent().getParcelableArrayListExtra("BRatings");
-            System.out.println(sentBRatings);
-        } catch (Exception e) {
-            System.out.println("BRatings malformed");
-        }
-
-        try{
-            sentWRatings = getIntent().getParcelableArrayListExtra("WRatings");
-            System.out.println(sentWRatings);
-        } catch (Exception e) {
-            System.out.println("WRatings malformed");
         }
 
         try{
@@ -99,40 +84,12 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             System.out.println("Something");
         }
 
-        try{
-            buildingsList = getIntent().getStringArrayListExtra("Buildings");
-        } catch (Exception e) {
-            System.out.println("Something else");
+        if(database != null) {
+            firebaseBRatings = database.getFirebaseBRatings();
+            firebaseWRatings = database.getFirebaseWRatings();
+            buildingsList = database.getSaveBuildings();
+            buildings = buildingsList.toArray(new String[buildingsList.size()]);
         }
-
-        if(buildingsList == null) {
-            buildingsList = new ArrayList<>();
-        }
-
-        buildings = buildingsList.toArray(new String[buildingsList.size()]);
-
-        if(sentBRatings == null) {
-            sentBRatings = new ArrayList<>();
-        }
-
-        if(sentWRatings == null) {
-            sentWRatings = new ArrayList<>();
-        }
-
-        //put into hashmaps for faster access later on
-        new Thread(() -> {
-            for(Bathroom b : sentBRatings) {
-                firebaseBRatings.put(b.getBuilding() + " " + b.getFloor(), b);
-            }
-            System.out.println(firebaseBRatings);
-        }).start();
-
-        new Thread(() -> {
-            for(WaterFountain w : sentWRatings) {
-                firebaseWRatings.put(w.getBuilding() + " " + w.getFloor(), w);
-            }
-            System.out.println(firebaseWRatings);
-        }).start();
 
         setUpUI();
         setUpInfo();

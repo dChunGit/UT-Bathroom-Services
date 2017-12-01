@@ -1,7 +1,7 @@
-package com.simplex.utbathroomservices.fragments;
+package com.simplex.utbathroomservices;
 
+import android.app.Application;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 //saves database state, right now only for orientation change but could use to back up data as well
-public class DatabaseFragment extends Fragment {
+public class Database extends Application {
 
     private HashMap<String, Bathroom> firebaseBRatings = new HashMap<>();
     private HashMap<String, WaterFountain> firebaseWRatings = new HashMap<>();
@@ -25,21 +25,6 @@ public class DatabaseFragment extends Fragment {
     private ArrayList<String> oldMapmarkers = new ArrayList<>();
     private HashMap<String, String> favorites = new HashMap<>();
     private HashMap<String, Favorite_Item> favoriteItems = new HashMap<>();
-
-    public DatabaseFragment() {
-        // Required empty public constructor
-    }
-
-    public static DatabaseFragment newInstance() {
-        return new DatabaseFragment();
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-
-    }
 
     public HashMap<String, Bathroom> getFirebaseBRatings() {
         return firebaseBRatings;
