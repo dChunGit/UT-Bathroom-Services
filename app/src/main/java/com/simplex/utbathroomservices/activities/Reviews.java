@@ -1,4 +1,4 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.activities;
 
 import android.animation.ObjectAnimator;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +10,7 @@ import android.view.View;
 
 import com.daasuu.ei.Ease;
 import com.daasuu.ei.EasingInterpolator;
+import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.adapters.ReviewAdapter;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
@@ -72,7 +73,7 @@ public class Reviews extends AppCompatActivity {
             ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationX", 0, 40, 0);
             animator.setInterpolator(new EasingInterpolator(Ease.ELASTIC_IN_OUT));
             animator.setStartDelay(500);
-            animator.setDuration(2000);
+            animator.setDuration(1500);
             animator.start();
         }
     }

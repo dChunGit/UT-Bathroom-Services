@@ -82,6 +82,7 @@
 
                     <TextView
                         android:id="@+id/rating1"
+                        android:layout_marginBottom="7dp"
                         android:layout_gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

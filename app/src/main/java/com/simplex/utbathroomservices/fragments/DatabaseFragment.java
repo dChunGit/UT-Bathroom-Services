@@ -7,6 +7,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+import com.simplex.utbathroomservices.dbflow.Favorite_Item;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +23,8 @@ public class DatabaseFragment extends Fragment {
     private ArrayList<Marker> mapMarkers = new ArrayList<>();
     private HashMap<String, MarkerOptions> newMapmarkers = new HashMap<>();
     private ArrayList<String> oldMapmarkers = new ArrayList<>();
+    private HashMap<String, String> favorites = new HashMap<>();
+    private HashMap<String, Favorite_Item> favoriteItems = new HashMap<>();
 
     public DatabaseFragment() {
         // Required empty public constructor
@@ -101,6 +104,22 @@ public class DatabaseFragment extends Fragment {
 
     public void setOldMapmarkers(ArrayList<String> oldMapmarkers) {
         this.oldMapmarkers = oldMapmarkers;
+    }
+
+    public HashMap<String, String> getFavorites() {
+        return favorites;
+    }
+
+    public void setFavorites(HashMap<String, String> favorites) {
+        this.favorites = favorites;
+    }
+
+    public HashMap<String, Favorite_Item> getFavoriteItems() {
+        return favoriteItems;
+    }
+
+    public void setFavoriteItems(HashMap<String, Favorite_Item> favoriteItems) {
+        this.favoriteItems = favoriteItems;
     }
 
 }

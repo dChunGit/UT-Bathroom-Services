@@ -12,12 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.simplex.utbathroomservices.activities.MainActivity;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
