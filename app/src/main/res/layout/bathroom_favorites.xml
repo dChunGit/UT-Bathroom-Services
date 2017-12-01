@@ -1,129 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-
-    xmlns:rb="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <android.support.v7.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:elevation="4dp"
-        android:layout_margin="7dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <android.support.v7.widget.CardView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_margin="7dp"
+            android:elevation="4dp">
 
             <LinearLayout
-                android:id="@+id/locationLayout"
-                android:layout_width="match_parent"
+                android:layout_margin="7dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="15dp"
-                android:gravity="center_vertical">
+                android:orientation="vertical">
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:id="@+id/locationText"
+                <LinearLayout
+                    android:id="@+id/locationLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    android:text="@string/building"/>
+                    android:layout_gravity="center">
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
+                    <TextView
+                        android:id="@+id/locationText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:text="@string/building"/>
 
-                <TextView
-                    android:id="@+id/buildingname1"
+                    <TextView
+                        android:gravity="center_horizontal"
+                        android:layout_marginStart="7dp"
+                        android:id="@+id/buildingname1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="N/A"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_margin="7dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="N/A"/>
+                    android:layout_gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:text="@string/room"/>
+
+                        <TextView
+                            android:layout_marginStart="7dp"
+                            android:gravity="center_horizontal"
+                            android:id="@+id/roomname1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="N/A"/>
+                </LinearLayout>
 
                 <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@color/lightgrey"/>
 
-                <TextView
+                <LinearLayout
+                    android:layout_margin="7dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    android:text="@string/room"/>
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
+                    <TextView
+                        android:id="@+id/rating1"
+                        android:layout_marginBottom="7dp"
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:text="@string/rating"/>
 
-                <TextView
-                    android:id="@+id/roomname1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="N/A"/>
+                    <com.iarcuschin.simpleratingbar.SimpleRatingBar
+                        android:id="@+id/stars1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        app:srb_starSize="20dp"
+                        app:srb_numberOfStars="5"
+                        app:srb_stepSize="0.1"
+                        app:srb_borderColor="@color/colorAccent"
+                        app:srb_fillColor="@color/colorAccent" />
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
+                </LinearLayout>
 
             </LinearLayout>
-
-            <LinearLayout
-                android:padding="15dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp">
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:id="@+id/rating"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="20sp"
-                    android:lineSpacingExtra="8dp"
-                    android:text="@string/rating"/>
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
-
-                <com.iarcuschin.simpleratingbar.SimpleRatingBar
-                    android:id="@+id/stars1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:srb_starSize="20dp"
-                    app:srb_numberOfStars="5"
-                    app:srb_stepSize="0.1"
-                    app:srb_borderColor="@color/colorAccent"
-                    app:srb_fillColor="@color/colorAccent" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"/>
-            </LinearLayout>
-        </LinearLayout>
-    </android.support.v7.widget.CardView>
+        </android.support.v7.widget.CardView>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

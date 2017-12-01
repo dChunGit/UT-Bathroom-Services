@@ -1,4 +1,4 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.activities;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.adapters.AboutAdapter;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
@@ -42,12 +43,7 @@ public class About extends AppCompatActivity {
         Toolbar mActionBarToolbar = findViewById(R.id.toolbar_about);
         setSupportActionBar(mActionBarToolbar);
         getSupportActionBar().setTitle(getString(R.string.about_app));
-        mActionBarToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        mActionBarToolbar.setNavigationOnClickListener((view) -> onBackPressed());
 
         //add back button to actionbar
         ActionBar actionbar = getSupportActionBar();

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="true"
     android:focusable="true"
-    tools:context="com.simplex.utbathroomservices.Add">
+    tools:context="com.simplex.utbathroomservices.activities.Add">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"

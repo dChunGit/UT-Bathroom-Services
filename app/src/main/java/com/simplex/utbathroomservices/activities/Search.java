@@ -1,10 +1,18 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.activities;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+<<<<<<< HEAD:app/src/main/java/com/simplex/utbathroomservices/Search.java
+import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
+import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+=======
+import com.simplex.utbathroomservices.R;
+>>>>>>> David:app/src/main/java/com/simplex/utbathroomservices/activities/Search.java
 import com.simplex.utbathroomservices.fragments.SearchFragment;
+
+import java.util.ArrayList;
 
 public class Search extends AppCompatActivity implements SearchFragment.SearchCallback{
     private SearchFragment searchFragment;
@@ -47,7 +55,7 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
     }
 
     @Override
-    public void onPostExecuteSearch() {
+    public void onPostExecuteSearch(ArrayList<Bathroom> filteredBathrooms, ArrayList<WaterFountain> filteredFountains) {
         try {
             fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
         } catch (Exception e) {
@@ -55,4 +63,11 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
         }
         searchFragment = null;
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+    }
+
 }

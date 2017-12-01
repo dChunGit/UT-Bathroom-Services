@@ -1,6 +1,7 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.activities;
 
 import android.animation.ObjectAnimator;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -17,9 +18,11 @@ import android.support.design.widget.BottomSheetBehavior.BottomSheetCallback;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -30,9 +33,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,25 +60,33 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.iarcuschin.simpleratingbar.SimpleRatingBar;
+import com.raizlabs.android.dbflow.config.DatabaseConfig;
+import com.raizlabs.android.dbflow.config.FlowConfig;
+import com.raizlabs.android.dbflow.config.FlowManager;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
+import com.simplex.utbathroomservices.dbflow.AppDatabase;
+import com.simplex.utbathroomservices.dbflow.Favorite_Item;
+import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.adapters.ReviewAdapter;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.fragments.DatabaseFragment;
-import com.simplex.utbathroomservices.fragments.ServiceFragment;
+import com.simplex.utbathroomservices.fragments.LocationFragment;
 import com.simplex.utbathroomservices.fragments.UpdateFragment;
 import com.wang.avi.AVLoadingIndicatorView;
 import com.willy.ratingbar.ScaleRatingBar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        GoogleMap.OnCameraMoveStartedListener, ServiceFragment.UpdateLocationListener, GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnCameraMoveStartedListener, LocationFragment.UpdateLocationListener, GoogleMap.OnMarkerClickListener,
         UpdateFragment.onUpdateListener {
     //TODO: Favorites activity
     //TODO: Reviews activity
@@ -114,9 +128,10 @@ public class MainActivity extends AppCompatActivity
     private AVLoadingIndicatorView sync;
     private LinearLayout bathroomreview, fountainreview;
     private FloatingActionButton addLocation, location, refresh;
+    private RecyclerView recyclerView;
 
     private UpdateFragment updateFragment;
-    private ServiceFragment serviceFragment;
+    private LocationFragment locationFragment;
     private DatabaseFragment databaseFragment;
     private FragmentManager fragmentManager;
     private static final String TAG_TASK_FRAGMENT = "updateFragment";
@@ -133,6 +148,10 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<String> oldMapmarkers = new ArrayList<>();
     private boolean syncing = false, locUpdate = false;
     private String currentSelected;
+
+    private android.support.design.widget.FloatingActionButton fab1;
+    private HashMap<String, String> favorites = new HashMap<>();
+    private HashMap<String, Favorite_Item> favoriteItems = new HashMap<>();
 
     private long mBackPressed;
     private static final int TIME_INTERVAL = 2000;
@@ -157,7 +176,7 @@ public class MainActivity extends AppCompatActivity
 
         fragmentManager = getSupportFragmentManager();
         updateFragment = (UpdateFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
-        serviceFragment = (ServiceFragment) fragmentManager.findFragmentByTag(TAG_LOC_FRAGMENT);
+        locationFragment = (LocationFragment) fragmentManager.findFragmentByTag(TAG_LOC_FRAGMENT);
         databaseFragment = (DatabaseFragment) fragmentManager.findFragmentByTag(TAG_DATA_FRAGMENT);
 
         //for location updates
@@ -172,6 +191,11 @@ public class MainActivity extends AppCompatActivity
         setFont();
         setUpUI();
         setUpMap();
+        FlowManager.init(FlowConfig.builder(this)
+                .addDatabaseConfig(DatabaseConfig.builder(AppDatabase.class)
+                        .databaseName("UTBSDatabase")
+                        .build())
+                .build());
 
         if(savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(SAVELOCATION);
@@ -197,6 +221,8 @@ public class MainActivity extends AppCompatActivity
                 mapMarkers = databaseFragment.getMapMarkers();
                 newMapmarkers = databaseFragment.getNewMapmarkers();
                 oldMapmarkers = databaseFragment.getOldMapmarkers();
+                favorites = databaseFragment.getFavorites();
+                favoriteItems = databaseFragment.getFavoriteItems();
             }
             String temp = savedInstanceState.getString(SELECTED);
             if(temp != null) {
@@ -204,6 +230,23 @@ public class MainActivity extends AppCompatActivity
                 processReview(currentSelected);
             }
         } else {
+            new Thread(() -> {
+                System.out.println("Called");
+                List<Favorite_Item> favoritesList = SQLite.select()
+                        .from(Favorite_Item.class)
+                        .queryList();
+
+                for(Favorite_Item favorite_item : favoritesList) {
+                    favorites.put(favorite_item.getFavorite(), favorite_item.getType());
+                    favoriteItems.put(favorite_item.getFavorite(), favorite_item);
+                }
+                if(databaseFragment != null) {
+                    databaseFragment.setFavorites(favorites);
+                    databaseFragment.setFavoriteItems(favoriteItems);
+                }
+                System.out.println("Favorites: " + favoritesList);
+            }).start();
+
             updateEntries("Update");
         }
 
@@ -337,12 +380,66 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @TargetApi(23)
+    private void setUpSheet(){
+        NestedScrollView nestedScrollView = findViewById(R.id.scrollReview);
+        android.support.design.widget.FloatingActionButton fab = findViewById(R.id.addreview);
+        nestedScrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View view, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if (scrollY > oldScrollY)
+                    fab.hide();
+                else if (scrollY < oldScrollY)
+                    fab.show();
+            }
+        });
+
+        fab1 = findViewById(R.id.starReview);
+        fab1.setOnClickListener((view) -> {
+            if(currentSelected != null) {
+                if (!favorites.containsKey(currentSelected)) {
+                    Favorite_Item favorite_item = new Favorite_Item();
+                    favorite_item.setFavorite(currentSelected);
+                    favorite_item.setType(currentSelected.split("@")[1].trim());
+
+                    favorites.put(favorite_item.getFavorite(), favorite_item.getType());
+                    favoriteItems.put(favorite_item.getFavorite(), favorite_item);
+                    favorite_item.save();
+                    fab1.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star));
+
+
+                    Toast.makeText(this, "Added to Favorites!", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Favorite_Item selected = favoriteItems.get(currentSelected);
+                    favorites.remove(selected.getFavorite());
+                    favoriteItems.remove(selected.getFavorite());
+                    selected.delete();
+                    fab1.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_border));
+
+                    Toast.makeText(this, "Removed from Favorites", Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        });
+    }
+
     private void doBounceAnimation(View targetView) {
         if(targetView != null) {
             ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationY", 0, -40, 0);
             animator.setInterpolator(new EasingInterpolator(Ease.CUBIC_IN_OUT));
             animator.setStartDelay(500);
-            animator.setDuration(2000);
+            animator.setDuration(1000);
+            animator.start();
+        }
+    }
+
+    private void doBounceAnimationH(View targetView) {
+        if(targetView != null) {
+            ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationX", 0, 40, 0);
+            animator.setInterpolator(new EasingInterpolator(Ease.CUBIC_IN_OUT));
+            animator.setStartDelay(500);
+            animator.setDuration(1500);
             animator.start();
         }
     }
@@ -369,6 +466,9 @@ public class MainActivity extends AppCompatActivity
         bathroomreview = findViewById(R.id.bathroomreview);
         fountainreview = findViewById(R.id.fountainreview);
         bottlerefill = findViewById(R.id.isbottlerefill);
+
+        setUpSheet();
+
 
         location = findViewById(R.id.location);
         location.setOnClickListener((view) ->{
@@ -459,6 +559,7 @@ public class MainActivity extends AppCompatActivity
 
                 } else if(newState == BottomSheetBehavior.STATE_EXPANDED) {
                     setBottomSheetToolbar();
+                    doBounceAnimationH(recyclerView);
 
                 } else if(newState == BottomSheetBehavior.STATE_DRAGGING) {
 
@@ -531,7 +632,7 @@ public class MainActivity extends AppCompatActivity
     private void setReview(Object location) {
         if(location != null) {
             Log.d("MainActivity", "Setting review " + location.toString());
-            RecyclerView recyclerView = findViewById(R.id.reviewRecycler);
+            recyclerView = findViewById(R.id.reviewRecycler);
 
             float orate;
             ArrayList<Rating> ratings;
@@ -555,6 +656,12 @@ public class MainActivity extends AppCompatActivity
                 clean = bathroom.getCleanliness();
                 ratings = bathroom.getRating();
                 imageUrls = bathroom.getImage();
+
+                if(favoriteItems.containsKey(bathroom.getBuilding() + " " + bathroom.getFloor() + " @ Bathroom")) {
+                    fab1.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star));
+                } else {
+                    fab1.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_border));
+                }
 
                 ReviewAdapter reviewAdapter = new ReviewAdapter(this, ratings, "Bathroom");
                 recyclerView.setAdapter(reviewAdapter);
@@ -611,6 +718,12 @@ public class MainActivity extends AppCompatActivity
                 orate = waterFountain.getOverallRating();
                 ratings = waterFountain.getRating();
                 imageUrls = waterFountain.getImage();
+
+                if(favoriteItems.containsKey(waterFountain.getBuilding() + " " + waterFountain.getFloor() + " @ Fountain")) {
+                    fab1.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star));
+                } else {
+                    fab1.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_border));
+                }
 
                 ReviewAdapter reviewAdapter = new ReviewAdapter(this, ratings, "Fountain");
                 recyclerView.setAdapter(reviewAdapter);
@@ -761,13 +874,16 @@ public class MainActivity extends AppCompatActivity
             }
             return true;
         } else if (id == R.id.action_about) {
+
             Intent settings = new Intent(this, About.class);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
             return true;
         } else if(id == R.id.action_search) {
-            new MaterialDialog.Builder(this)
+            String type;
+
+            MaterialDialog m = new MaterialDialog.Builder(this)
                     .customView(R.layout.filter_dialog, true)
                     .cancelable(true)
                     .title("QUICK SEARCH")
@@ -778,16 +894,63 @@ public class MainActivity extends AppCompatActivity
                             Toast.makeText(getApplicationContext(), "Searching", Toast.LENGTH_SHORT).show();
                         }
                         View filterDialogView = dialog.getCustomView();
+                        Spinner typespinner = filterDialogView.findViewById(R.id.typespinnerDialog);
+                        Spinner tempspinner = filterDialogView.findViewById(R.id.tempPicker_dialog);
+                        Spinner tastespinner = filterDialogView.findViewById(R.id.tastePicker_dialog);
+                        SwitchCompat switchRefill = filterDialogView.findViewById(R.id.refillStation_dialog);
                         ScaleRatingBar overallDialog = filterDialogView.findViewById(R.id.overallBar_dialog);
                         ScaleRatingBar spaceDialog = filterDialogView.findViewById(R.id.spaceBar_dialog);
                         ScaleRatingBar activityDialog = filterDialogView.findViewById(R.id.activityBar_dialog);
                         ScaleRatingBar wifiDialog= filterDialogView.findViewById(R.id.wifiBar_dialog);
                         ScaleRatingBar cleanDialog = filterDialogView.findViewById(R.id.cleanBar_dialog);
 
-                        Log.d("MainActivity", overallDialog.getRating() + " " + spaceDialog.getRating() + " " + activityDialog.getRating() +
-                            " " + wifiDialog.getRating() + " " + cleanDialog.getRating());
+                        Log.d("MainActivity", typespinner.getSelectedItem() + " " + tempspinner.getSelectedItem() + " " +
+                                switchRefill.isChecked() + " " + tastespinner.getSelectedItem() + " " + overallDialog.getRating() +
+                                " " + spaceDialog.getRating() + " " + activityDialog.getRating() + " " +
+                                wifiDialog.getRating() + " " + cleanDialog.getRating());
                     })
                     .show();
+
+            View customDialog = m.getCustomView();
+            LinearLayout bathroomLL = customDialog.findViewById(R.id.overall_dialog);
+            LinearLayout fountainLL = customDialog.findViewById(R.id.fountainAdd_dialog);
+
+            Spinner typespinner = customDialog.findViewById(R.id.typespinnerDialog);
+            Spinner tempspinner = customDialog.findViewById(R.id.tempPicker_dialog);
+            Spinner tastespinner = customDialog.findViewById(R.id.tastePicker_dialog);
+            ArrayAdapter<CharSequence> spinneradapter = ArrayAdapter.createFromResource(this,
+                    R.array.type_array, R.layout.spinner_item);
+            ArrayAdapter<CharSequence> tempadapter = ArrayAdapter.createFromResource(this,
+                    R.array.temp_array, R.layout.spinner_item);
+            ArrayAdapter<CharSequence> tasteadapter = ArrayAdapter.createFromResource(this,
+                    R.array.taste_array, R.layout.spinner_item);
+            spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            tempadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            tasteadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            typespinner.setAdapter(spinneradapter);
+            tempspinner.setAdapter(tempadapter);
+            tastespinner.setAdapter(tasteadapter);
+            typespinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    switch(i) {
+                        case 0: {
+                            bathroomLL.setVisibility(View.VISIBLE);
+                            fountainLL.setVisibility(View.GONE);
+                        } break;
+                        case 1: {
+                            fountainLL.setVisibility(View.VISIBLE);
+                            bathroomLL.setVisibility(View.GONE);
+                        }
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+
 
             return true;
         } else if(id == R.id.action_maptype) {
@@ -846,6 +1009,18 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.favorites) {
 
             Intent settings = new Intent(this, Favorites.class);
+            //send bathroom/fountain
+            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
+            settings.putParcelableArrayListExtra("WRatings", saveFountain);
+            startActivity(settings);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+
+        } else if(id == R.id.reviews) {
+
+            Intent settings = new Intent(MainActivity.this, Reviews.class);
+            //send bathroom/fountain
+            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
+            settings.putParcelableArrayListExtra("WRatings", saveFountain);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
@@ -939,10 +1114,10 @@ public class MainActivity extends AppCompatActivity
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
             //for location updates
-            if(serviceFragment == null) {
+            if(locationFragment == null) {
                 Log.d("MainActivity", "Starting Location Updates");
-                serviceFragment = ServiceFragment.newInstance();
-                fragmentManager.beginTransaction().add(serviceFragment, TAG_LOC_FRAGMENT).commit();
+                locationFragment = LocationFragment.newInstance();
+                fragmentManager.beginTransaction().add(locationFragment, TAG_LOC_FRAGMENT).commit();
             }
 
         } else {
@@ -964,10 +1139,10 @@ public class MainActivity extends AppCompatActivity
 
                     mLocationPermissionGranted = true;
                     //for location updates
-                    if(serviceFragment == null) {
+                    if(locationFragment == null) {
                         Log.d("MainActivity", "Starting Location Updates");
-                        serviceFragment = ServiceFragment.newInstance();
-                        fragmentManager.beginTransaction().add(serviceFragment, TAG_LOC_FRAGMENT).commit();
+                        locationFragment = LocationFragment.newInstance();
+                        fragmentManager.beginTransaction().add(locationFragment, TAG_LOC_FRAGMENT).commit();
                     }
                 }
             }
@@ -1024,8 +1199,8 @@ public class MainActivity extends AppCompatActivity
             if (mLocationPermissionGranted) {
                 if(location == null) {
                     Location current = null;
-                    if(serviceFragment != null) {
-                        current = mFusedLocationProviderApi.getLastLocation(serviceFragment.getCurrentLocation());
+                    if(locationFragment != null) {
+                        current = mFusedLocationProviderApi.getLastLocation(locationFragment.getCurrentLocation());
                     }
                     if (current != null) {
                         mLastKnownLocation = current;
@@ -1258,7 +1433,7 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
             
         }
-        serviceFragment = null;
+        locationFragment = null;
         updateFragment = null;
     }
 

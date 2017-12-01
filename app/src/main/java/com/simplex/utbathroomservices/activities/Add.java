@@ -1,4 +1,4 @@
-package com.simplex.utbathroomservices;
+package com.simplex.utbathroomservices.activities;
 
 import android.animation.LayoutTransition;
 import android.app.Activity;
@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
+import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
 import com.simplex.utbathroomservices.cloudfirestore.Building;
@@ -170,6 +171,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
+        toolbar.setNavigationOnClickListener((view) -> onBackPressed());
 
         displayStall = findViewById(R.id.customDisplay);
         bathroomLL = findViewById(R.id.bathcard);
@@ -568,4 +570,5 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             Toast.makeText(this, "Error Saving to Database. Please try again", Toast.LENGTH_LONG).show();
         }
     }
+
 }

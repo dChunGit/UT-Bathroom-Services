@@ -6,6 +6,8 @@
     <string name="title_activity_settings">Settings</string>
     <string name="title_addActivity">Add New Location</string>
     <string name="title_addActivityAlt">Add New Review</string>
+    <string name="title_activity_favorites">Favorites</string>
+    <string name="title_activity_reviews">My Reviews</string>
 
     <!--Drawer Items-->
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -153,15 +155,16 @@
         <item>AVLoadingIndicatorView</item>
         <item>TapTargetView</item>
         <item>EasingInterpolator</item>
+        <item>DBFlow</item>
         <item>AppCompat-v7 27.0.1</item>
         <item>Constraint-Layout 1.0.2</item>
         <item>Design 27.0.1</item>
         <item>RecyclerView 27.0.1</item>
         <item>CardView 27.0.1</item>
         <item>CustomTabs 27.0.1</item>
-        <item>Play Services Maps 11.6.0</item>
-        <item>Firebase Firestore 11.6.0</item>
-        <item>Play Services Location 11.6.0</item>
+        <item>Play Services Maps 11.6.2</item>
+        <item>Firebase Firestore 11.6.2</item>
+        <item>Play Services Location 11.6.2</item>
     </string-array>
 
     <string-array name="license">
@@ -169,10 +172,11 @@
         <item>Copyright - Christopher Jenkins - Apache 2.0</item>
         <item>Copyright - Aidan Michael Follestad - MIT</item>
         <item>Copyright - Iván Arcuschin - Apache 2.0</item>
-        <item>Copyright - Willy Yu - MIT License</item>
+        <item>Copyright - Willy Yu - MIT</item>
         <item>Copyright - Jack Wang - Apache 2.0</item>
         <item>Copyright - Keepsafe Software Inc. - Apache 2.0</item>
         <item>Copyright - Masayuki Suda - MIT</item>
+        <item>Copyright - Raizlabs - MIT</item>
         <item>Copyright - Android - Apache 2.0</item>
         <item>Copyright - Android - Apache 2.0</item>
         <item>Copyright - Android - Apache 2.0</item>
