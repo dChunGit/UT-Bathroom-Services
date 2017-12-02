@@ -101,10 +101,12 @@ public class SearchFragment extends Fragment {
 
     private class Search extends AsyncTask<String, Integer, Integer> {
         Bundle searchParams;
+
         public Search(Bundle b)
         {
             searchParams = b;
         }
+
         protected void onPreExecute() {
             // Proxy the call to the Activity.
             searchCallback.onPreExecuteSearch();
@@ -123,7 +125,8 @@ public class SearchFragment extends Fragment {
         }
 
         protected void onPostExecute(Integer success) {
-            searchCallback.onPostExecuteSearch((ArrayList<Bathroom>)searchParams.get("BRatings") , (ArrayList<WaterFountain>) searchParams.get("WRatings"));
+            searchCallback.onPostExecuteSearch((ArrayList<Bathroom>) searchParams.get("BRatings"),
+                    (ArrayList<WaterFountain>) searchParams.get("WRatings"));
             asyncRunning = false;
         }
 

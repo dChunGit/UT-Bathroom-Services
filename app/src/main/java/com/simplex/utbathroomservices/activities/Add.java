@@ -24,6 +24,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
+import com.raizlabs.android.dbflow.config.DatabaseConfig;
+import com.raizlabs.android.dbflow.config.FlowConfig;
+import com.raizlabs.android.dbflow.config.FlowManager;
+import com.simplex.utbathroomservices.Database;
 import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
@@ -32,11 +36,13 @@ import com.simplex.utbathroomservices.cloudfirestore.DatabaseCallback;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountainDB;
+import com.simplex.utbathroomservices.dbflow.AppDatabase;
+import com.simplex.utbathroomservices.dbflow.Rating_Item;
 import com.willy.ratingbar.ScaleRatingBar;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class Add extends AppCompatActivity implements AdapterView.OnItemSelectedListener, DatabaseCallback {
 
@@ -49,12 +55,10 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
     private int stallnum;
     private boolean customStallSelect = false, isFillable;
 
-    private String[] buildings;
-    private ConcurrentHashMap<String, Bathroom> firebaseBRatings = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, WaterFountain> firebaseWRatings = new ConcurrentHashMap<>();
-    private ArrayList<Bathroom> sentBRatings = new ArrayList<>();
-    private ArrayList<WaterFountain> sentWRatings = new ArrayList<>();
+    private HashMap<String, Bathroom> firebaseBRatings = new HashMap<>();
+    private HashMap<String, WaterFountain> firebaseWRatings = new HashMap<>();
     private ArrayList<String> buildingsList = new ArrayList<>();
+    private String[] buildings = new String[0];
 
     private AutoCompleteTextView autoCompleteTextView;
     private EditText editText, commentsEditText;
@@ -66,30 +70,19 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
     private String editLocation;
 
+    private Database database;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
         System.out.println(getIntent().getExtras());
+        database = (Database) getApplication();
 
         try {
             location = getIntent().getParcelableExtra("Location");
         } catch (Exception e) {
             System.out.println("Location Not Sent or Something Else");
-        }
-
-        try{
-            sentBRatings = getIntent().getParcelableArrayListExtra("BRatings");
-            System.out.println(sentBRatings);
-        } catch (Exception e) {
-            System.out.println("BRatings malformed");
-        }
-
-        try{
-            sentWRatings = getIntent().getParcelableArrayListExtra("WRatings");
-            System.out.println(sentWRatings);
-        } catch (Exception e) {
-            System.out.println("WRatings malformed");
         }
 
         try{
@@ -99,40 +92,18 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
             System.out.println("Something");
         }
 
-        try{
-            buildingsList = getIntent().getStringArrayListExtra("Buildings");
-        } catch (Exception e) {
-            System.out.println("Something else");
+        if(database != null) {
+            firebaseBRatings = database.getFirebaseBRatings();
+            firebaseWRatings = database.getFirebaseWRatings();
+            buildingsList = database.getSaveBuildings();
+            buildings = buildingsList.toArray(new String[buildingsList.size()]);
         }
 
-        if(buildingsList == null) {
-            buildingsList = new ArrayList<>();
-        }
-
-        buildings = buildingsList.toArray(new String[buildingsList.size()]);
-
-        if(sentBRatings == null) {
-            sentBRatings = new ArrayList<>();
-        }
-
-        if(sentWRatings == null) {
-            sentWRatings = new ArrayList<>();
-        }
-
-        //put into hashmaps for faster access later on
-        new Thread(() -> {
-            for(Bathroom b : sentBRatings) {
-                firebaseBRatings.put(b.getBuilding() + " " + b.getFloor(), b);
-            }
-            System.out.println(firebaseBRatings);
-        }).start();
-
-        new Thread(() -> {
-            for(WaterFountain w : sentWRatings) {
-                firebaseWRatings.put(w.getBuilding() + " " + w.getFloor(), w);
-            }
-            System.out.println(firebaseWRatings);
-        }).start();
+        FlowManager.init(FlowConfig.builder(this)
+                .addDatabaseConfig(DatabaseConfig.builder(AppDatabase.class)
+                        .databaseName("UTBSDatabase")
+                        .build())
+                .build());
 
         setUpUI();
         setUpInfo();
@@ -381,20 +352,35 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                         }
 
                         if (type.equals("Bathroom")) {
-
-                            Rating rating = new Rating(commentsEditText.getText().toString(), space, stallnum,
-                                    wifiV, activityV, overallV, cleanlinessV, null, false, null);
+                            UUID uuid = UUID.randomUUID();
+                            Rating rating = new Rating(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits(), building, floorNumber,
+                                    commentsEditText.getText().toString(), space, stallnum, wifiV, activityV, overallV,
+                                    cleanlinessV, "cold", false, "Meh");
                             newRating.add(rating);
+
+                            Rating_Item rating_item = new Rating_Item();
+                            rating_item.setLocation(building + " " + floorNumber);
+                            rating_item.setUuid(uuid);
+                            rating_item.setType("Bathroom");
+                            rating_item.save();
+
                             BathroomDB bathroomDB = new BathroomDB(this);
                             bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
                                     wifiV, activityV, overallV,
                                     cleanlinessV, newRating, new ArrayList<>());
 
                         } else if (type.equals("Fountain")) {
-
-                            Rating rating = new Rating(commentsEditText.getText().toString(), null, 0,
-                                    0, 0, 0, overallV, temp, isFillable, taste);
+                            UUID uuid = UUID.randomUUID();
+                            Rating rating = new Rating(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits(), building, floorNumber,
+                                    commentsEditText.getText().toString(), "XSmall", 0, 0, 0, 0,
+                                    overallV, temp, isFillable, taste);
                             newRating.add(rating);
+
+                            Rating_Item rating_item = new Rating_Item();
+                            rating_item.setLocation(building + " " + floorNumber);
+                            rating_item.setUuid(uuid);
+                            rating_item.setType("Fountain");
+                            rating_item.save();
 
                             WaterFountainDB waterFountainDB = new WaterFountainDB(this);
                             waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
@@ -423,8 +409,16 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
         ArrayList<Rating> newRating = waterFountain.getRating();
 
-        Rating rating = new Rating(commentsEditText.getText().toString(), null, 0,
+        UUID uuid = UUID.randomUUID();
+        Rating rating = new Rating(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits(),
+                waterFountain.getBuilding(), waterFountain.getFloor(), commentsEditText.getText().toString(), "XSmall", 0,
                 0, 0, 0, overallV, temp, isFillable, taste);
+
+        Rating_Item rating_item = new Rating_Item();
+        rating_item.setLocation(building + " " + floorNumber);
+        rating_item.setUuid(uuid);
+        rating_item.setType("Fountain");
+        rating_item.save();
 
         newRating.add(rating);
         waterFountain.setRating(newRating);
@@ -495,8 +489,16 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         bathroom.setCleanliness(((cleanP * reviews) + cleanlinessV)/(reviews + 1));
 
         ArrayList<Rating> newRating = bathroom.getRating();
-        Rating rating = new Rating(commentsEditText.getText().toString(), space, stallnum,
-                wifiV, activityV, overallV, cleanlinessV, null, false, null);
+        UUID uuid = UUID.randomUUID();
+        Rating rating = new Rating(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits(),
+                bathroom.getBuilding(), bathroom.getFloor(), commentsEditText.getText().toString(), space, stallnum,
+                wifiV, activityV, overallV, cleanlinessV, "cold", false, "Meh");
+
+        Rating_Item rating_item = new Rating_Item();
+        rating_item.setLocation(building + " " + floorNumber);
+        rating_item.setUuid(uuid);
+        rating_item.setType("Bathroom");
+        rating_item.save();
 
         newRating.add(rating);
         bathroom.setRating(newRating);
