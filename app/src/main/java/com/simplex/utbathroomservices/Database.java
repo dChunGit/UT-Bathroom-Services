@@ -25,6 +25,15 @@ public class Database extends Application {
     private ArrayList<String> oldMapmarkers = new ArrayList<>();
     private HashMap<String, String> favorites = new HashMap<>();
     private HashMap<String, Favorite_Item> favoriteItems = new HashMap<>();
+    private HashMap<String, MarkerOptions> restoreMapMarkers = new HashMap<>();
+
+    public HashMap<String, MarkerOptions> getRestoreMapMarkers() {
+        return restoreMapMarkers;
+    }
+
+    public void setRestoreMapMarkers(HashMap<String, MarkerOptions> restoreMapMarkers) {
+        this.restoreMapMarkers = restoreMapMarkers;
+    }
 
     public HashMap<String, Bathroom> getFirebaseBRatings() {
         return firebaseBRatings;

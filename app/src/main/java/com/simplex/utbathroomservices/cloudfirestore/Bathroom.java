@@ -64,6 +64,7 @@ public class Bathroom implements Parcelable {
                 ", overallRating=" + overallRating +
                 '}';
     }
+
     public String getBuilding() {
         return building;
     }

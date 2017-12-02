@@ -31,6 +31,44 @@
             android:paddingEnd="30dp"/>
 
     </RelativeLayout>
+    <RelativeLayout
+        android:layout_margin="7dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Overall"
+            android:layout_margin="7dp"/>
+
+        <LinearLayout
+            android:layout_marginTop="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_alignParentEnd="true">
+
+            <com.willy.ratingbar.ScaleRatingBar
+                android:id="@+id/overallBar_dialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                rb:numStars="5"
+                rb:starWidth="30dp"
+                rb:starHeight="30dp"
+                rb:starPadding="7dp"
+                rb:touchable="true"
+                android:layout_margin="2dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/up"
+                android:layout_margin="7dp"
+                />
+        </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -42,45 +80,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <RelativeLayout
-                android:layout_margin="7dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Overall"
-                    android:layout_margin="7dp"/>
-
-                <LinearLayout
-                    android:layout_marginTop="24dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:layout_alignParentEnd="true">
-
-                    <com.willy.ratingbar.ScaleRatingBar
-                        android:id="@+id/overallBar_dialog"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        rb:numStars="5"
-                        rb:starWidth="30dp"
-                        rb:starHeight="30dp"
-                        rb:starPadding="7dp"
-                        rb:touchable="true"
-                        android:layout_margin="2dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/up"
-                        android:layout_margin="7dp"
-                        />
-                </LinearLayout>
-            </RelativeLayout>
 
             <RelativeLayout
                 android:layout_margin="7dp"
