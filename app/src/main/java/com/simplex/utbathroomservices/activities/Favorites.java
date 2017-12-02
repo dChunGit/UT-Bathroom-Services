@@ -73,6 +73,8 @@ public class Favorites extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        setUpUI();
+
 
     }
 
@@ -88,17 +90,24 @@ public class Favorites extends AppCompatActivity {
 
     private void setUpAdapter(){
         RecyclerView recyclerView1 = findViewById(R.id.reviewRecycler1);
-        FavoriteAdapter favoriteAdapter1 = new FavoriteAdapter(this, Bfavorites, "Bathroom");
-        recyclerView1.setAdapter(favoriteAdapter1);
-        recyclerView1.setLayoutManager(new StaggeredGridLayoutManager(1, 0));
+        if(Bfavorites.size() == 0) {
+            recyclerView1.setVisibility(View.GONE);
+        } else {
+            FavoriteAdapter favoriteAdapter1 = new FavoriteAdapter(this, Bfavorites, "Bathroom");
+            recyclerView1.setAdapter(favoriteAdapter1);
+            recyclerView1.setLayoutManager(new StaggeredGridLayoutManager(1, 0));
+            doBounceAnimation(recyclerView1);
+        }
 
         RecyclerView recyclerView2 = findViewById(R.id.reviewRecycler2);
-        FavoriteAdapter favoriteAdapter2 = new FavoriteAdapter(this, Wfavorites, "Fountain");
-        recyclerView2.setAdapter(favoriteAdapter2);
-        recyclerView2.setLayoutManager(new StaggeredGridLayoutManager(1, 0));
-
-        doBounceAnimation(recyclerView1);
-        doBounceAnimation(recyclerView2);
+        if(Wfavorites.size() == 0) {
+            recyclerView2.setVisibility(View.GONE);
+        } else {
+            FavoriteAdapter favoriteAdapter2 = new FavoriteAdapter(this, Wfavorites, "Fountain");
+            recyclerView2.setAdapter(favoriteAdapter2);
+            recyclerView2.setLayoutManager(new StaggeredGridLayoutManager(1, 0));
+            doBounceAnimation(recyclerView2);
+        }
     }
 
     private void doBounceAnimation(View targetView) {

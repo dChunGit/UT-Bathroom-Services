@@ -192,6 +192,7 @@ public class MainActivity extends AppCompatActivity
         setFont();
         setUpUI();
         setUpMap();
+
         FlowManager.init(FlowConfig.builder(this)
                 .addDatabaseConfig(DatabaseConfig.builder(AppDatabase.class)
                         .databaseName("UTBSDatabase")

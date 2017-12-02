@@ -166,7 +166,6 @@ public class Bathroom implements Parcelable {
         this.overallRating = overallRating;
     }
 
-
     protected Bathroom(Parcel in) {
         longitude = in.readDouble();
         latitude = in.readDouble();

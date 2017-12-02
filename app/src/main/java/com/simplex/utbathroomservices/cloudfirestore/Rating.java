@@ -3,11 +3,18 @@ package com.simplex.utbathroomservices.cloudfirestore;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.UUID;
+
 /**
  * Created by zoeng on 11/10/17.
  */
 
 public class Rating implements Parcelable {
+
+    long uuidLSB;
+    long uuidMSB;
+    String building;
+    String floor;
     String review;
     String space;
     Integer numberStalls;
@@ -22,7 +29,9 @@ public class Rating implements Parcelable {
     @Override
     public String toString() {
         return "Rating{" +
-                "review='" + review + '\'' +
+                "uuid='" + uuidMSB +
+                " " + uuidLSB + '\'' +
+                ", review='" + review + '\'' +
                 ", space='" + space + '\'' +
                 ", numberStalls='" + numberStalls + '\'' +
                 ", wifiQuality='" + wifiQuality + '\'' +
@@ -38,9 +47,15 @@ public class Rating implements Parcelable {
     public Rating(){
 
     }
-    public Rating(String review, String space, Integer numberStalls, Integer wifiQuality, Integer busyness,
-                  Integer cleanliness, Integer overallRating, String temperature, boolean isBottleRefillStation,
+
+    public Rating(long uuidMSB, long uuidLSB, String building, String floor, String review, String space,
+                  Integer numberStalls, Integer wifiQuality, Integer busyness, Integer cleanliness,
+                  Integer overallRating, String temperature, boolean isBottleRefillStation,
                   String taste) {
+        this.uuidLSB = uuidLSB;
+        this.uuidMSB = uuidMSB;
+        this.building = building;
+        this.floor = floor;
         this.review = review;
         this.space = space;
         this.numberStalls = numberStalls;
@@ -51,6 +66,38 @@ public class Rating implements Parcelable {
         this.temperature = temperature;
         this.isBottleRefillStation = isBottleRefillStation;
         this.taste = taste;
+    }
+
+    public String getBuilding() {
+        return building;
+    }
+
+    public void setBuilding(String building) {
+        this.building = building;
+    }
+
+    public String getFloor() {
+        return floor;
+    }
+
+    public void setFloor(String floor) {
+        this.floor = floor;
+    }
+
+    public long getUuidLSB() {
+        return uuidLSB;
+    }
+
+    public void setUuidLSB(long uuidLSB) {
+        this.uuidLSB = uuidLSB;
+    }
+
+    public long getUuidMSB() {
+        return uuidMSB;
+    }
+
+    public void setUuidMSB(long uuidMSB) {
+        this.uuidMSB = uuidMSB;
     }
 
     public String getReview() {
@@ -134,6 +181,10 @@ public class Rating implements Parcelable {
     }
 
     protected Rating(Parcel in) {
+        uuidMSB =  in.readLong();
+        uuidLSB = in.readLong();
+        building = in.readString();
+        floor = in.readString();
         review = in.readString();
         space = in.readString();
         numberStalls = in.readByte() == 0x00 ? null : in.readInt();
@@ -153,6 +204,10 @@ public class Rating implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(uuidMSB);
+        dest.writeLong(uuidLSB);
+        dest.writeString(building);
+        dest.writeString(floor);
         dest.writeString(review);
         dest.writeString(space);
         if (numberStalls == null) {
