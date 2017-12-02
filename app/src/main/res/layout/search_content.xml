@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:rb="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/parentAnim_search"
+    android:animateLayoutChanges="true"
+    android:layout_below="@id/appbarSearch">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Type"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+
+                    <android.support.v7.widget.AppCompatSpinner
+                        android:id="@+id/typespinner_search"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:prompt="@string/spinnerprompt"
+                        android:paddingEnd="30dp"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Building"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <AutoCompleteTextView
+                        android:id="@+id/completeBuilding_search"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:hint="Initials"
+                        android:layout_alignParentEnd="true"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Overall"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/overallBar_search"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="true"
+                        android:layout_margin="2dp"/>
+
+                </RelativeLayout>
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/bathcard_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:layout_margin="7dp">
+
+            <LinearLayout
+                android:id="@+id/bathroomAdd_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Space"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <android.support.v7.widget.AppCompatSpinner
+                        android:id="@+id/spacePicker_search"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:prompt="@string/spaceprompt"
+                        android:paddingEnd="30dp"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Number of Stalls"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <EditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/customDisplay_search"
+                        android:layout_toLeftOf="@+id/stallpicker_search"
+                        android:layout_centerVertical="true"
+                        android:inputType="number"
+                        android:hint="Custom Value"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <android.support.v7.widget.AppCompatSpinner
+                        android:id="@+id/stallpicker_search"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:prompt="@string/stallprompt"
+                        android:paddingEnd="30dp"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Activity"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/activityBar_search"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="true"
+                        android:layout_margin="2dp"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="WiFi"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/wifiBar_search"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="true"
+                        android:layout_margin="2dp"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Cleanliness"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <com.willy.ratingbar.ScaleRatingBar
+                        android:id="@+id/cleanBar_search"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        rb:numStars="5"
+                        rb:starWidth="30dp"
+                        rb:starHeight="30dp"
+                        rb:starPadding="7dp"
+                        rb:touchable="true"
+                        android:layout_margin="2dp"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/fountaincard_search"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:layout_margin="7dp">
+
+            <LinearLayout
+                android:id="@+id/fountainAdd_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Temperature"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <android.support.v7.widget.AppCompatSpinner
+                        android:id="@+id/tempPicker_search"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:prompt="@string/tempPrompt"
+                        android:paddingEnd="30dp"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Bottle Refill Station"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <android.support.v7.widget.SwitchCompat
+                        android:id="@+id/refillStation_search"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:prompt="@string/stallprompt"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="7dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="Taste"
+                        android:textSize="14sp"
+                        android:layout_margin="7dp"/>
+
+                    <android.support.v7.widget.AppCompatSpinner
+                        android:id="@+id/tastePicker_search"
+                        android:layout_alignParentEnd="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:prompt="@string/tastePrompt"
+                        android:paddingEnd="30dp"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+
+    </LinearLayout>
+</android.support.v4.widget.NestedScrollView>
