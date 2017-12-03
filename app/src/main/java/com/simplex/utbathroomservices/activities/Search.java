@@ -32,6 +32,8 @@ import com.willy.ratingbar.ScaleRatingBar;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+
 public class Search extends AppCompatActivity implements SearchFragment.SearchCallback, AdapterView.OnItemSelectedListener{
     private SearchFragment searchFragment;
     private FragmentManager fragmentManager;
@@ -95,6 +97,13 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
         getSupportActionBar().setTitle(getString(R.string.title_activity_search));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener((view) -> onBackPressed());
+
+        //set font
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/ColabReg.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build()
+        );
 
         displayStall = findViewById(R.id.customDisplay_search);
         bathroomLL = findViewById(R.id.bathcard_search);

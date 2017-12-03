@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+
 public class Reviews extends AppCompatActivity {
     private RecyclerView recyclerView3, recyclerView4;
     private ArrayList<Rating> myBathrooms = new ArrayList<>();
@@ -101,6 +103,13 @@ public class Reviews extends AppCompatActivity {
         getSupportActionBar().setTitle(getString(R.string.title_activity_reviews));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener((view) -> onBackPressed());
+
+        //set font
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/ColabReg.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build()
+        );
 
     }
 

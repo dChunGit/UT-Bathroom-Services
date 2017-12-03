@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+
 public class Add extends AppCompatActivity implements AdapterView.OnItemSelectedListener, DatabaseCallback {
 
     private long mBackPressed;
@@ -143,6 +145,13 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
         toolbar.setNavigationOnClickListener((view) -> onBackPressed());
+
+        //set font
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/ColabReg.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build()
+        );
 
         displayStall = findViewById(R.id.customDisplay);
         bathroomLL = findViewById(R.id.bathcard);

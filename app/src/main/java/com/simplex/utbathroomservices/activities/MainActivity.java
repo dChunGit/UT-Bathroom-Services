@@ -33,6 +33,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
@@ -490,7 +491,8 @@ public class MainActivity extends AppCompatActivity
         clearCard = findViewById(R.id.clearCard);
         clearCard.setOnClickListener((view) -> {
             updateEntries("Update");
-            clearCard.setVisibility(View.GONE);
+            slideToRight(clearCard);
+            //clearCard.setVisibility(View.GONE);
         });
 
         setUpFabs();
@@ -1489,7 +1491,8 @@ public class MainActivity extends AppCompatActivity
         } else if(requestCode == SEARCH_LOCATION) {
             if(resultCode == Activity.RESULT_OK) {
                 addMarkers(data.getParcelableArrayListExtra("SEARCH_MARKER"), true);
-                clearCard.setVisibility(View.VISIBLE);
+                slideToLeft(clearCard);
+                //clearCard.setVisibility(View.VISIBLE);
                 searchUpdate = true;
             }
         }
@@ -1512,12 +1515,30 @@ public class MainActivity extends AppCompatActivity
         System.out.println(filteredFountains);
 
         addMarkers(markerOptions, true);
-
-        clearCard.setVisibility(View.VISIBLE);
+        slideToLeft(clearCard);
+        //clearCard.setVisibility(View.VISIBLE);
 
         searchFragment = null;
         fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT)).commitAllowingStateLoss();
 
 
     }
+
+    public void slideToRight(View view){
+        TranslateAnimation animate = new TranslateAnimation(0,view.getWidth(),0,0);
+        animate.setDuration(500);
+        animate.setFillAfter(true);
+        view.startAnimation(animate);
+        view.setVisibility(View.GONE);
+    }
+
+    public void slideToLeft(View view){
+        TranslateAnimation animate = new TranslateAnimation(view.getWidth()+7,0,0,0);
+        animate.setDuration(500);
+        animate.setFillAfter(true);
+        view.startAnimation(animate);
+        view.setVisibility(View.VISIBLE);
+    }
+
+
 }
