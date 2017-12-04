@@ -64,6 +64,7 @@ public class Bathroom implements Parcelable {
                 ", overallRating=" + overallRating +
                 '}';
     }
+
     public String getBuilding() {
         return building;
     }
@@ -165,7 +166,6 @@ public class Bathroom implements Parcelable {
     public void setOverallRating(Integer overallRating) {
         this.overallRating = overallRating;
     }
-
 
     protected Bathroom(Parcel in) {
         longitude = in.readDouble();

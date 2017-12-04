@@ -10,39 +10,89 @@ import android.view.View;
 
 import com.daasuu.ei.Ease;
 import com.daasuu.ei.EasingInterpolator;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
+import com.simplex.utbathroomservices.Database;
 import com.simplex.utbathroomservices.R;
+import com.simplex.utbathroomservices.adapters.MyReviewAdapter;
 import com.simplex.utbathroomservices.adapters.ReviewAdapter;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
+import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+import com.simplex.utbathroomservices.dbflow.Favorite_Item;
+import com.simplex.utbathroomservices.dbflow.Rating_Item;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class Reviews extends AppCompatActivity {
     private RecyclerView recyclerView3, recyclerView4;
-    private ArrayList<Bathroom> sentBRatings = new ArrayList<>();
-    private ArrayList<WaterFountain> sentWRatings = new ArrayList<>();
+    private ArrayList<Rating> myBathrooms = new ArrayList<>();
+    private ArrayList<Rating> myFountains = new ArrayList<>();
+    private HashMap<String, Bathroom> firebaseBRatings = new HashMap<>();
+    private HashMap<String, WaterFountain> firebaseWRatings = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reviews);
-        try{
-            sentBRatings = getIntent().getParcelableArrayListExtra("BRatings");
-            System.out.println(sentBRatings);
-        } catch (Exception e) {
-            System.out.println("BRatings malformed");
-        }
+        Database database = (Database) getApplication();
 
-        try{
-            sentWRatings = getIntent().getParcelableArrayListExtra("WRatings");
-            System.out.println(sentWRatings);
-        } catch (Exception e) {
-            System.out.println("WRatings malformed");
-        }
+        new Thread(() -> {
+            System.out.println("Called");
+            firebaseBRatings = database.getFirebaseBRatings();
+            firebaseWRatings = database.getFirebaseWRatings();
+
+            System.out.println(firebaseBRatings);
+            System.out.println(firebaseWRatings);
+
+            List<Rating_Item> uuidList = SQLite.select()
+                    .from(Rating_Item.class)
+                    .queryList();
+
+            for(Rating_Item rating_item : uuidList) {
+
+                String key = rating_item.getLocation();
+                String type = rating_item.getType();
+                System.out.println(key + " " + type);
+
+                if(type.equalsIgnoreCase("Bathroom")) {
+                    if (firebaseBRatings.containsKey(key)) {
+                        System.out.println("Bathroom contains");
+                        ArrayList<Rating> rating = firebaseBRatings.get(key).getRating();
+                        for (Rating rating1 : rating) {
+                            long msb = rating_item.getUuid().getMostSignificantBits();
+                            long lsb = rating_item.getUuid().getLeastSignificantBits();
+                            if(rating1.getUuidMSB() == msb && rating1.getUuidLSB() == lsb) {
+                                myBathrooms.add(rating1);
+                            }
+                        }
+
+                    }
+                }else if(type.equalsIgnoreCase("Fountain")) {
+                    if(firebaseWRatings.containsKey(key)) {
+                        System.out.println("Fountain contains");
+                        ArrayList<Rating> rating = firebaseWRatings.get(key).getRating();
+                        for (Rating rating1 : rating) {
+                            long msb = rating_item.getUuid().getMostSignificantBits();
+                            long lsb = rating_item.getUuid().getLeastSignificantBits();
+                            if(rating1.getUuidMSB() == msb && rating1.getUuidLSB() == lsb) {
+                                myFountains.add(rating1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            System.out.println("UUIDS: " + uuidList);
+            runOnUiThread(() -> setUpAdapters());
+
+
+        }).start();
 
         setUpUI();
-        setUpAdapters();
     }
 
     private void setUpUI() {
@@ -57,15 +107,24 @@ public class Reviews extends AppCompatActivity {
     private void setUpAdapters() {
         recyclerView3 = findViewById(R.id.reviewRecycler3);
         recyclerView4 = findViewById(R.id.reviewRecycler4);
-        ReviewAdapter reviewBAdapter = new ReviewAdapter(this, sentBRatings.get(0).getRating(), "Bathroom");
-        ReviewAdapter reviewFAdapter = new ReviewAdapter(this, sentWRatings.get(0).getRating(), "Fountain");
-        recyclerView3.setAdapter(reviewBAdapter);
-        recyclerView3.setLayoutManager(new StaggeredGridLayoutManager(1, 0));
-        recyclerView4.setAdapter(reviewFAdapter);
-        recyclerView4.setLayoutManager(new StaggeredGridLayoutManager(1, 0));
+        if(myBathrooms.size() == 0) {
+            recyclerView3.setVisibility(View.GONE);
+        } else {
+            MyReviewAdapter reviewBAdapter = new MyReviewAdapter(this, myBathrooms, "Bathroom");
+            recyclerView3.setAdapter(reviewBAdapter);
+            recyclerView3.setLayoutManager(new StaggeredGridLayoutManager(1, 0));
+            doBounceAnimation(recyclerView3);
+        }
 
-        doBounceAnimation(recyclerView3);
-        doBounceAnimation(recyclerView4);
+        if(myFountains.size() == 0) {
+            recyclerView4.setVisibility(View.GONE);
+        } else {
+            MyReviewAdapter reviewFAdapter = new MyReviewAdapter(this, myFountains, "Fountain");
+            recyclerView4.setAdapter(reviewFAdapter);
+            recyclerView4.setLayoutManager(new StaggeredGridLayoutManager(1, 0));
+            doBounceAnimation(recyclerView4);
+        }
+
     }
 
     private void doBounceAnimation(View targetView) {

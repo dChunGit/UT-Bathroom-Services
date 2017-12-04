@@ -6,13 +6,16 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.simplex.utbathroomservices.Database;
+import com.simplex.utbathroomservices.SearchParams;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
-import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Created by dchun on 11/19/17.
@@ -24,22 +27,23 @@ public class SearchFragment extends Fragment {
     protected SearchCallback searchCallback;
     private boolean asyncRunning, cancel;
     private Search search;
+    private SearchParams searchParams;
 
     public interface SearchCallback {
-        void onPreExecuteSearch();
-        void onProgressUpdateSearch();
         void onCancelledSearch();
-        void onPostExecuteSearch(ArrayList<Bathroom> filteredBathrooms, ArrayList<WaterFountain> filteredFountains);
+        void onPostExecuteSearch(ArrayList<Bathroom> filteredBathrooms,
+                                 ArrayList<WaterFountain> filteredFountains, ArrayList<MarkerOptions> markerOptions);
     }
 
     public SearchFragment() {
         // Required empty public constructor
     }
 
-    public static SearchFragment newInstance() {
+    public static SearchFragment newInstance(SearchParams searchParams) {
         SearchFragment fragment = new SearchFragment();
         Bundle args = new Bundle();
-        //add search params
+        //add search userParams
+        args.putParcelable("Params", searchParams);
         fragment.setArguments(args);
         return fragment;
     }
@@ -61,17 +65,17 @@ public class SearchFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle b = null;
+        Database database = (Database) getActivity().getApplication();
         if (getArguments() != null) {
-            //get search params
-            b = getArguments();
+            //get search userParams
+            searchParams = getArguments().getParcelable("Params");
+            System.out.println(searchParams);
         }
 
         cancel = false;
 
         if (!asyncRunning) {
-            search = new Search(b);
-
+            search = new Search(searchParams, database.getSaveBathroom(), database.getSaveFountain());
             search.execute();
         }
         setRetainInstance(true);
@@ -100,19 +104,18 @@ public class SearchFragment extends Fragment {
     }
 
     private class Search extends AsyncTask<String, Integer, Integer> {
-        Bundle searchParams;
-        public Search(Bundle b)
-        {
-            searchParams = b;
-        }
-        protected void onPreExecute() {
-            // Proxy the call to the Activity.
-            searchCallback.onPreExecuteSearch();
-            asyncRunning = true;
-        }
+        private SearchParams userParams;
+        private ArrayList<Bathroom> bathrooms = new ArrayList<>();
+        private ArrayList<WaterFountain> fountains = new ArrayList<>();
+        private ArrayList<MarkerOptions> markerOptions = new ArrayList<>();
 
-        protected void onProgressUpdate(Integer... percent) {
-            searchCallback.onProgressUpdateSearch();
+        public Search(SearchParams userParams, ArrayList<Bathroom> bathrooms, ArrayList<WaterFountain> fountains) {
+            System.out.println("Searching");
+            System.out.println(bathrooms);
+            System.out.println(fountains);
+            this.userParams = userParams;
+            this.bathrooms = bathrooms;
+            this.fountains = fountains;
         }
 
         protected void onCancelled() {
@@ -123,34 +126,70 @@ public class SearchFragment extends Fragment {
         }
 
         protected void onPostExecute(Integer success) {
-            searchCallback.onPostExecuteSearch((ArrayList<Bathroom>)searchParams.get("BRatings") , (ArrayList<WaterFountain>) searchParams.get("WRatings"));
+            setUpMarkers(bathrooms);
+            setUpMarkers(fountains);
+            searchCallback.onPostExecuteSearch(bathrooms, fountains, markerOptions);
             asyncRunning = false;
+        }
+
+        private <T> void setUpMarkers(ArrayList<T> results) {
+            for(T item: results) {
+                float hue;
+                double longitude, latitude;
+                String title, type;
+                if(item instanceof Bathroom) {
+                    Bathroom bathroom = (Bathroom) item;
+                    title = bathroom.getBuilding() + " " + bathroom.getFloor();
+                    System.out.println(title);
+                    longitude = bathroom.getLongitude();
+                    latitude = bathroom.getLatitude();
+                    type = "Bathroom";
+                    hue = BitmapDescriptorFactory.HUE_ROSE;
+
+                } else {
+                    WaterFountain fountain = (WaterFountain) item;
+                    title = fountain.getBuilding() + " " + fountain.getFloor();
+                    System.out.println(title);
+                    longitude = fountain.getLongitude();
+                    latitude = fountain.getLatitude();
+                    type = "Fountain";
+                    hue = BitmapDescriptorFactory.HUE_CYAN;
+                }
+
+                LatLng location = new LatLng(latitude, longitude);
+                MarkerOptions options = new MarkerOptions().position(location).title(title + " @ " + type).
+                        icon(BitmapDescriptorFactory.defaultMarker(hue));
+                synchronized (this) {
+                    markerOptions.add(options);
+                }
+
+            }
+
         }
 
         @Override
         protected Integer doInBackground(String... strings) {
-            //initalize with params once we figure it out
-            ArrayList<Integer> userParams = (ArrayList<Integer>) searchParams.get("USpec");
-            String building = null;
-            int floor = userParams.get(0);
-            int space = userParams.get(1);
-            int stalls = userParams.get(2);
-            int wifi = userParams.get(3);
-            int busyness = userParams.get(4);
-            int cleanliness = userParams.get(5);
-            int rating = userParams.get(6);
-            List<Bathroom> baths = (List<Bathroom>) searchParams.get("BRatings");
+            System.out.println("Searching algo: " + userParams);
+            //initalize with userParams once we figure it out
+            String searchType = userParams.getSearchType();
+            String typeFilter = userParams.getType();
+            String building = userParams.getBuilding();
+            //int floor = userParams.getFloor().;
+            int space = userParams.getSpace();
+            int stalls = userParams.getStalls();
+            int wifi = userParams.getWifi();
+            int busyness = userParams.getBusyness();
+            int cleanliness = userParams.getCleanliness();
+            int rating = userParams.getRating();
             //water fountain stuff
-            List<WaterFountain> fountains = (List<WaterFountain>) searchParams.get("WRatings");
-            int fountain = userParams.get(7);
-            int taste = userParams.get(8);
-            int temperature = userParams.get(9);
-            BathroomDB bDB = new BathroomDB(); //maybe need callback?
+            boolean isFillable = userParams.getIsFillable();
+            int taste = userParams.getTaste();
+            int temperature = userParams.getTemperature();
             //do search
             /*assume default priority: building->floor, rating
              */
-            if(fountain != 1) {
-                Iterator<Bathroom> it = baths.iterator();
+            if(typeFilter.equals("Bathroom")) {
+                Iterator<Bathroom> it = bathrooms.iterator();
                 while (it.hasNext()) {
                     int translatedSpace = 0;
                     Bathroom temp = it.next();
@@ -169,22 +208,41 @@ public class SearchFragment extends Fragment {
                             break;
                         case "XLarge":
                             translatedSpace = 5;
+                            break;
+                        default: translatedSpace = 0;
                     }
-                    if (!temp.getBuilding().equals(building.toUpperCase()) ||
-                            temp.getBusyness() < busyness ||
-                            !(Integer.valueOf(temp.getFloor()) == floor) ||
-                            temp.getNumberStalls() < stalls ||
-                            temp.getCleanliness() < cleanliness ||
-                            temp.getOverallRating() < rating ||
-                            temp.getWifiQuality() < wifi ||
-                            translatedSpace < space)
-                        it.remove();
+                    if(searchType.equals("Simple")) {
+                        if (temp.getBusyness() < busyness ||
+                                temp.getCleanliness() < cleanliness ||
+                                temp.getOverallRating() < rating ||
+                                temp.getWifiQuality() < wifi ||
+                                translatedSpace < space)
+                            it.remove();
+                    } else {
+                        if(building.equals("")) {
+                            if (temp.getBusyness() < busyness ||
+                                    temp.getNumberStalls() < stalls ||
+                                    temp.getCleanliness() < cleanliness ||
+                                    temp.getOverallRating() < rating ||
+                                    temp.getWifiQuality() < wifi ||
+                                    translatedSpace < space)
+                                it.remove();
+                        } else {
+                            if (!temp.getBuilding().equals(building.toUpperCase()) ||
+                                    temp.getBusyness() < busyness ||
+                                    temp.getNumberStalls() < stalls ||
+                                    temp.getCleanliness() < cleanliness ||
+                                    temp.getOverallRating() < rating ||
+                                    temp.getWifiQuality() < wifi ||
+                                    translatedSpace < space)
+                                it.remove();
+                        }
+                    }
                 }
-            }
-            else
-            {
+
+            } else if(typeFilter.equals("Fountain")){
                 Iterator<WaterFountain> it = fountains.iterator();
-               /* while (it.hasNext()) {
+                while (it.hasNext()) {
                     WaterFountain temp = it.next();
                     int translatedTaste = 0;
                     int translatedTemperature = 0;
@@ -203,21 +261,34 @@ public class SearchFragment extends Fragment {
                         case "Pretty Good": translatedTaste = 4; break;
                         case "Meh": translatedTaste = 3; break;
                         case "Not Great": translatedTaste = 2; break;
-                        case "Disgusting": translatedTaste = 1;
+                        case "Disgusting": translatedTaste = 1; break;
+                        default: translatedTaste = 0;
                     }
-                    if (!temp.getBuilding().equals(building.toUpperCase()) ||
-                            !(Integer.valueOf(temp.getFloor()) == floor) ||
-                            temp.getOverallRating() < rating ||
-                            translatedTaste < taste ||
-                            translatedTemperature < temperature)
-                        it.remove();
-                }*/
+                    if(searchType.equals("Simple")) {
+                        if (temp.getOverallRating() < rating ||
+                                translatedTaste < taste ||
+                                translatedTemperature < temperature ||
+                                isFillable != temp.isBottleRefillStation())
+                            it.remove();
+                    } else {
+                        if(building.equals("")) {
+                            if (temp.getOverallRating() < rating ||
+                                    translatedTaste < taste ||
+                                    translatedTemperature < temperature ||
+                                    isFillable != temp.isBottleRefillStation())
+                                it.remove();
+                        } else {
+                            if (!temp.getBuilding().equals(building.toUpperCase()) ||
+                                    temp.getOverallRating() < rating ||
+                                    translatedTaste < taste ||
+                                    translatedTemperature < temperature ||
+                                    isFillable != temp.isBottleRefillStation())
+                                it.remove();
+                        }
+                    }
+                }
             }
             //whatever is left, return it
-
-
-
-
             return 1;
         }
     }

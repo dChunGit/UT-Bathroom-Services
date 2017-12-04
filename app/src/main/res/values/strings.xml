@@ -8,6 +8,8 @@
     <string name="title_addActivityAlt">Add New Review</string>
     <string name="title_activity_favorites">Favorites</string>
     <string name="title_activity_reviews">My Reviews</string>
+    <string name="title_activity_search">Search</string>
+
 
     <!--Drawer Items-->
     <string name="navigation_drawer_open">Open navigation drawer</string>

@@ -64,6 +64,7 @@ import com.raizlabs.android.dbflow.config.DatabaseConfig;
 import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
+import com.simplex.utbathroomservices.SearchParams;
 import com.simplex.utbathroomservices.dbflow.AppDatabase;
 import com.simplex.utbathroomservices.dbflow.Favorite_Item;
 import com.simplex.utbathroomservices.R;
@@ -71,12 +72,14 @@ import com.simplex.utbathroomservices.adapters.ReviewAdapter;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
-import com.simplex.utbathroomservices.fragments.DatabaseFragment;
+import com.simplex.utbathroomservices.Database;
 import com.simplex.utbathroomservices.fragments.LocationFragment;
+import com.simplex.utbathroomservices.fragments.SearchFragment;
 import com.simplex.utbathroomservices.fragments.UpdateFragment;
 import com.wang.avi.AVLoadingIndicatorView;
 import com.willy.ratingbar.ScaleRatingBar;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +90,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleMap.OnCameraMoveStartedListener, LocationFragment.UpdateLocationListener, GoogleMap.OnMarkerClickListener,
-        UpdateFragment.onUpdateListener {
+        UpdateFragment.onUpdateListener, SearchFragment.SearchCallback {
     //TODO: Favorites activity
     //TODO: Reviews activity
     //TODO: Search Activity
@@ -105,6 +108,7 @@ public class MainActivity extends AppCompatActivity
     final String position = "POSITION";
     private boolean whichtoolbar = false;
     private static final int ADD_LOCATION = 0;
+    private static final int SEARCH_LOCATION = 1;
 
     private GoogleMap mMap;
     private final LatLng mDefaultLocation = new LatLng(30.286310, -97.739560);
@@ -117,11 +121,12 @@ public class MainActivity extends AppCompatActivity
     private float zoomLevel;
 
     private boolean addedNUpdate = false;
+    private boolean searchUpdate = false;
 
     private BottomSheetBehavior bottomSheetBehavior;
     private Toolbar toolbar, locationToolbar;
     private RelativeLayout bottomSheetLayout;
-    private CardView cardToolbar;
+    private CardView cardToolbar, clearCard;
     private TextView toolbar2, building, room, stallamount, bottlerefill;
     private DrawerLayout drawerLayout;
     private FloatingActionMenu floatingActionMenu;
@@ -132,11 +137,12 @@ public class MainActivity extends AppCompatActivity
 
     private UpdateFragment updateFragment;
     private LocationFragment locationFragment;
-    private DatabaseFragment databaseFragment;
+    private SearchFragment searchFragment;
+    private Database database;
     private FragmentManager fragmentManager;
     private static final String TAG_TASK_FRAGMENT = "updateFragment";
     private static final String TAG_LOC_FRAGMENT = "locationFragment";
-    private static final String TAG_DATA_FRAGMENT = "databaseFragment";
+    private static final String TAG_SEARCH_FRAGMENT = "searchFragment";
 
     private HashMap<String, Bathroom> firebaseBRatings = new HashMap<>();
     private HashMap<String, WaterFountain> firebaseWRatings = new HashMap<>();
@@ -177,20 +183,16 @@ public class MainActivity extends AppCompatActivity
         fragmentManager = getSupportFragmentManager();
         updateFragment = (UpdateFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
         locationFragment = (LocationFragment) fragmentManager.findFragmentByTag(TAG_LOC_FRAGMENT);
-        databaseFragment = (DatabaseFragment) fragmentManager.findFragmentByTag(TAG_DATA_FRAGMENT);
+        searchFragment = (SearchFragment) fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT);
+        database = (Database) getApplication();
 
         //for location updates
         checkPermissions();
 
-        //to store data
-        if(databaseFragment == null) {
-            databaseFragment = DatabaseFragment.newInstance();
-            fragmentManager.beginTransaction().add(databaseFragment, TAG_DATA_FRAGMENT).commit();
-        }
-
         setFont();
         setUpUI();
         setUpMap();
+
         FlowManager.init(FlowConfig.builder(this)
                 .addDatabaseConfig(DatabaseConfig.builder(AppDatabase.class)
                         .databaseName("UTBSDatabase")
@@ -211,18 +213,18 @@ public class MainActivity extends AppCompatActivity
             if(!syncing) {
                 sync.hide();
             }
-            if(databaseFragment != null) {
+            if(database != null) {
                 Log.d("MainActivity", "restoring data");
-                firebaseBRatings = databaseFragment.getFirebaseBRatings();
-                firebaseWRatings = databaseFragment.getFirebaseWRatings();
-                saveBathroom = databaseFragment.getSaveBathroom();
-                saveFountain = databaseFragment.getSaveFountain();
-                saveBuildings = databaseFragment.getSaveBuildings();
-                mapMarkers = databaseFragment.getMapMarkers();
-                newMapmarkers = databaseFragment.getNewMapmarkers();
-                oldMapmarkers = databaseFragment.getOldMapmarkers();
-                favorites = databaseFragment.getFavorites();
-                favoriteItems = databaseFragment.getFavoriteItems();
+                firebaseBRatings = database.getFirebaseBRatings();
+                firebaseWRatings = database.getFirebaseWRatings();
+                saveBathroom = database.getSaveBathroom();
+                saveFountain = database.getSaveFountain();
+                saveBuildings = database.getSaveBuildings();
+                mapMarkers = database.getMapMarkers();
+                newMapmarkers = database.getNewMapmarkers();
+                oldMapmarkers = database.getOldMapmarkers();
+                favorites = database.getFavorites();
+                favoriteItems = database.getFavoriteItems();
             }
             String temp = savedInstanceState.getString(SELECTED);
             if(temp != null) {
@@ -237,12 +239,18 @@ public class MainActivity extends AppCompatActivity
                         .queryList();
 
                 for(Favorite_Item favorite_item : favoritesList) {
-                    favorites.put(favorite_item.getFavorite(), favorite_item.getType());
-                    favoriteItems.put(favorite_item.getFavorite(), favorite_item);
+                    String key = favorite_item.getFavorite().split("@")[0].trim();
+                    if(firebaseBRatings.containsKey(key) || firebaseWRatings.containsKey(key)) {
+                        favorites.put(favorite_item.getFavorite(), favorite_item.getType());
+                        favoriteItems.put(favorite_item.getFavorite(), favorite_item);
+                    } else {
+                        favorite_item.delete();
+                    }
                 }
-                if(databaseFragment != null) {
-                    databaseFragment.setFavorites(favorites);
-                    databaseFragment.setFavoriteItems(favoriteItems);
+
+                if(database != null) {
+                    database.setFavorites(favorites);
+                    database.setFavoriteItems(favoriteItems);
                 }
                 System.out.println("Favorites: " + favoritesList);
             }).start();
@@ -381,7 +389,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @TargetApi(23)
-    private void setUpSheet(){
+    private void setUpFabs() {
         NestedScrollView nestedScrollView = findViewById(R.id.scrollReview);
         android.support.design.widget.FloatingActionButton fab = findViewById(R.id.addreview);
         nestedScrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
@@ -393,8 +401,11 @@ public class MainActivity extends AppCompatActivity
                     fab.show();
             }
         });
+        setUpSheet();
+    }
 
-        fab1 = findViewById(R.id.starReview);
+    private void setUpSheet(){
+                fab1 = findViewById(R.id.starReview);
         fab1.setOnClickListener((view) -> {
             if(currentSelected != null) {
                 if (!favorites.containsKey(currentSelected)) {
@@ -407,6 +418,10 @@ public class MainActivity extends AppCompatActivity
                     favorite_item.save();
                     fab1.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star));
 
+                    if(database != null) {
+                        database.setFavorites(favorites);
+                        database.setFavoriteItems(favoriteItems);
+                    }
 
                     Toast.makeText(this, "Added to Favorites!", Toast.LENGTH_SHORT).show();
 
@@ -416,6 +431,11 @@ public class MainActivity extends AppCompatActivity
                     favoriteItems.remove(selected.getFavorite());
                     selected.delete();
                     fab1.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_border));
+
+                    if(database != null) {
+                        database.setFavorites(favorites);
+                        database.setFavoriteItems(favoriteItems);
+                    }
 
                     Toast.makeText(this, "Removed from Favorites", Toast.LENGTH_SHORT).show();
 
@@ -467,8 +487,13 @@ public class MainActivity extends AppCompatActivity
         fountainreview = findViewById(R.id.fountainreview);
         bottlerefill = findViewById(R.id.isbottlerefill);
 
-        setUpSheet();
+        clearCard = findViewById(R.id.clearCard);
+        clearCard.setOnClickListener((view) -> {
+            updateEntries("Update");
+            clearCard.setVisibility(View.GONE);
+        });
 
+        setUpFabs();
 
         location = findViewById(R.id.location);
         location.setOnClickListener((view) ->{
@@ -491,10 +516,6 @@ public class MainActivity extends AppCompatActivity
                     Log.d("MainActivity", "Putting in extra " + mLastKnownLocation.toString());
                     settings.putExtra("Location", mLastKnownLocation);
                 }
-
-                settings.putParcelableArrayListExtra("BRatings", saveBathroom);
-                settings.putParcelableArrayListExtra("WRatings", saveFountain);
-                settings.putStringArrayListExtra("Buildings", saveBuildings);
                 startActivityForResult(settings, ADD_LOCATION);
                 overridePendingTransition(R.anim.fadein, R.anim.fadeout);
             } else {
@@ -528,10 +549,7 @@ public class MainActivity extends AppCompatActivity
         addfab.setOnClickListener((view) -> {
             Intent settings = new Intent(MainActivity.this, Add.class);
             //send bathroom/fountain
-            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
-            settings.putParcelableArrayListExtra("WRatings", saveFountain);
             settings.putExtra("Selected", currentSelected);
-            settings.putStringArrayListExtra("Buildings", saveBuildings);
             startActivityForResult(settings, ADD_LOCATION);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
         });
@@ -903,11 +921,16 @@ public class MainActivity extends AppCompatActivity
                         ScaleRatingBar activityDialog = filterDialogView.findViewById(R.id.activityBar_dialog);
                         ScaleRatingBar wifiDialog= filterDialogView.findViewById(R.id.wifiBar_dialog);
                         ScaleRatingBar cleanDialog = filterDialogView.findViewById(R.id.cleanBar_dialog);
+                        SearchParams searchParams = new SearchParams("Simple", (String) typespinner.getSelectedItem(),
+                                "", "", (int) spaceDialog.getRating(), 0, (int) wifiDialog.getRating(),
+                                (int) activityDialog.getRating(), (int) cleanDialog.getRating(), (int) overallDialog.getRating(),
+                                switchRefill.isChecked(), tastespinner.getSelectedItemPosition(), tempspinner.getSelectedItemPosition());
+                        System.out.println("Searching: " + searchParams);
+                        if(searchFragment == null) {
+                            searchFragment = SearchFragment.newInstance(searchParams);
+                            fragmentManager.beginTransaction().add(searchFragment, TAG_SEARCH_FRAGMENT).commit();
+                        }
 
-                        Log.d("MainActivity", typespinner.getSelectedItem() + " " + tempspinner.getSelectedItem() + " " +
-                                switchRefill.isChecked() + " " + tastespinner.getSelectedItem() + " " + overallDialog.getRating() +
-                                " " + spaceDialog.getRating() + " " + activityDialog.getRating() + " " +
-                                wifiDialog.getRating() + " " + cleanDialog.getRating());
                     })
                     .show();
 
@@ -1009,23 +1032,20 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.favorites) {
 
             Intent settings = new Intent(this, Favorites.class);
-            //send bathroom/fountain
-            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
-            settings.putParcelableArrayListExtra("WRatings", saveFountain);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
         } else if(id == R.id.reviews) {
 
-            Intent settings = new Intent(MainActivity.this, Reviews.class);
-            //send bathroom/fountain
-            settings.putParcelableArrayListExtra("BRatings", saveBathroom);
-            settings.putParcelableArrayListExtra("WRatings", saveFountain);
+            Intent settings = new Intent(this, Reviews.class);
             startActivity(settings);
             overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
         } else if (id == R.id.advanced_search) {
             //advanced search algorithm
+            Intent settings = new Intent(this, Search.class);
+            startActivityForResult(settings, SEARCH_LOCATION);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 
         } else if(id == R.id.about) {
 
@@ -1227,7 +1247,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLocationUpdate(Location location) {
-        Log.d("MainActivity", "Updating Location: " + location);
         updateLocationUI();
         setDeviceLocation(location);
     }
@@ -1285,17 +1304,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void addMarkers(ArrayList<MarkerOptions> markers, boolean last) {
-        for(MarkerOptions m : markers) {
+
+        for (MarkerOptions m : markers) {
             newMapmarkers.put(m.getTitle(), m);
         }
 
-        if(last) {
+        if (last) {
             Log.d("MainActivity", "New: " + newMapmarkers);
             Log.d("MainActivity", "Old: " + oldMapmarkers);
             Log.d("MainActivity", "Markers: " + mapMarkers);
 
             //inefficient, should prob only remove ones no longer in the map
-            for(Marker m : mapMarkers) {
+            for (Marker m : mapMarkers) {
                 Log.d("MainActivity", "Removing");
                 m.remove();
             }
@@ -1303,19 +1323,21 @@ public class MainActivity extends AppCompatActivity
             mapMarkers.clear();
             oldMapmarkers.clear();
 
-            for(String title : newMapmarkers.keySet()) {
+            for (String title : newMapmarkers.keySet()) {
                 Log.d("MainActivity", title);
                 MarkerOptions markerOptions = newMapmarkers.get(title);
-                Marker marker = mMap.addMarker(markerOptions);
+                if(mMap != null) {
+                    Marker marker = mMap.addMarker(markerOptions);
+                    oldMapmarkers.add(marker.getId());
+                    mapMarkers.add(marker);
+                }
 
-                oldMapmarkers.add(marker.getId());
-                mapMarkers.add(marker);
             }
-            
-            if(databaseFragment != null) {
-                databaseFragment.setNewMapmarkers(newMapmarkers);
-                databaseFragment.setMapMarkers(mapMarkers);
-                databaseFragment.setOldMapmarkers(oldMapmarkers);
+
+            if (database != null) {
+                database.setNewMapmarkers(newMapmarkers);
+                database.setMapMarkers(mapMarkers);
+                database.setOldMapmarkers(oldMapmarkers);
             }
 
             newMapmarkers.clear();
@@ -1330,9 +1352,9 @@ public class MainActivity extends AppCompatActivity
             firebaseBRatings = firebaseUpdate;
             saveBathroom = resultsList;
             
-            if(databaseFragment != null) {
-                databaseFragment.setFirebaseBRatings(firebaseBRatings);
-                databaseFragment.setSaveBathroom(saveBathroom);
+            if(database != null) {
+                database.setFirebaseBRatings(firebaseBRatings);
+                database.setSaveBathroom(saveBathroom);
             }
 
             Log.d("MainActivity", firebaseBRatings.toString());
@@ -1361,9 +1383,9 @@ public class MainActivity extends AppCompatActivity
             firebaseWRatings = firebaseUpdate;
             saveFountain = resultsList;
             
-            if(databaseFragment != null) {
-                databaseFragment.setFirebaseWRatings(firebaseWRatings);
-                databaseFragment.setSaveFountain(saveFountain);
+            if(database != null) {
+                database.setFirebaseWRatings(firebaseWRatings);
+                database.setSaveFountain(saveFountain);
             }
             
             Log.d("MainActivity", firebaseWRatings.toString());
@@ -1388,8 +1410,8 @@ public class MainActivity extends AppCompatActivity
         runOnUiThread(() -> {
             saveBuildings = b;
             
-            if(databaseFragment != null) {
-                databaseFragment.setSaveBuildings(saveBuildings);
+            if(database != null) {
+                database.setSaveBuildings(saveBuildings);
             }
             
             updateFragment = null;
@@ -1429,10 +1451,11 @@ public class MainActivity extends AppCompatActivity
 
         }
         try {
-            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_DATA_FRAGMENT)).commitAllowingStateLoss();
+            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT)).commitAllowingStateLoss();
         } catch (Exception e) {
-            
+
         }
+        searchFragment = null;
         locationFragment = null;
         updateFragment = null;
     }
@@ -1463,6 +1486,38 @@ public class MainActivity extends AppCompatActivity
             if(resultCode == Activity.RESULT_OK){
                 addedNUpdate = true;
             }
+        } else if(requestCode == SEARCH_LOCATION) {
+            if(resultCode == Activity.RESULT_OK) {
+                addMarkers(data.getParcelableArrayListExtra("SEARCH_MARKER"), true);
+                clearCard.setVisibility(View.VISIBLE);
+                searchUpdate = true;
+            }
         }
+    }
+
+    @Override
+    public void onCancelledSearch() {
+        try {
+            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT)).commitAllowingStateLoss();
+        } catch (Exception e) {
+
+        }
+        searchFragment = null;
+    }
+
+    @Override
+    public void onPostExecuteSearch(ArrayList<Bathroom> filteredBathrooms, ArrayList<WaterFountain> filteredFountains, ArrayList<MarkerOptions> markerOptions) {
+        System.out.println("Filter Finished");
+        System.out.println(filteredBathrooms);
+        System.out.println(filteredFountains);
+
+        addMarkers(markerOptions, true);
+
+        clearCard.setVisibility(View.VISIBLE);
+
+        searchFragment = null;
+        fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT)).commitAllowingStateLoss();
+
+
     }
 }
