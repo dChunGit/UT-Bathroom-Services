@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.simplex.utbathroomservices.interfaces.UpdateLocationListener;
 import com.simplex.utbathroomservices.location.LocationCallback;
 import com.simplex.utbathroomservices.location.LocationService;
 
@@ -32,10 +33,6 @@ public class LocationFragment extends Fragment implements LocationCallback {
 
     public GoogleApiClient getCurrentLocation() {
         return mServer.getCurrentLocation();
-    }
-
-    public interface UpdateLocationListener {
-        void onLocationUpdate(Location location);
     }
 
     public LocationFragment() {

@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,15 +25,15 @@ import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.SearchParams;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+import com.simplex.utbathroomservices.interfaces.SearchCallback;
 import com.simplex.utbathroomservices.fragments.SearchFragment;
 import com.willy.ratingbar.ScaleRatingBar;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
-public class Search extends AppCompatActivity implements SearchFragment.SearchCallback, AdapterView.OnItemSelectedListener{
+public class Search extends AppCompatActivity implements SearchCallback, AdapterView.OnItemSelectedListener{
     private SearchFragment searchFragment;
     private FragmentManager fragmentManager;
 
@@ -184,7 +183,7 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
         switch(adapterView.getId()) {
-            case R.id.typespinner: {
+            case R.id.typespinner_search: {
                 switch(i) {
                     case 0: {
                         type = "Bathroom";
@@ -198,7 +197,7 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
                     }
                 }
             } break;
-            case R.id.stallpicker: {
+            case R.id.stallpicker_search: {
                 //displaystall is for custom input
                 displayStall.setVisibility(View.INVISIBLE);
                 customStallSelect = false;
@@ -216,13 +215,13 @@ public class Search extends AppCompatActivity implements SearchFragment.SearchCa
                     }
                 }
             } break;
-            case R.id.spacePicker: {
+            case R.id.spacePicker_search: {
                 spaceV = i + 1;
             } break;
-            case R.id.tempPicker: {
+            case R.id.tempPicker_search: {
                 tempV = 5- i;
             } break;
-            case R.id.tastePicker: {
+            case R.id.tastePicker_search: {
                 tasteV = 5 - i;
             }
         }

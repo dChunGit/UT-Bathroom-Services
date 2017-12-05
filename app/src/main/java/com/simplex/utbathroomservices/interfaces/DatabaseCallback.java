@@ -1,4 +1,8 @@
-package com.simplex.utbathroomservices.cloudfirestore;
+package com.simplex.utbathroomservices.interfaces;
+
+import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
+import com.simplex.utbathroomservices.cloudfirestore.Building;
+import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

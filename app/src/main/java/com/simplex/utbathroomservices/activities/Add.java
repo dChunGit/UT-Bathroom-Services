@@ -4,7 +4,6 @@ import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -18,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +30,7 @@ import com.simplex.utbathroomservices.R;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
 import com.simplex.utbathroomservices.cloudfirestore.Building;
-import com.simplex.utbathroomservices.cloudfirestore.DatabaseCallback;
+import com.simplex.utbathroomservices.interfaces.DatabaseCallback;
 import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountainDB;
@@ -53,7 +51,6 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
     private Location location;
     private String type, building, floorNumber, space, temp, taste;
-    private int overallV, activityV, wifiV, cleanlinessV;
     private int stallnum;
     private boolean customStallSelect = false, isFillable;
 
@@ -181,7 +178,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         cleanliness = findViewById(R.id.cleanBar_add);
         commentsEditText = findViewById(R.id.comments);
 
-        overall.setOnRatingChangeListener((ratingBar, rating) -> {
+        /*overall.setOnRatingChangeListener((ratingBar, rating) -> {
             overallV = (int) rating;
         });
         activity.setOnRatingChangeListener((ratingBar, rating) -> {
@@ -192,7 +189,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         });
         cleanliness.setOnRatingChangeListener((ratingBar, rating) -> {
             cleanlinessV = (int) rating;
-        });
+        });*/
     }
 
     private void setUpSpinners() {
@@ -363,8 +360,8 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
                         if (type.equals("Bathroom")) {
                             UUID uuid = UUID.randomUUID();
                             Rating rating = new Rating(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits(), building, floorNumber,
-                                    commentsEditText.getText().toString(), space, stallnum, wifiV, activityV, overallV,
-                                    cleanlinessV, "cold", false, "Meh");
+                                    commentsEditText.getText().toString(), space, stallnum, (int) wifi.getRating(), (int) activity.getRating(),
+                                    (int) overall.getRating(), (int) cleanliness.getRating(), "cold", false, "Meh");
                             newRating.add(rating);
 
                             Rating_Item rating_item = new Rating_Item();
@@ -375,14 +372,14 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
                             BathroomDB bathroomDB = new BathroomDB(this);
                             bathroomDB.addBathroomToDB(location, building, floorNumber, 1, space, stallnum,
-                                    wifiV, activityV, overallV,
-                                    cleanlinessV, newRating, new ArrayList<>());
+                                    (int) wifi.getRating(), (int) activity.getRating(),
+                                    (int) overall.getRating(), (int) cleanliness.getRating(), newRating, new ArrayList<>());
 
                         } else if (type.equals("Fountain")) {
                             UUID uuid = UUID.randomUUID();
                             Rating rating = new Rating(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits(), building, floorNumber,
                                     commentsEditText.getText().toString(), "XSmall", 0, 0, 0, 0,
-                                    overallV, temp, isFillable, taste);
+                                    (int) overall.getRating(), temp, isFillable, taste);
                             newRating.add(rating);
 
                             Rating_Item rating_item = new Rating_Item();
@@ -393,7 +390,7 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
                             WaterFountainDB waterFountainDB = new WaterFountainDB(this);
                             waterFountainDB.addWaterFountainToDB(location, building, floorNumber, 1, temp,
-                                    isFillable, taste, overallV, newRating, new ArrayList<>());
+                                    isFillable, taste, (int) overall.getRating(), newRating, new ArrayList<>());
 
                         }
                     }
@@ -414,14 +411,14 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
         waterFountain.setTemperature(getTempVal(((tempP * reviews) + getTempString(temp))/(reviews + 1)));
         //need to make bottle refill an arraylist at some point to get majority instead of latest
         waterFountain.setTaste(getTasteVal(((tasteP * reviews) + getTasteString(taste))/(reviews + 1)));
-        waterFountain.setOverallRating(((overallP * reviews) + overallV)/(reviews + 1));
+        waterFountain.setOverallRating(((overallP * reviews) + (int) overall.getRating())/(reviews + 1));
 
         ArrayList<Rating> newRating = waterFountain.getRating();
 
         UUID uuid = UUID.randomUUID();
         Rating rating = new Rating(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits(),
                 waterFountain.getBuilding(), waterFountain.getFloor(), commentsEditText.getText().toString(), "XSmall", 0,
-                0, 0, 0, overallV, temp, isFillable, taste);
+                0, 0, 0, (int) overall.getRating(), temp, isFillable, taste);
 
         Rating_Item rating_item = new Rating_Item();
         rating_item.setLocation(building + " " + floorNumber);
@@ -492,16 +489,17 @@ public class Add extends AppCompatActivity implements AdapterView.OnItemSelected
 
         bathroom.setSpace(getSpaceString(((spaceP * reviews) + getSpaceVal(space))/(reviews + 1)));
         bathroom.setNumberStalls(((stallNumP * reviews) + stallnum)/(reviews + 1));
-        bathroom.setWifiQuality(((wifiP * reviews) + wifiV)/(reviews + 1));
-        bathroom.setBusyness(((activityP * reviews) + activityV)/(reviews + 1));
-        bathroom.setOverallRating(((overallP * reviews) + overallV)/(reviews + 1));
-        bathroom.setCleanliness(((cleanP * reviews) + cleanlinessV)/(reviews + 1));
+        bathroom.setWifiQuality(((wifiP * reviews) + (int) wifi.getRating())/(reviews + 1));
+        bathroom.setBusyness(((activityP * reviews) + (int) activity.getRating())/(reviews + 1));
+        bathroom.setOverallRating(((overallP * reviews) + (int) overall.getRating())/(reviews + 1));
+        bathroom.setCleanliness(((cleanP * reviews) + (int) cleanliness.getRating())/(reviews + 1));
 
         ArrayList<Rating> newRating = bathroom.getRating();
         UUID uuid = UUID.randomUUID();
         Rating rating = new Rating(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits(),
                 bathroom.getBuilding(), bathroom.getFloor(), commentsEditText.getText().toString(), space, stallnum,
-                wifiV, activityV, overallV, cleanlinessV, "cold", false, "Meh");
+                (int) wifi.getRating(), (int) activity.getRating(), (int) overall.getRating(),
+                (int) cleanliness.getRating(), "cold", false, "Meh");
 
         Rating_Item rating_item = new Rating_Item();
         rating_item.setLocation(building + " " + floorNumber);

@@ -13,6 +13,7 @@ import com.simplex.utbathroomservices.Database;
 import com.simplex.utbathroomservices.SearchParams;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+import com.simplex.utbathroomservices.interfaces.SearchCallback;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,12 +29,6 @@ public class SearchFragment extends Fragment {
     private boolean asyncRunning, cancel;
     private Search search;
     private SearchParams searchParams;
-
-    public interface SearchCallback {
-        void onCancelledSearch();
-        void onPostExecuteSearch(ArrayList<Bathroom> filteredBathrooms,
-                                 ArrayList<WaterFountain> filteredFountains, ArrayList<MarkerOptions> markerOptions);
-    }
 
     public SearchFragment() {
         // Required empty public constructor

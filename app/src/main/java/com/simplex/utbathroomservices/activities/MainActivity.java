@@ -75,12 +75,14 @@ import com.simplex.utbathroomservices.cloudfirestore.Rating;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.Database;
 import com.simplex.utbathroomservices.fragments.LocationFragment;
+import com.simplex.utbathroomservices.interfaces.SearchCallback;
 import com.simplex.utbathroomservices.fragments.SearchFragment;
 import com.simplex.utbathroomservices.fragments.UpdateFragment;
+import com.simplex.utbathroomservices.interfaces.UpdateLocationListener;
+import com.simplex.utbathroomservices.interfaces.onUpdateListener;
 import com.wang.avi.AVLoadingIndicatorView;
 import com.willy.ratingbar.ScaleRatingBar;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,8 +92,8 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        GoogleMap.OnCameraMoveStartedListener, LocationFragment.UpdateLocationListener, GoogleMap.OnMarkerClickListener,
-        UpdateFragment.onUpdateListener, SearchFragment.SearchCallback {
+        GoogleMap.OnCameraMoveStartedListener, UpdateLocationListener, GoogleMap.OnMarkerClickListener,
+        onUpdateListener, SearchCallback, GoogleMap.OnMapLongClickListener {
     //TODO: Favorites activity
     //TODO: Reviews activity
     //TODO: Search Activity
@@ -207,6 +209,7 @@ public class MainActivity extends AppCompatActivity
             zoomLevel = savedInstanceState.getFloat(ZOOM);
             bottomSheetBehavior.setState(savedInstanceState.getInt(BOTTOMSHEET));
             whichtoolbar = savedInstanceState.getBoolean(TOOLBAR);
+
             if(whichtoolbar) {
                 setBottomSheetToolbar();
             }
@@ -214,6 +217,7 @@ public class MainActivity extends AppCompatActivity
             if(!syncing) {
                 sync.hide();
             }
+
             if(database != null) {
                 Log.d("MainActivity", "restoring data");
                 firebaseBRatings = database.getFirebaseBRatings();
@@ -576,9 +580,11 @@ public class MainActivity extends AppCompatActivity
 
                 if(newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     setTopSheetToolbar();
+                    clearCard.setVisibility(View.VISIBLE);
 
                 } else if(newState == BottomSheetBehavior.STATE_EXPANDED) {
                     setBottomSheetToolbar();
+                    clearCard.setVisibility(View.GONE);
                     doBounceAnimationH(recyclerView);
 
                 } else if(newState == BottomSheetBehavior.STATE_DRAGGING) {
@@ -1115,6 +1121,7 @@ public class MainActivity extends AppCompatActivity
 
         mMap.setOnCameraMoveStartedListener(this);
         mMap.setOnMarkerClickListener(this);
+        mMap.setOnMapLongClickListener(this);
 
         initializeMap();
 
@@ -1442,21 +1449,9 @@ public class MainActivity extends AppCompatActivity
     public void onDestroy() {
 
         super.onDestroy();
-        try {
-            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
-        } catch (Exception e) {
-
-        }
-        try {
-            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_LOC_FRAGMENT)).commitAllowingStateLoss();
-        } catch (Exception e) {
-
-        }
-        try {
-            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT)).commitAllowingStateLoss();
-        } catch (Exception e) {
-
-        }
+        fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT)).commitAllowingStateLoss();
+        fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_LOC_FRAGMENT)).commitAllowingStateLoss();
+        fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT)).commitAllowingStateLoss();
         searchFragment = null;
         locationFragment = null;
         updateFragment = null;
@@ -1500,11 +1495,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onCancelledSearch() {
-        try {
-            fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT)).commitAllowingStateLoss();
-        } catch (Exception e) {
-
-        }
+        fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT)).commitAllowingStateLoss();
         searchFragment = null;
     }
 
@@ -1516,11 +1507,9 @@ public class MainActivity extends AppCompatActivity
 
         addMarkers(markerOptions, true);
         slideToLeft(clearCard);
-        //clearCard.setVisibility(View.VISIBLE);
 
         searchFragment = null;
         fragmentManager.beginTransaction().remove(fragmentManager.findFragmentByTag(TAG_SEARCH_FRAGMENT)).commitAllowingStateLoss();
-
 
     }
 
@@ -1533,7 +1522,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void slideToLeft(View view){
-        TranslateAnimation animate = new TranslateAnimation(view.getWidth()+7,0,0,0);
+        TranslateAnimation animate = new TranslateAnimation(view.getWidth(),0,0,0);
         animate.setDuration(500);
         animate.setFillAfter(true);
         view.startAnimation(animate);
@@ -1541,4 +1530,23 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        if(!syncing && locUpdate) {
+
+            floatingActionMenu.close(true);
+            Intent settings = new Intent(MainActivity.this, Add.class);
+            Location location = new Location("dummy");
+            location.setLatitude(latLng.latitude);
+            location.setLongitude(latLng.longitude);
+            if (location != null) {
+                Log.d("MainActivity", "Putting in extra " + location.toString());
+                settings.putExtra("Location", location);
+            }
+            startActivityForResult(settings, ADD_LOCATION);
+            overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+        } else {
+            Toast.makeText(this, "Please wait until sync is complete", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

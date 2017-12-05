@@ -75,7 +75,7 @@ public class MyReviewAdapter extends RecyclerView.Adapter<MyReviewAdapter.Review
 
             holder.stalls.setText(String.valueOf(reviews.get(position).getNumberStalls()));
             holder.spaceBar.setRating(getSpaceVal(reviews.get(position).getSpace()));
-            holder.activityBar.setRating(reviews.get(position).getOverallRating());
+            holder.activityBar.setRating(reviews.get(position).getBusyness());
             holder.wifiBar.setRating(reviews.get(position).getWifiQuality());
             holder.cleanBar.setRating(reviews.get(position).getCleanliness());
 

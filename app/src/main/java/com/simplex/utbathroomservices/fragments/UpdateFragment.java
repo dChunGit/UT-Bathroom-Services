@@ -1,7 +1,6 @@
 package com.simplex.utbathroomservices.fragments;
 
 import android.content.Context;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
@@ -12,25 +11,16 @@ import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.BathroomDB;
 import com.simplex.utbathroomservices.cloudfirestore.Building;
 import com.simplex.utbathroomservices.cloudfirestore.BuildingDB;
-import com.simplex.utbathroomservices.cloudfirestore.DatabaseCallback;
+import com.simplex.utbathroomservices.interfaces.DatabaseCallback;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountainDB;
+import com.simplex.utbathroomservices.interfaces.onUpdateListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 //gets data from firebase database, later should make it periodic
 public class UpdateFragment extends Fragment implements DatabaseCallback {
-
-    public interface onUpdateListener {
-        void onUpdateBFinish(HashMap<String, Bathroom> firebaseResults, ArrayList<Bathroom> resultsList,
-                             ArrayList<MarkerOptions> markers, boolean doAll);
-        void onUpdateWFinish(HashMap<String, WaterFountain> firebaseResults, ArrayList<WaterFountain> resultsList,
-                             ArrayList<MarkerOptions> markers, boolean doAll);
-        void onUpdateBuildingFinish(ArrayList<String> buildings);
-    }
 
     private onUpdateListener mListener;
     private ArrayList<MarkerOptions> markerOptions = new ArrayList<>();
