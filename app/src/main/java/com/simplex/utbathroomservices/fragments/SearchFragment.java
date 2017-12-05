@@ -13,6 +13,7 @@ import com.simplex.utbathroomservices.Database;
 import com.simplex.utbathroomservices.SearchParams;
 import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
+import com.simplex.utbathroomservices.interfaces.SearchCallback;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,12 +29,6 @@ public class SearchFragment extends Fragment {
     private boolean asyncRunning, cancel;
     private Search search;
     private SearchParams searchParams;
-
-    public interface SearchCallback {
-        void onCancelledSearch();
-        void onPostExecuteSearch(ArrayList<Bathroom> filteredBathrooms,
-                                 ArrayList<WaterFountain> filteredFountains, ArrayList<MarkerOptions> markerOptions);
-    }
 
     public SearchFragment() {
         // Required empty public constructor
@@ -128,6 +123,8 @@ public class SearchFragment extends Fragment {
         protected void onPostExecute(Integer success) {
             setUpMarkers(bathrooms);
             setUpMarkers(fountains);
+            System.out.println(bathrooms);
+            System.out.println(fountains);
             searchCallback.onPostExecuteSearch(bathrooms, fountains, markerOptions);
             asyncRunning = false;
         }
@@ -189,6 +186,7 @@ public class SearchFragment extends Fragment {
             /*assume default priority: building->floor, rating
              */
             if(typeFilter.equals("Bathroom")) {
+                fountains.clear();
                 Iterator<Bathroom> it = bathrooms.iterator();
                 while (it.hasNext()) {
                     int translatedSpace = 0;
@@ -241,6 +239,7 @@ public class SearchFragment extends Fragment {
                 }
 
             } else if(typeFilter.equals("Fountain")){
+                bathrooms.clear();
                 Iterator<WaterFountain> it = fountains.iterator();
                 while (it.hasNext()) {
                     WaterFountain temp = it.next();
