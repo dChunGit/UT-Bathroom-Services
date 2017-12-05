@@ -584,8 +584,8 @@ public class MainActivity extends AppCompatActivity
 
                 } else if(newState == BottomSheetBehavior.STATE_EXPANDED) {
                     setBottomSheetToolbar();
-                    clearCard.setVisibility(View.GONE);
                     doBounceAnimationH(recyclerView);
+                    clearCard.setVisibility(View.GONE);
 
                 } else if(newState == BottomSheetBehavior.STATE_DRAGGING) {
 
@@ -601,12 +601,15 @@ public class MainActivity extends AppCompatActivity
                 floatingActionMenu.setAlpha(1 - slideOffset);
                 cardToolbar.setAlpha(1 - slideOffset);
                 toolbar2.setAlpha(1-slideOffset);
+                clearCard.setAlpha(1-slideOffset);
                 //sets threshold so view doesn't have a hitch on slide
                 if((1 - slideOffset) < .05) {
                     cardToolbar.setVisibility(View.GONE);
                     toolbar2.setVisibility(View.GONE);
+                    clearCard.setVisibility(View.GONE);
                 } else {
                     cardToolbar.setVisibility(View.VISIBLE);
+                    clearCard.setVisibility(View.VISIBLE);
                     toolbar2.setVisibility(View.VISIBLE);
                 }
             }
@@ -1516,7 +1519,7 @@ public class MainActivity extends AppCompatActivity
     public void slideToRight(View view){
         TranslateAnimation animate = new TranslateAnimation(0,view.getWidth(),0,0);
         animate.setDuration(500);
-        animate.setFillAfter(true);
+        //animate.setFillAfter(true);
         view.startAnimation(animate);
         view.setVisibility(View.GONE);
     }
@@ -1524,7 +1527,7 @@ public class MainActivity extends AppCompatActivity
     public void slideToLeft(View view){
         TranslateAnimation animate = new TranslateAnimation(view.getWidth(),0,0,0);
         animate.setDuration(500);
-        animate.setFillAfter(true);
+        //animate.setFillAfter(true);
         view.startAnimation(animate);
         view.setVisibility(View.VISIBLE);
     }

@@ -123,6 +123,8 @@ public class SearchFragment extends Fragment {
         protected void onPostExecute(Integer success) {
             setUpMarkers(bathrooms);
             setUpMarkers(fountains);
+            System.out.println(bathrooms);
+            System.out.println(fountains);
             searchCallback.onPostExecuteSearch(bathrooms, fountains, markerOptions);
             asyncRunning = false;
         }
@@ -184,6 +186,7 @@ public class SearchFragment extends Fragment {
             /*assume default priority: building->floor, rating
              */
             if(typeFilter.equals("Bathroom")) {
+                fountains.clear();
                 Iterator<Bathroom> it = bathrooms.iterator();
                 while (it.hasNext()) {
                     int translatedSpace = 0;
@@ -236,6 +239,7 @@ public class SearchFragment extends Fragment {
                 }
 
             } else if(typeFilter.equals("Fountain")){
+                bathrooms.clear();
                 Iterator<WaterFountain> it = fountains.iterator();
                 while (it.hasNext()) {
                     WaterFountain temp = it.next();
