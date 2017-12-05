@@ -123,6 +123,7 @@ public class SearchFragment extends Fragment {
         protected void onPostExecute(Integer success) {
             setUpMarkers(bathrooms);
             setUpMarkers(fountains);
+            System.out.println("Search Fragment");
             System.out.println(bathrooms);
             System.out.println(fountains);
             searchCallback.onPostExecuteSearch(bathrooms, fountains, markerOptions);

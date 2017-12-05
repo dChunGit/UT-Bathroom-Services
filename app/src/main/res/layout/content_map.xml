@@ -35,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:text="No Location"
                 android:gravity="center"
-                android:textSize="30sp"
+                android:textSize="24sp"
                 android:textColor="@color/textColorAlt"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorPrimary"/>
