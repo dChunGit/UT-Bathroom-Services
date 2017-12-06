@@ -496,6 +496,7 @@ public class MainActivity extends AppCompatActivity
         clearCard.setOnClickListener((view) -> {
             updateEntries("Update");
             slideToRight(clearCard);
+            searchUpdate = false;
             //clearCard.setVisibility(View.GONE);
         });
 
@@ -577,10 +578,13 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                System.out.println(searchUpdate);
 
                 if(newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     setTopSheetToolbar();
-                    clearCard.setVisibility(View.VISIBLE);
+                    if(searchUpdate) {
+                        clearCard.setVisibility(View.VISIBLE);
+                    }
 
                 } else if(newState == BottomSheetBehavior.STATE_EXPANDED) {
                     setBottomSheetToolbar();
@@ -609,8 +613,10 @@ public class MainActivity extends AppCompatActivity
                     clearCard.setVisibility(View.GONE);
                 } else {
                     cardToolbar.setVisibility(View.VISIBLE);
-                    clearCard.setVisibility(View.VISIBLE);
                     toolbar2.setVisibility(View.VISIBLE);
+                    if(searchUpdate) {
+                        clearCard.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         });
@@ -1509,6 +1515,7 @@ public class MainActivity extends AppCompatActivity
         System.out.println(filteredFountains);
 
         addMarkers(markerOptions, true);
+        searchUpdate = true;
         slideToLeft(clearCard);
 
         searchFragment = null;
