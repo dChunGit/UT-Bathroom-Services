@@ -1,6 +1,7 @@
 package com.simplex.utbathroomservices;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.Bundle;
 
 import com.google.android.gms.maps.model.Marker;
@@ -9,8 +10,22 @@ import com.simplex.utbathroomservices.cloudfirestore.Bathroom;
 import com.simplex.utbathroomservices.cloudfirestore.WaterFountain;
 import com.simplex.utbathroomservices.dbflow.Favorite_Item;
 
+import org.acra.ACRA;
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
+import org.acra.config.ConfigurationBuilder;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
+@ReportsCrashes(mailTo = "simplexhelper@gmail.com",
+        mode = ReportingInteractionMode.DIALOG,
+        resToastText = R.string.exception,
+        resDialogText = R.string.crash_dialog_text,
+        resDialogTitle = R.string.crash_dialog_title,
+        resDialogOkToast = R.string.crash_dialog_ok_toast,
+        resDialogTheme = R.style.AppTheme_Dialog,
+        logcatArguments = { "-t", "100", "-v" })
 
 //saves database state, right now only for orientation change but could use to back up data as well
 public class Database extends Application {
@@ -26,6 +41,12 @@ public class Database extends Application {
     private HashMap<String, String> favorites = new HashMap<>();
     private HashMap<String, Favorite_Item> favoriteItems = new HashMap<>();
     private HashMap<String, MarkerOptions> restoreMapMarkers = new HashMap<>();
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        ACRA.init(this);
+    }
 
     public HashMap<String, MarkerOptions> getRestoreMapMarkers() {
         return restoreMapMarkers;

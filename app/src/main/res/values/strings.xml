@@ -10,6 +10,12 @@
     <string name="title_activity_reviews">My Reviews</string>
     <string name="title_activity_search">Search</string>
 
+    <string name="exception">Oops, something went wrong. Email me the logs and I\'ll take a look at it asap!</string>
+    <string name="crash_dialog_title">UTBS has crashed</string>
+    <string name="crash_dialog_text">An unexpected error occurred forcing the
+    application to stop. Please help me by emailing the error logs.</string>
+    <string name="crash_dialog_ok_toast">Thank you!</string>
+
 
     <!--Drawer Items-->
     <string name="navigation_drawer_open">Open navigation drawer</string>

@@ -51,6 +51,8 @@ dependencies {
     implementation "com.github.Raizlabs.DBFlow:dbflow-core:${dbflow_version}"
     implementation "com.github.Raizlabs.DBFlow:dbflow:${dbflow_version}"
     implementation 'com.jakewharton.timber:timber:4.6.0'
+    implementation 'ch.acra:acra:4.9.2'
+
 
 }
 apply plugin: 'com.google.gms.google-services'
